@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>New Client & Pet Intake</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#1E2A24;
+    --ink-soft:#4C5A52;
+    --paper:#F4F6F1;
+    --card:#FFFFFF;
+    --pine:#2F6F5E;
+    --pine-dark:#234F42;
+    --pine-tint:#E4EBE1;
+    --brass:#C99A3B;
+    --brass-tint:#F3E9D2;
+    --line:#DEE3D8;
+    --danger:#B4483A;
+    --danger-tint:#F7E7E4;
+    --radius:14px;
+    /* ---- spacing scale (use these everywhere instead of one-off px values) ---- */
+    --space-1:6px;
+    --space-2:10px;
+    --space-3:16px;
+    --space-4:24px;
+    --space-5:32px;
+    --gap-option:var(--space-4);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+    padding:32px 16px 80px;
+  }
+  .wrap{max-width:640px;margin:0 auto}
+  .eyebrow{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:11px;
+    font-weight:600;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--pine);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:10px;
+  }
+  .eyebrow::before{content:"";width:16px;height:1px;background:var(--pine)}
+  h1{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:clamp(22px,3.6vw,28px);
+    line-height:1.16;
+    letter-spacing:-0.01em;
+    margin:0 0 6px;
+  }
+  .sub{
+    font-size:14.5px;
+    color:var(--ink-soft);
+    line-height:1.55;
+    margin:0 0 var(--space-4);
+    max-width:46ch;
+  }
+
+  /* ---- paw step tracker ---- */
+  .tracker{
+    position:relative;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin:0 4px var(--space-4);
+  }
+  .tracker::before{
+    content:"";
+    position:absolute;
+    top:15px;left:15px;right:15px;
+    height:0;
+    border-top:1.5px dashed var(--line);
+    z-index:0;
+  }
+  .tstep{
+    position:relative;
+    z-index:1;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:6px;
+    flex:1;
+  }
+  .paw{width:30px;height:30px;transition:transform .25s ease}
+  .paw svg{width:100%;height:100%;display:block}
+  .paw .pad,.paw .toe{fill:var(--card);stroke:var(--line);stroke-width:1.4;transition:fill .25s ease,stroke .25s ease}
+  .tstep.done .paw .pad,.tstep.done .paw .toe{fill:var(--pine);stroke:var(--pine)}
+  .tstep.current .paw{transform:scale(1.12)}
+  .tstep.current .paw .pad,.tstep.current .paw .toe{fill:var(--brass);stroke:var(--brass)}
+  .tlabel{
+    font-family:'IBM Plex Mono',monospace;
+    font-size:9.5px;
+    letter-spacing:0.06em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    text-align:center;
+  }
+  .tstep.current .tlabel{color:var(--ink);font-weight:600}
+
+  /* ---- card ---- */
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:var(--space-4) var(--space-4) var(--space-4);
+    box-shadow:0 1px 2px rgba(30,42,36,0.04);
+  }
+  .step{display:none}
+  .step.active{display:block;animation:fade .3s ease}
+  @keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:translateY(0)}}
+
+  .step-title{
+    font-family:'Fraunces',serif;
+    font-weight:600;
+    font-size:20px;
+    margin:0 0 var(--space-1);
+  }
+  .step-hint{font-size:13px;color:var(--ink-soft);margin:0 0 var(--space-4)}
+
+  .field{margin-bottom:var(--space-3)}
+  .field label{
+    display:block;
+    font-size:12.5px;
+    font-weight:600;
+    color:var(--ink);
+    margin-bottom:var(--space-1)}
+  .field .opt{font-weight:400;color:var(--ink-soft);font-size:11.5px}
+  .field input[type=text],.field input[type=tel],.field input[type=email],.field input[type=date],.field select,.field textarea{
+    width:100%;
+    font-family:'Inter',sans-serif;
+    font-size:14.5px;
+    color:var(--ink);
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:11px 12px;
+    outline:none;
+    transition:border-color .15s ease,background .15s ease;
+  }
+  .field input:focus,.field select:focus,.field textarea:focus{
+    border-color:var(--pine);
+    background:#fff;
+  }
+  .field textarea{resize:vertical;min-height:64px;font-family:inherit}
+  .field.err input,.field.err select{border-color:var(--danger);background:var(--danger-tint)}
+  .field.err .check-item{color:var(--danger)}
+  .field.err .check-item input{accent-color:var(--danger)}
+  .errmsg{display:none;font-size:11.5px;color:var(--danger);margin-top:5px}
+  .field.err .errmsg{display:block}
+
+  .row2{display:grid;grid-template-columns:1fr 1fr;gap:var(--space-3)}
+  @media(max-width:480px){.row2{grid-template-columns:1fr}}
+
+  .inline-fields{display:flex;gap:var(--gap-option);align-items:flex-start;flex-wrap:wrap}
+  .inline-field{flex:0 0 auto}
+  .inline-field label{white-space:nowrap}
+  .inline-field .radiogroup{flex-wrap:nowrap}
+
+  .radiogroup{display:flex;flex-wrap:wrap;gap:var(--space-1)}
+  .radiogroup label{
+    display:inline-flex;align-items:center;gap:var(--space-1);
+    font-size:13px;font-weight:500;
+    padding:8px 13px;
+    border:1px solid var(--line);
+    border-radius:20px;
+    background:var(--paper);
+    cursor:pointer;
+    user-select:none;
+    transition:all .15s ease;
+  }
+  .radiogroup input{display:none}
+  .radiogroup label:has(input:checked){background:var(--pine);border-color:var(--pine);color:#fff}
+
+  .checklist{display:flex;flex-direction:column;gap:var(--gap-option);margin-top:var(--space-3)}
+  .check-item{
+    display:flex;align-items:center;gap:var(--space-3);
+    font-size:14px;font-weight:500;color:var(--ink);
+    line-height:1.4;
+    cursor:pointer;
+    user-select:none;
+  }
+  .check-item input{width:18px;height:18px;margin:0;accent-color:var(--pine);cursor:pointer;flex-shrink:0}
+  .field .check-item{display:flex}
+  .check-item.compact{gap:var(--space-1);font-size:12px}
+  .check-item.compact input{width:14px;height:14px}
+
+
+  .switch-row{
+    display:flex;flex-direction:column;
+    background:var(--pine-tint);
+    border-radius:10px;
+    padding:var(--space-3);
+    margin-bottom:var(--space-3);
+  }
+  .switch-row-top{display:flex;align-items:center;justify-content:space-between}
+  .switch-row .check-item{
+    margin-top:var(--space-3);padding-top:var(--space-2);
+    border-top:1px dashed rgba(47,111,94,0.28);
+  }
+  .switch-row .stxt{font-size:13.5px;font-weight:600}
+  .switch-row .ssub{font-size:11.5px;color:var(--ink-soft);font-weight:400;margin-top:1px}
+  .switch{position:relative;width:42px;height:24px;flex-shrink:0;margin-left:12px}
+  .switch input{display:none}
+  .switch .track{position:absolute;inset:0;background:#C7D1C7;border-radius:20px;transition:background .2s}
+  .switch .knob{position:absolute;top:3px;left:3px;width:18px;height:18px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 2px rgba(0,0,0,0.2)}
+  .switch input:checked + .track{background:var(--pine)}
+  .switch input:checked + .track .knob{transform:translateX(18px)}
+
+  .section-div{border-top:1px dashed var(--line);margin:var(--space-4) 0 var(--space-3)}
+  .subhead{font-family:'IBM Plex Mono',monospace;font-size:10.5px;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin:0 0 var(--space-2)}
+
+  .navrow{display:flex;justify-content:space-between;align-items:center;margin-top:var(--space-4)}
+  button{font-family:'Inter',sans-serif;cursor:pointer;border:none}
+  .btn-primary{
+    background:var(--pine);color:#fff;
+    font-size:14px;font-weight:600;
+    padding:12px 22px;border-radius:24px;
+    transition:background .15s ease,transform .1s ease;
+  }
+  .btn-primary:hover{background:var(--pine-dark)}
+  .btn-primary:active{transform:scale(0.97)}
+  .btn-ghost{
+    background:transparent;color:var(--ink-soft);
+    font-size:14px;font-weight:600;
+    padding:12px 10px;
+  }
+  .btn-ghost:hover{color:var(--ink)}
+  .btn-ghost:disabled{opacity:0;pointer-events:none}
+
+  /* confirmation ticket */
+  .ticket{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:var(--radius);
+    padding:34px 26px;
+    text-align:center;
+    position:relative;
+    overflow:hidden;
+  }
+  .ticket::before,.ticket::after{
+    content:"";position:absolute;top:50%;width:22px;height:22px;
+    background:var(--paper);border-radius:50%;transform:translateY(-50%);
+  }
+  .ticket::before{left:-11px}
+  .ticket::after{right:-11px}
+  .ticket .paw-big{width:52px;height:52px;margin:0 auto 14px}
+  .ticket .paw-big .pad,.ticket .paw-big .toe{fill:var(--pine)}
+  .ticket h2{font-family:'Fraunces',serif;font-size:24px;margin:0 0 8px}
+  .ticket p{font-size:13.5px;color:var(--ink-soft);margin:0 0 18px;line-height:1.55}
+  .ticket .thanks{
+    font-family:'Fraunces',serif;
+    font-weight:700;
+    font-size:19px;
+    color:var(--ink);
+    margin:0 0 18px;
+    line-height:1.35;
+  }
+
+  footer{
+    max-width:640px;margin:26px auto 0;
+    text-align:center;font-size:11.5px;color:#93A093;
+  }
+  footer a{color:#93A093;text-decoration:underline;cursor:pointer}
+
+  a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible,[tabindex]:focus-visible{
+    outline:2px solid var(--brass);outline-offset:2px;
+  }
+  .visually-hidden{
+    position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+    overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;
+  }
+
+  /* terms & conditions link + modal */
+  .terms-link{color:var(--pine);font-weight:600;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+  .terms-link:hover{color:var(--pine-dark)}
+  .terms-modal-bg{position:fixed;inset:0;background:rgba(30,42,36,0.55);display:none;align-items:flex-start;justify-content:center;padding:40px 14px;overflow-y:auto;z-index:60}
+  .terms-modal-bg.open{display:flex}
+  .terms-modal{background:#fff;border-radius:var(--radius);max-width:560px;width:100%;padding:var(--space-4);max-height:85vh;overflow-y:auto}
+  .terms-modal h3{font-family:'Fraunces',serif;font-size:19px;margin:0 0 var(--space-1)}
+  .terms-modal .tm-sub{font-size:12.5px;color:var(--ink-soft);margin:0 0 var(--space-4)}
+  .terms-section{margin-bottom:var(--space-4)}
+  .terms-section:last-of-type{margin-bottom:var(--space-3)}
+  .terms-section h4{font-family:'Fraunces',serif;font-weight:600;font-size:14.5px;color:var(--pine-dark);margin:0 0 var(--space-1)}
+  .terms-section p{font-size:13px;color:var(--ink-soft);line-height:1.6;margin:0}
+  .terms-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px dashed var(--line)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="eyebrow">New client intake</div>
+  <h1>Let's get to know you<br/>&amp; your pet.</h1>
+  <p class="sub">Fill this out before your first visit so I'm ready with everything your pet needs :)</p>
+
+  <div class="tracker" id="tracker"></div>
+
+  <div class="card" id="formCard">
+
+    <!-- STEP 1: Owner -->
+    <div class="step" data-step="1">
+      <div class="step-title">Your details</div>
+      <p class="step-hint">How I'll reach you about appointments.</p>
+
+      <div class="field" id="f-ownerName">
+        <label for="ownerName">Your full name</label>
+        <input type="text" id="ownerName" placeholder="Jane Smith"/>
+        <div class="errmsg">Please enter your name.</div>
+      </div>
+      <div class="field" id="f-ownerPhone">
+        <label for="ownerPhone">Phone number</label>
+        <input type="tel" id="ownerPhone" placeholder="0412 345 678" maxlength="12" oninput="formatPhone(this)"/>
+        <div class="errmsg">Please enter a phone number.</div>
+      </div>
+      <div class="field">
+        <label for="ownerEmail">Email <span class="opt">(optional)</span></label>
+        <input type="email" id="ownerEmail" placeholder="jane@email.com"/>
+      </div>
+      <div class="field">
+        <label id="contactPrefLabel">Preferred contact method</label>
+        <div class="radiogroup" id="contactPrefGroup" role="radiogroup" aria-labelledby="contactPrefLabel">
+          <label><input type="radio" name="contactPref" value="Phone call" checked/>Phone call</label>
+          <label><input type="radio" name="contactPref" value="Text"/>Text</label>
+          <label><input type="radio" name="contactPref" value="Email"/>Email</label>
+          <label><input type="radio" name="contactPref" value="Other"/>Other</label>
+        </div>
+      </div>
+      <div class="row2" id="socialFields" style="display:none">
+        <div class="field" id="f-socialPlatform">
+          <label for="socialPlatform">Platform</label>
+          <input type="text" id="socialPlatform" placeholder="e.g. Instagram, Facebook"/>
+          <div class="errmsg">Please enter the platform.</div>
+        </div>
+        <div class="field">
+          <label for="socialHandle">Username / handle <span class="opt">(if not already known)</span></label>
+          <input type="text" id="socialHandle" placeholder="@janesmith"/>
+        </div>
+      </div>
+    </div>
+
+    <!-- STEP 2: Pet basics -->
+    <div class="step" data-step="2">
+      <div class="step-title">About your pet</div>
+      <p class="step-hint">The basics. I'll get to grooming preferences next.</p>
+
+      <div class="field" id="f-petName">
+        <label for="petName">Pet's name</label>
+        <input type="text" id="petName" placeholder="Biscuit"/>
+        <div class="errmsg">Please enter your pet's name.</div>
+      </div>
+      <div class="field" id="f-petBreed">
+        <label for="petBreed">Breed</label>
+        <input type="text" id="petBreed" placeholder="e.g. Golden Retriever"/>
+        <div class="errmsg">Please enter a breed.</div>
+      </div>
+      <div class="field" id="f-petAge">
+        <label for="petDob">Date of birth <span class="opt">(or check below if unknown)</span></label>
+        <input type="date" id="petDob"/>
+        <label class="check-item compact" for="approxAgeToggle" style="margin-top:var(--space-3)">
+          <input type="checkbox" id="approxAgeToggle" onchange="toggleApproxAge()"/>
+          I only know their approximate age
+        </label>
+        <input type="text" id="petApproxAge" placeholder="e.g. 2 years" oninput="autoTilde(this)" style="display:none;margin-top:var(--space-2)"/>
+        <div class="errmsg">Please enter a date of birth or approximate age.</div>
+      </div>
+      <div class="field">
+        <div class="inline-fields">
+          <div class="inline-field">
+            <label id="petSexLabel">Sex</label>
+            <div class="radiogroup" role="radiogroup" aria-labelledby="petSexLabel">
+              <label><input type="radio" name="petSex" value="Male" checked/>Male</label>
+              <label><input type="radio" name="petSex" value="Female"/>Female</label>
+            </div>
+          </div>
+          <div class="inline-field">
+            <label id="petDesexedLabel">Desexed?</label>
+            <div class="radiogroup" role="radiogroup" aria-labelledby="petDesexedLabel">
+              <label><input type="radio" name="petDesexed" value="Yes" checked/>Yes</label>
+              <label><input type="radio" name="petDesexed" value="No"/>No</label>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="petSize">Size</label>
+        <select id="petSize">
+          <option>Mini</option>
+          <option selected>Small</option>
+          <option>Medium</option>
+          <option>Large</option>
+          <option>Extra large</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- STEP 3: Health & care -->
+    <div class="step" data-step="3">
+      <div class="step-title">Health &amp; care notes</div>
+      <p class="step-hint">This helps me keep your pet safe and comfortable.</p>
+
+      <div class="switch-row">
+        <div class="switch-row-top">
+          <div>
+            <div class="stxt">OK to give treats?</div>
+            <div class="ssub">I'll take any allergies you've listed into account.</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="treatsOk" checked/>
+            <span class="track"><span class="knob"></span></span>
+          </label>
+        </div>
+        <label class="check-item compact" for="limitTreats">
+          <input type="checkbox" id="limitTreats"/>
+          Please don't give too many treats
+        </label>
+      </div>
+
+      <div class="field">
+        <label id="behaviourLabel">Behaviour &amp; temperament <span class="opt">(select any that apply)</span></label>
+        <div class="checklist" id="behaviourChips" role="group" aria-labelledby="behaviourLabel"></div>
+        <textarea id="behaviourNotes" placeholder="Other behaviours or concerns" style="margin-top:var(--space-2)"></textarea>
+      </div>
+
+      <div class="field">
+        <label id="medicalLabel">Medical conditions <span class="opt">(select any that apply)</span></label>
+        <div class="checklist" id="medicalChips" role="group" aria-labelledby="medicalLabel"></div>
+        <textarea id="medicalNotes" placeholder="Other conditions, concerns, or relevant details" style="margin-top:var(--space-2)"></textarea>
+      </div>
+
+      <div class="field" id="allergiesField">
+        <label for="customAllergies">Allergies <span class="opt">(optional)</span></label>
+        <label class="check-item" for="noAllergies" style="margin-top:var(--space-3);margin-bottom:var(--space-4)">
+          <input type="checkbox" id="noAllergies" onchange="refreshAllergiesField()"/>
+          No known allergies
+        </label>
+        <textarea id="customAllergies" placeholder="e.g. chicken, certain shampoos, fragrances..."></textarea>
+      </div>
+
+      <div class="field">
+        <label for="extraNotes">Anything else I should know? <span class="opt">(optional)</span></label>
+        <textarea id="extraNotes" placeholder=""></textarea>
+      </div>
+    </div>
+
+    <!-- STEP 4: Review & Consent -->
+    <div class="step" data-step="4">
+      <div class="step-title">Review &amp; consent</div>
+      <p class="step-hint">Last step, please review, agree to the terms, and confirm below.</p>
+
+      <p style="font-size:13.5px;color:var(--ink-soft);line-height:1.6;margin:0 0 var(--space-4)">
+        I confirm the information above is accurate to the best of my knowledge, and that I've read and understood the full Terms &amp; Conditions covering grooming risk, emergency care, and photo consent.
+      </p>
+
+      <div class="field" id="f-agreeTerms">
+        <label class="check-item" for="agreeTerms">
+          <input type="checkbox" id="agreeTerms"/>
+          <span>I agree to the <a class="terms-link" onclick="openTerms(event)">Terms &amp; Conditions</a> <span style="color:var(--danger)">*</span></span>
+        </label>
+        <div class="errmsg">Please read and agree to the Terms &amp; Conditions before submitting.</div>
+      </div>
+
+      <div class="field" id="f-signature">
+        <label for="signature">Typed signature (full name) <span style="color:var(--danger)">*</span></label>
+        <input type="text" id="signature" placeholder="Jane Smith"/>
+        <div class="errmsg">Please type your full name as your signature.</div>
+      </div>
+
+      <div class="field" id="f-consentDate">
+        <label for="consentDate">Date <span style="color:var(--danger)">*</span></label>
+        <input type="date" id="consentDate"/>
+        <div class="errmsg">Please confirm today's date.</div>
+      </div>
+    </div>
+
+    <div class="navrow">
+      <button class="btn-ghost" id="backBtn" onclick="goStep(currentStep-1)">Back</button>
+      <button class="btn-primary" id="nextBtn" onclick="handleNext()">Continue</button>
+    </div>
+  </div>
+
+  <!-- confirmation (hidden until submit) -->
+  <div class="ticket" id="ticket" style="display:none">
+    <div class="paw-big">
+      <svg viewBox="0 0 64 64"><use href="#pawShape"/></svg>
+    </div>
+    <h2>You're all set!</h2>
+    <p>Thank you, I've received <span id="ticketPetName">your pet's</span> details. I'll be in touch to confirm the appointment.</p>
+    <p class="thanks">Thank you so much for supporting me. I really appreciate it! 🐾</p>
+    <div>
+      <button class="btn-primary" onclick="resetForm()">Submit another pet</button>
+    </div>
+  </div>
+
+</div>
+
+<footer>Having trouble? Give me a call and I'll take your details over the phone.</footer>
+
+<!-- terms & conditions modal -->
+<div class="terms-modal-bg" id="termsModalBg">
+  <div class="terms-modal" role="dialog" aria-modal="true" aria-labelledby="termsModalTitle" tabindex="-1">
+    <h3 id="termsModalTitle">Terms &amp; Conditions</h3>
+    <p class="tm-sub">Please read before agreeing on the review step.</p>
+
+    <div class="terms-section">
+      <h4>Information accuracy</h4>
+      <p>I confirm that the information I have provided about myself and my pet is accurate and complete, including my dog's health, behaviour, and grooming history. I agree to inform the groomer of any relevant changes before the appointment.</p>
+    </div>
+
+    <div class="terms-section">
+      <h4>Grooming risk</h4>
+      <p>I understand that grooming services, including de-matting and nail trimming, carry some inherent risks. I authorise the groomer to provide the services I have requested and to make reasonable adjustments where necessary for my dog's safety and wellbeing.</p>
+    </div>
+
+    <div class="terms-section">
+      <h4>Matting &amp; safety</h4>
+      <p>Severe matting will not be brushed out where doing so may cause unnecessary pain or distress. Matted coats may need to be clipped shorter than requested to safely remove the matting.</p>
+    </div>
+
+    <div class="terms-section">
+      <h4>Style &amp; safety adjustments</h4>
+      <p>I understand that the requested grooming style may not always be achievable and may be adjusted to suit my dog's individual needs, coat, and behaviour. The groomer may pause, modify, or stop the groom where necessary for my dog's safety or wellbeing, and the final result may vary.</p>
+    </div>
+
+    <div class="terms-section">
+      <h4>Additional fees</h4>
+      <p>Additional handling time or specialist care may incur an extra fee, where applicable.</p>
+    </div>
+
+    <div class="terms-section">
+      <h4>Emergency care</h4>
+      <p>If my pet requires urgent veterinary attention during their appointment and I cannot be reached, I authorise the groomer to seek veterinary care where reasonably necessary to protect my pet's health and wellbeing.</p>
+    </div>
+
+    <div class="terms-section">
+      <h4>Photos &amp; social media</h4>
+      <p>Photos may be taken for grooming records, and, only with my permission, used on social media.</p>
+    </div>
+
+    <div class="terms-modal-actions">
+      <button class="btn-ghost" style="padding:9px 16px;font-size:13px;opacity:1" onclick="closeTerms()">Close</button>
+      <button class="btn-primary" style="padding:9px 16px;font-size:13px" onclick="acceptTerms()">I agree</button>
+    </div>
+  </div>
+</div>
+
+<!-- shared paw SVG shape -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="pawShape" viewBox="0 0 64 64">
+    <ellipse class="pad" cx="32" cy="42" rx="15" ry="12"/>
+    <ellipse class="toe" cx="14" cy="20" rx="6.2" ry="8.4" transform="rotate(-18 14 20)"/>
+    <ellipse class="toe" cx="27" cy="11" rx="6.2" ry="8.6" transform="rotate(-6 27 11)"/>
+    <ellipse class="toe" cx="41" cy="11" rx="6.2" ry="8.6" transform="rotate(6 41 11)"/>
+    <ellipse class="toe" cx="53" cy="20" rx="6.2" ry="8.4" transform="rotate(18 53 20)"/>
+  </symbol>
+</svg>
+
+<script>
+// Same Apps Script Web App the grooming app syncs with — this is what
+// actually creates the client/pet records. Formspree stays as a
+// human-readable backup record / email notification.
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_ynXODB2AT9oXF_etXln8VxCJLxixmt0ILJvj7gWuG-corJsoJ2fIIqjEzk6AD1ub/exec";
+
+const BEHAVIOUR_TRAITS=["New to grooming","High energy / excitable","Anxious / nervous","May bark, lunge or growl at other dogs","May bite when stressed or uncomfortable"];
+const MEDICAL_TAGS=["No known conditions","Arthritis / joint problems","Recent surgery","Skin condition / sensitive skin","Lumps, bumps and skin tags","Hearing or vision impaired"];
+
+let currentStep=1;
+const TOTAL_STEPS=4;
+const stepLabels=["You","Pet","Health","Review"];
+
+function buildTracker(){
+  const t=document.getElementById("tracker");
+  t.innerHTML=stepLabels.map((label,i)=>{
+    const n=i+1;
+    return `<div class="tstep" data-tstep="${n}">
+      <div class="paw"><svg viewBox="0 0 64 64"><use href="#pawShape"/></svg></div>
+      <div class="tlabel">${label}</div>
+    </div>`;
+  }).join("");
+}
+function updateTracker(){
+  document.querySelectorAll(".tstep").forEach(el=>{
+    const n=Number(el.dataset.tstep);
+    el.classList.toggle("done",n<currentStep);
+    el.classList.toggle("current",n===currentStep);
+  });
+}
+
+function buildChips(elId,options,groupName){
+  document.getElementById(elId).innerHTML=options.map((o,i)=>
+    `<label class="check-item"><input type="checkbox" name="${groupName}" value="${o.replace(/"/g,'&quot;')}"/>${o}</label>`
+  ).join("");
+}
+
+function buildMedicalChips(elId,options,groupName){
+  document.getElementById(elId).innerHTML=options.map(o=>{
+    const safe=o.replace(/"/g,'&quot;');
+    return `<label class="check-item"><input type="checkbox" name="${groupName}" value="${safe}"/>${o}</label>`;
+  }).join("");
+}
+
+buildChips("behaviourChips",BEHAVIOUR_TRAITS,"behaviour");
+buildMedicalChips("medicalChips",MEDICAL_TAGS,"medical");
+buildTracker();
+updateTracker();
+
+let refreshMedicalSection=()=>{};
+setupMedicalNone();
+
+function setupMedicalNone(){
+  const NONE_VALUE="No known conditions";
+  const noneInput=document.querySelector(`input[name="medical"][value="${NONE_VALUE.replace(/"/g,'&quot;')}"]`);
+  const otherInputs=[...document.querySelectorAll('input[name="medical"]')].filter(i=>i.value!==NONE_VALUE);
+  const medicalNotes=document.getElementById("medicalNotes");
+
+  function refresh(){
+    const isNone=noneInput.checked;
+    otherInputs.forEach(i=>{
+      i.closest(".check-item").style.display=isNone?"none":"flex";
+      if(isNone)i.checked=false;
+    });
+    medicalNotes.style.display=isNone?"none":"block";
+  }
+  refreshMedicalSection=refresh;
+  noneInput.addEventListener("change",refresh);
+  otherInputs.forEach(i=>i.addEventListener("change",()=>{
+    if(i.checked)noneInput.checked=false;
+    refresh();
+  }));
+  refresh();
+}
+
+function refreshAllergiesField(){
+  const noneChecked=document.getElementById("noAllergies").checked;
+  const textarea=document.getElementById("customAllergies");
+  textarea.style.display=noneChecked?"none":"block";
+  if(noneChecked)textarea.value="";
+}
+document.getElementById("customAllergies").addEventListener("input",function(){
+  if(this.value.trim())document.getElementById("noAllergies").checked=false;
+});
+
+function updateSocialFields(){
+  const isOther=getRadio("contactPref")==="Other";
+  document.getElementById("socialFields").style.display=isOther?"grid":"none";
+  if(!isOther)clearError("f-socialPlatform");
+}
+document.getElementById("contactPrefGroup").addEventListener("change",updateSocialFields);
+updateSocialFields();
+refreshAllergiesField();
+
+function getChecked(name){return[...document.querySelectorAll(`input[name="${name}"]:checked`)].map(i=>i.value);}
+
+function toggleApproxAge(){
+  const checked=document.getElementById("approxAgeToggle").checked;
+  document.getElementById("petDob").style.display=checked?"none":"block";
+  document.getElementById("petApproxAge").style.display=checked?"block":"none";
+  if(checked)document.getElementById("petDob").value="";
+  else document.getElementById("petApproxAge").value="";
+  clearError("f-petAge");
+}
+
+function autoTilde(el){
+  const v=el.value;
+  if(v&&!v.startsWith("~"))el.value="~"+v.replace(/^\s+/,"");
+  else if(v==="~")el.value="";
+}
+
+function formatPhone(el){
+  const digits=el.value.replace(/\D/g,"").slice(0,10);
+  const parts=[];
+  if(digits.length>0)parts.push(digits.slice(0,4));
+  if(digits.length>4)parts.push(digits.slice(4,7));
+  if(digits.length>7)parts.push(digits.slice(7,10));
+  el.value=parts.join(" ");
+}
+function getRadio(name){const el=document.querySelector(`input[name="${name}"]:checked`);return el?el.value:"";}
+
+function clearError(fieldId){document.getElementById(fieldId)?.classList.remove("err");}
+function setError(fieldId){document.getElementById(fieldId)?.classList.add("err");}
+
+function validateStep(step){
+  let ok=true;
+  if(step===1){
+    clearError("f-ownerName");clearError("f-ownerPhone");clearError("f-socialPlatform");
+    if(!document.getElementById("ownerName").value.trim()){setError("f-ownerName");ok=false;}
+    if(!document.getElementById("ownerPhone").value.trim()){setError("f-ownerPhone");ok=false;}
+    if(getRadio("contactPref")==="Other"&&!document.getElementById("socialPlatform").value.trim()){setError("f-socialPlatform");ok=false;}
+  }
+  if(step===2){
+    clearError("f-petName");clearError("f-petBreed");clearError("f-petAge");
+    if(!document.getElementById("petName").value.trim()){setError("f-petName");ok=false;}
+    if(!document.getElementById("petBreed").value.trim()){setError("f-petBreed");ok=false;}
+    const hasDob=document.getElementById("petDob").value;
+    const hasApprox=document.getElementById("petApproxAge").value.trim();
+    if(!hasDob&&!hasApprox){setError("f-petAge");ok=false;}
+  }
+  if(step===4){
+    clearError("f-agreeTerms");clearError("f-signature");clearError("f-consentDate");
+    if(!document.getElementById("agreeTerms").checked){setError("f-agreeTerms");ok=false;}
+    if(!document.getElementById("signature").value.trim()){setError("f-signature");ok=false;}
+    if(!document.getElementById("consentDate").value){setError("f-consentDate");ok=false;}
+  }
+  return ok;
+}
+
+function handleNext(){
+  if(!validateStep(currentStep))return;
+  if(currentStep===TOTAL_STEPS){submitForm();return;}
+  goStep(currentStep+1);
+}
+
+function goStep(n){
+  if(n<1)return;
+  currentStep=n;
+  document.querySelectorAll(".step").forEach(s=>s.classList.toggle("active",Number(s.dataset.step)===n));
+  updateTracker();
+  document.getElementById("backBtn").disabled=(n===1);
+  document.getElementById("nextBtn").textContent=(n===TOTAL_STEPS)?"Submit":"Continue";
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+goStep(1);
+document.getElementById("consentDate").value=new Date().toISOString().slice(0,10);
+
+async function submitForm(){
+  const submission={
+    id:Date.now()+"-"+Math.random().toString(36).slice(2,8),
+    submittedAt:new Date().toISOString(),
+    ownerName:document.getElementById("ownerName").value.trim(),
+    ownerPhone:document.getElementById("ownerPhone").value.trim(),
+    ownerEmail:document.getElementById("ownerEmail").value.trim(),
+    contactPref:getRadio("contactPref"),
+    socialPlatform:document.getElementById("socialPlatform").value.trim(),
+    socialHandle:document.getElementById("socialHandle").value.trim(),
+    petName:document.getElementById("petName").value.trim(),
+    petBreed:document.getElementById("petBreed").value.trim(),
+    petDob:document.getElementById("petDob").value,
+    petApproxAge:document.getElementById("petApproxAge").value.trim(),
+    petSex:getRadio("petSex"),
+    petDesexed:getRadio("petDesexed"),
+    petSize:document.getElementById("petSize").value,
+    treatsOk:document.getElementById("treatsOk").checked,
+    limitTreats:document.getElementById("limitTreats").checked,
+    behaviour:getChecked("behaviour"),
+    medical:getChecked("medical"),
+    behaviourNotes:document.getElementById("behaviourNotes").value.trim(),
+    medicalNotes:document.getElementById("medicalNotes").value.trim(),
+    noAllergies:document.getElementById("noAllergies").checked,
+    customAllergies:document.getElementById("noAllergies").checked?"No known allergies":document.getElementById("customAllergies").value.trim(),
+    extraNotes:document.getElementById("extraNotes").value.trim(),
+    agreeTerms:document.getElementById("agreeTerms").checked,
+    signature:document.getElementById("signature").value.trim(),
+    consentDate:document.getElementById("consentDate").value,
+  };
+
+  // Primary: send to the grooming app's Apps Script so it shows up as a
+  // real client + pet record automatically.
+  let appOk=false;
+  try{
+    const res=await fetch(SCRIPT_URL,{
+      method:"POST",
+      body:JSON.stringify({action:"addIntake",data:submission}),
+      headers:{"Content-Type":"text/plain"}
+    });
+    const text=await res.text();
+    let json;try{json=JSON.parse(text);}catch(e){json=null;}
+    appOk=!!(json&&json.ok);
+    if(!appOk)console.error("Apps Script intake submission failed:",text);
+  }catch(e){
+    console.error("Apps Script intake error:",e);
+  }
+
+  // Backup: also send to Formspree for a human-readable record/email notification.
+  let formspreeOk=false;
+  try{
+    const formspreePayload={
+      "Submitted At":submission.submittedAt,
+      "Owner Name":submission.ownerName,
+      "Phone Number":submission.ownerPhone,
+      "Email":submission.ownerEmail,
+      "Preferred Contact Method":submission.contactPref,
+      "Social Media Platform":submission.socialPlatform,
+      "Social Media Handle":submission.socialHandle,
+      "Pet Name":submission.petName,
+      "Breed":submission.petBreed,
+      "Date of Birth":submission.petDob,
+      "Approximate Age":submission.petApproxAge,
+      "Sex":submission.petSex,
+      "Desexed":submission.petDesexed,
+      "Size":submission.petSize,
+      "OK to Give Treats":submission.treatsOk?"Yes":"No",
+      "Limit Treats":submission.limitTreats?"Yes":"No",
+      "Behaviour & Temperament":submission.behaviour.join(", "),
+      "Behaviour Notes":submission.behaviourNotes,
+      "Medical Conditions":submission.medical.join(", "),
+      "Medical Notes":submission.medicalNotes,
+      "Allergies":submission.customAllergies,
+      "Additional Notes":submission.extraNotes,
+      "Agreed to Terms":submission.agreeTerms?"Yes":"No",
+      "Signature":submission.signature,
+      "Consent Date":submission.consentDate,
+    };
+    const res=await fetch("https://formspree.io/f/xrpzylow",{
+      method:"POST",
+      headers:{"Content-Type":"application/json","Accept":"application/json"},
+      body:JSON.stringify(formspreePayload)
+    });
+    formspreeOk=res.ok;
+    if(!res.ok)console.error("Formspree submission failed",res.status);
+  }catch(e){
+    console.error("Formspree error",e);
+  }
+  document.getElementById("ticketPetName").textContent=submission.petName||"your pet's";
+  document.getElementById("formCard").style.display="none";
+  document.getElementById("tracker").style.display="none";
+  document.getElementById("ticket").style.display="block";
+  if(!appOk&&!formspreeOk){
+    const p=document.querySelector("#ticket p");
+    p.innerHTML+=" <br/><span style='color:var(--danger)'>Note: I couldn't save this automatically, please also let me know by phone just in case.</span>";
+  }
+}
+
+function resetForm(){
+  document.querySelectorAll('.step input[type=text],.step input[type=tel],.step input[type=email],.step input[type=date],.step textarea').forEach(i=>i.value="");
+  document.querySelectorAll('.step input[type=checkbox]').forEach(i=>i.checked=(i.id==="treatsOk"));
+  document.querySelectorAll('.step input[type=radio]').forEach(i=>i.checked=false);
+  document.querySelector('input[name=contactPref][value="Phone call"]').checked=true;
+  document.querySelector('input[name=petSex][value="Male"]').checked=true;
+  document.querySelector('input[name=petDesexed][value="Yes"]').checked=true;
+  document.getElementById("petDob").style.display="block";
+  document.getElementById("petApproxAge").style.display="none";
+  updateSocialFields();
+  refreshMedicalSection();
+  refreshAllergiesField();
+  clearError("f-petAge");
+  clearError("f-agreeTerms");
+  clearError("f-signature");
+  clearError("f-consentDate");
+  closeTerms();
+  document.getElementById("consentDate").value=new Date().toISOString().slice(0,10);
+  document.getElementById("ticket").style.display="none";
+  document.getElementById("formCard").style.display="block";
+  document.getElementById("tracker").style.display="flex";
+  goStep(1);
+}
+
+/* ---- terms & conditions modal ---- */
+let _termsTriggerEl=null;
+function openTerms(e){
+  if(e)e.preventDefault();
+  _termsTriggerEl=document.activeElement;
+  document.getElementById("termsModalBg").classList.add("open");
+  document.addEventListener("keydown",termsModalKeydown);
+  requestAnimationFrame(()=>document.querySelector("#termsModalBg .terms-modal").focus());
+}
+function closeTerms(){
+  document.getElementById("termsModalBg").classList.remove("open");
+  document.removeEventListener("keydown",termsModalKeydown);
+  if(_termsTriggerEl){_termsTriggerEl.focus();_termsTriggerEl=null;}
+}
+function termsModalKeydown(e){
+  if(e.key==="Escape"){closeTerms();return;}
+  if(e.key==="Tab"){
+    const modal=document.querySelector("#termsModalBg .terms-modal");
+    const focusables=[...modal.querySelectorAll('button,[href],input,select,textarea,[tabindex]:not([tabindex="-1"])')]
+      .filter(el=>el.offsetParent!==null);
+    if(!focusables.length)return;
+    const first=focusables[0],last=focusables[focusables.length-1];
+    if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}
+    else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}
+  }
+}
+function acceptTerms(){
+  document.getElementById("agreeTerms").checked=true;
+  clearError("f-agreeTerms");
+  closeTerms();
+}
+</script>
+</body>
+</html>
