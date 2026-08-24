@@ -822,7 +822,7 @@ async function submitForm(){
   }catch(e){
     console.error("Formspree error",e);
   }
-  document.getElementById("ticketPetName").textContent=submission.petName||"your pet's";
+  document.getElementById("ticketPetName").textContent="your";
   document.getElementById("formCard").style.display="none";
   document.getElementById("tracker").style.display="none";
   document.getElementById("ticket").style.display="block";

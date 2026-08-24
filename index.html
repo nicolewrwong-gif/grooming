@@ -110,7 +110,7 @@ tr:hover td{background:#fafbfc}
   </div>
   <div style="display:flex;align-items:center;gap:14px">
     <span id="sync-status"></span>
-    <span id="intake-banner" onclick="switchTab('clients')" style="display:none;align-items:center;gap:6px;background:#EEEBFA;color:#534AB7;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer"></span>
+    <span id="intake-banner" onclick="openIntakeReviewModal()" style="display:none;align-items:center;gap:6px;background:#EEEBFA;color:#534AB7;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer"></span>
     <button class="accent" onclick="openBkModal(null)">+ New booking</button>
   </div>
 </div>
@@ -287,6 +287,15 @@ tr:hover td{background:#fafbfc}
 <div class="mb10"><label class="lbl">Base price ($)</label><input type="number" id="mp-price"/></div>
 <div class="mb10"><label class="lbl">Base duration (min)</label><input type="number" id="mp-dur"/></div>
 <div class="row-end"><button onclick="closePriceModal()">Cancel</button><button class="primary" onclick="savePriceModal()">Save</button></div>
+</div>
+</div>
+
+<div id="modal-intake-review" class="modal-bg">
+<div class="modal" style="width:460px">
+<h2>🆕 Review new intake submissions</h2>
+<p style="font-size:12.5px;color:#888;margin:-6px 0 12px">New clients and pets from the intake form. Check consent, edit anything that needs it, then mark reviewed.</p>
+<div id="intake-review-list"></div>
+<div class="row-end"><button onclick="closeIntakeReviewModal()">Close</button></div>
 </div>
 </div>
 
@@ -839,9 +848,6 @@ async function checkIntake(){
       if(item.contactPref==="Other"&&(item.socialPlatform||item.socialHandle)){
         ownerNoteParts.push(`Contact via ${item.socialPlatform||"social media"}${item.socialHandle?": "+item.socialHandle:""}`);
       }
-      if(item.signature||item.consentDate){
-        ownerNoteParts.push(`Consent form signed by ${item.signature||"?"}${item.consentDate?" on "+item.consentDate:""}.`);
-      }
       if(!owner){
         owner={id:nextOId++,name:item.ownerName||"Unknown",phone,email:item.ownerEmail||"",
           contact:mapIntakeContact_(item),notes:ownerNoteParts.join(" "),needsReview:true};
@@ -881,7 +887,8 @@ async function checkIntake(){
         allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",
         treatsOk:item.treatsOk!==false,
         lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
-        customSpecialHandling:"",hideBrachy:false,oodleName:null,needsReview:true});
+        customSpecialHandling:"",hideBrachy:false,oodleName:null,needsReview:true,
+        consentSigned:!!(item.agreeTerms&&item.signature),consentSignature:item.signature||"",consentDate:item.consentDate||""});
       processedIds.push(item.id);
     });
     if(processedIds.length){
@@ -897,9 +904,40 @@ function updateIntakeBanner(){
   const n=owners.filter(o=>o.needsReview).length+pets.filter(p=>p.needsReview).length;
   if(n){el.style.display="inline-flex";el.textContent=`🆕 ${n} new from intake — Review`;}
   else{el.style.display="none";}
+  if(document.getElementById("modal-intake-review").classList.contains("open"))renderIntakeReviewModal();
 }
 function markOwnerReviewed(id){owners=owners.map(o=>o.id===id?{...o,needsReview:false}:o);save();render();}
 function markPetReviewed(id){pets=pets.map(p=>p.id===id?{...p,needsReview:false}:p);save();render();}
+function markIntakeEntryReviewed(petId,ownerId){
+  pets=pets.map(p=>p.id===petId?{...p,needsReview:false}:p);
+  if(ownerId)owners=owners.map(o=>o.id===ownerId?{...o,needsReview:false}:o);
+  save();render();
+}
+function openIntakeReviewModal(){
+  renderIntakeReviewModal();
+  document.getElementById("modal-intake-review").classList.add("open");
+}
+function closeIntakeReviewModal(){document.getElementById("modal-intake-review").classList.remove("open");}
+function renderIntakeReviewModal(){
+  const reviewPets=pets.filter(p=>p.needsReview);
+  const reviewedOwnerIds=new Set(reviewPets.flatMap(p=>p.ownerIds||[]));
+  const standaloneOwners=owners.filter(o=>o.needsReview&&!reviewedOwnerIds.has(o.id));
+  const listEl=document.getElementById("intake-review-list");
+  if(!reviewPets.length&&!standaloneOwners.length){
+    listEl.innerHTML=`<p style="font-size:13px;color:#888;text-align:center;padding:20px 0">All caught up — nothing left to review.</p>`;
+    return;
+  }
+  let html="";
+  reviewPets.forEach(p=>{
+    const owner=owners.find(o=>(p.ownerIds||[]).includes(o.id));
+    const consentBit=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:`<span class="badge" style="background:#FDECEB;color:#B4483A">&#9888; No consent on file</span>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editPet(${p.id})">&#9998; Edit pet</button>${owner?`<button class="sm" onclick="closeIntakeReviewModal();editOwner(${owner.id})">&#9998; Edit owner</button>`:""}<button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button></div></div></div>`;
+  });
+  standaloneOwners.forEach(o=>{
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editOwner(${o.id})">&#9998; Edit owner</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button></div></div></div>`;
+  });
+  listEl.innerHTML=html;
+}
 // ───────────────────────────────────────────────────────────────────────
 
 function lss(key,val){
@@ -1152,13 +1190,14 @@ function renderPets(){
     const last=bookings.filter(b=>b.petId===p.id).sort((a,b)=>b.date.localeCompare(a.date))[0];
     const brachy=isBrachy(p.breed)&&!p.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">Brachy</span>`:"";
     const reviewBadge=p.needsReview?`<span class="badge" style="background:#EEEBFA;color:#534AB7;margin-left:6px">🆕 New</span>`:"";
+    const consentBadge=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46;margin-left:6px" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:(p.needsReview?`<span class="badge" style="background:#FDECEB;color:#B4483A;margin-left:6px">&#9888; No consent on file</span>`:"");
     const treatsBadge=p.treatsOk===false?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">No treats</span>`:`<span class="badge" style="background:#EAF7EE;color:#5BAF7A;margin-left:6px">Treats OK</span>`;
     const behTags=sortBehTraits((p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)&&BEHAVIOUR_TRAITS.includes(t))).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
     const medTags=(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)&&MEDICAL_TAGS.includes(t)).map(t=>{const c=medColor(t);return tag(t,c.bg,c.text);}).join("");
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${p.lastNote}</div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${p.lastNote}</div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
