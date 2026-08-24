@@ -1,0 +1,2333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>✂️ Grooming</title>
+<style>
+:root{
+  --navy:#1C2B3A;
+  --navy-mid:#243447;
+  --navy-light:#2E4156;
+  --teal:#00A99D;
+  --teal-dark:#008B80;
+  --teal-bg:#E6F7F6;
+  --accent:#4DA6FF;
+  --accent-bg:#E8F3FF;
+  --text:#1a1a1a;
+  --text-muted:#6B7280;
+  --border:#E5E7EB;
+  --bg:#F3F4F6;
+  --white:#fff;
+  --green-bg:#EAF7EE;--green:#5BAF7A;
+  --amber-bg:#FFF3CD;--amber:#92620A;
+  --red-bg:#FDECEB;--red:#E8534A;
+  --blue-bg:#E8F3FF;--blue:#185FA5;
+  --purple-bg:#EEEDFE;--purple:#534AB7;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
+input,select,textarea,button{font-family:inherit;font-size:13px}
+select,input[type=text],input[type=date],input[type=time],input[type=number],textarea{
+  width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);
+  transition:border-color .15s;outline:none}
+select:focus,input:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,169,157,0.12)}
+button{cursor:pointer;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--text);padding:9px 18px;font-weight:600;transition:all .15s;font-size:13px}
+button:hover{background:var(--bg);border-color:#ccc}
+button.primary{background:var(--teal);color:#fff;border-color:var(--teal);border-radius:14px;box-shadow:0 3px 8px rgba(0,169,157,0.28)}
+button.primary:hover{background:var(--teal-dark);border-color:var(--teal-dark)}
+button.green{background:#5BAF7A;color:#fff;border-color:#5BAF7A;border-radius:14px;box-shadow:0 3px 8px rgba(91,175,122,0.28)}
+button.green:hover{background:#4a9a69;border-color:#4a9a69}
+button.accent{background:#b0d8f9;color:#1a4a6e;border-color:#b0d8f9;border-radius:14px;box-shadow:0 3px 8px rgba(176,216,249,0.5)}
+button.accent:hover{background:#98ccf5;border-color:#98ccf5}
+button.sm{padding:5px 12px;font-size:11px;border-radius:10px;font-weight:500}
+button.danger{border-color:var(--red);color:var(--red);background:#fff;border-radius:14px}
+button.danger:hover{background:var(--red-bg)}
+label.lbl{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500;letter-spacing:0.02em}
+/* ── HEADER STRIP ── */
+#app-header{background:#fff;color:var(--text);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+#app-header .app-title{font-size:18px;font-weight:600;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px;color:var(--text)}
+#app-header .app-subtitle{font-size:12px;color:var(--text-muted);margin-top:2px}
+#app-header button.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-size:13px;padding:9px 20px;border-radius:14px}
+#app-header button.primary:hover{background:var(--teal-dark);border-color:var(--teal-dark)}
+#app-header button.accent{font-size:13px;padding:9px 20px;border-radius:14px}
+#sync-status{font-size:12px;color:var(--text-muted)}
+/* ── STAT CARDS ── */
+.stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:1.25rem 1.5rem 0}
+.stat{background:#fff;border-radius:10px;padding:0.95rem 1.1rem;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.stat .slabel{font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
+.stat .sval{font-size:22px;font-weight:600;color:var(--navy)}
+/* ── TABS ── */
+.tabs-wrap{padding:0 1.5rem;border-bottom:1px solid var(--border);background:#fff;box-shadow:0 1px 0 var(--border)}
+.tabs{display:flex;gap:0;flex-wrap:wrap}
+.tab-btn{padding:10px 16px;font-size:13px;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px;color:var(--text-muted);font-weight:500;border-radius:0;transition:color .15s}
+.tab-btn:hover{color:var(--navy);background:var(--bg)}
+.tab-btn.active{color:var(--teal);border-bottom:3px solid var(--teal);font-weight:600}
+/* ── MAIN CONTENT ── */
+.page-content{padding:1.25rem 1.5rem}
+/* ── CARDS ── */
+.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+/* ── TABLE ── */
+table{width:100%;border-collapse:collapse}
+th{font-size:11px;color:var(--text-muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg)}
+td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafbfc}
+/* ── BADGES / TAGS ── */
+.badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
+.tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap;margin-right:3px;margin-bottom:3px}
+/* ── PRICE BOX ── */
+.price-box{background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px;margin-bottom:10px;font-size:13px}
+.price-row{display:flex;justify-content:space-between;margin-bottom:4px}
+.price-row.total{font-weight:700;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;color:var(--navy)}
+/* ── MODAL ── */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-bg.open{display:flex}
+.modal{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:440px;max-width:95vw;margin-bottom:40px;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.modal h2{font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--navy)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.mb10{margin-bottom:10px}
+.row-end{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem}
+/* ── CONFIRM ── */
+.confirm-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center}
+.confirm-bg.open{display:flex}
+.confirm-box{background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;width:320px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.confirm-box p{font-size:13px;margin-bottom:1rem;color:var(--navy);font-weight:500}
+/* ── MISC ── */
+.search-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;justify-content:space-between}
+.search-row .right{display:flex;gap:8px}
+.multi-toggle{display:flex;flex-wrap:wrap;gap:5px}
+.rule-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.rule-card-title{font-size:14px;font-weight:600;margin-bottom:0.5rem;color:var(--navy)}
+.rule-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-right:5px;margin-bottom:5px}
+</style>
+</head>
+<body>
+<div id="app-header">
+  <div>
+    <div class="app-title">✂️ Grooming</div>
+    <div class="app-subtitle">Bookings &amp; client management</div>
+  </div>
+  <div style="display:flex;align-items:center;gap:14px">
+    <span id="sync-status"></span>
+    <span id="intake-banner" onclick="switchTab('clients')" style="display:none;align-items:center;gap:6px;background:#EEEBFA;color:#534AB7;border-radius:20px;padding:5px 12px;font-size:12px;font-weight:500;cursor:pointer"></span>
+    <button class="accent" onclick="openBkModal(null)">+ New booking</button>
+  </div>
+</div>
+<div class="stats-bar">
+  <div class="stat"><div class="slabel">Today's bookings</div><div class="sval" id="m-today">0</div></div>
+  <div class="stat"><div class="slabel">This week</div><div class="sval" id="m-week">0</div></div>
+  <div class="stat"><div class="slabel">Total clients</div><div class="sval" id="m-clients">0</div></div>
+  <div class="stat"><div class="slabel">Pending confirm</div><div class="sval" id="m-pending">0</div></div>
+</div>
+<div class="tabs-wrap" style="margin-top:1.1rem">
+  <div class="tabs" id="tabs-row"></div>
+</div>
+<div class="page-content" id="page"></div>
+<div id="app" style="display:none"></div>
+
+<div id="modal-booking" class="modal-bg">
+<div class="modal" style="width:440px">
+<h2 id="bk-title">New booking</h2>
+<div id="bk-completion-banner" style="display:none;background:#EAF7EE;color:#2f7a4a;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px">✅ Booking marked as done — add any final details below (blades/combs, photos, products, payment, time spent) before saving.</div>
+<div class="mb10 bk-core-only"><label class="lbl">Pet</label><select id="bk-pet"></select><div id="bk-pet-hint" style="font-size:11px;color:#888;margin-top:3px"></div></div>
+<div class="mb10 bk-core-only"><label class="lbl">Owner</label><div id="bk-owner-display" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#f6f6f6;color:#888;font-size:13px;min-height:34px">—</div><input type="hidden" id="bk-owner"/></div>
+<div class="mb10 bk-core-only"><label class="lbl">Service</label><select id="bk-service"></select></div>
+<div class="mb10 bk-core-only"><label class="lbl">Add-ons</label><div id="bk-addons" class="multi-toggle"></div></div>
+<div class="grid2 bk-core-only">
+  <div><label class="lbl">Date</label><input type="date" id="bk-date"/></div>
+  <div><label class="lbl">Time</label><input type="time" id="bk-time"/></div>
+</div>
+<div class="mb10 bk-core-only"><label class="lbl">Status</label><select id="bk-status"><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="done">Done</option><option value="cancelled">Cancelled</option></select></div>
+<div class="mb10 bk-core-only"><label class="lbl">Booking notes</label><textarea id="bk-notes" rows="2" placeholder="e.g. check ear infection"></textarea></div>
+<div class="mb10 bk-postonly"><label class="lbl">Completion notes</label><textarea id="bk-completionnotes" rows="2" placeholder="e.g. notes added after the groom was done"></textarea></div>
+<div class="mb10 bk-postonly"><label class="lbl">For next time</label><textarea id="bk-nextnote" rows="2" placeholder="e.g. trim nails shorter next visit"></textarea></div>
+<div class="mb10 bk-postonly">
+  <label class="lbl">Products used</label>
+  <div id="bk-products" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px"></div>
+</div>
+<div class="mb10 bk-postonly">
+  <label class="lbl">Blades used</label>
+  <div id="bk-blades" class="multi-toggle"></div>
+</div>
+<div class="mb10 bk-postonly">
+  <label class="lbl">Extension combs used</label>
+  <div id="bk-combs" class="multi-toggle"></div>
+</div>
+<div class="grid2 bk-postonly">
+  <div id="bk-matting-wrap" style="display:none"><label class="lbl">De-matting (min)</label><input type="number" id="bk-matting" value="0" min="0"/></div>
+  <div><label class="lbl">Custom price ($)</label><input type="number" id="bk-custom" placeholder="Auto"/></div>
+</div>
+<div class="mb10 bk-postonly"><label class="lbl">Time spent</label><select id="bk-timespent"></select></div>
+<div id="bk-price-box" class="price-box"></div>
+<div style="margin-bottom:8px" class="bk-postonly"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-waived"> Waive payment</label></div>
+<div style="margin-bottom:10px" class="bk-postonly"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-paid"> Mark as paid</label></div>
+<div class="mb10 bk-postonly">
+  <label class="lbl">Before &amp; after photos</label>
+  <div style="display:flex;gap:10px">
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500">Before</div>
+      <div id="bk-before-preview" onclick="document.getElementById('bk-before-input').click()" style="width:100%;aspect-ratio:4/5;border-radius:8px;border:1.5px dashed var(--border);background:#fafafa;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:11px;color:#aaa;text-align:center;flex-direction:column;gap:4px">
+        <span style="font-size:20px">📷</span>Upload
+      </div>
+      <input type="file" id="bk-before-input" accept="image/*" style="display:none" onchange="bkPhotoSelected(this,'before')"/>
+      <div style="display:none;margin-top:4px;gap:4px;flex-direction:column" id="bk-before-actions">
+        <button type="button" class="sm" onclick="bkCropPhoto('before')">✂️ Crop</button>
+        <button type="button" class="sm danger" onclick="bkRemovePhoto('before')">Remove</button>
+      </div>
+    </div>
+    <div style="flex:1">
+      <div style="font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500">After</div>
+      <div id="bk-after-preview" onclick="document.getElementById('bk-after-input').click()" style="width:100%;aspect-ratio:4/5;border-radius:8px;border:1.5px dashed var(--border);background:#fafafa;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;font-size:11px;color:#aaa;text-align:center;flex-direction:column;gap:4px">
+        <span style="font-size:20px">📷</span>Upload
+      </div>
+      <input type="file" id="bk-after-input" accept="image/*" style="display:none" onchange="bkPhotoSelected(this,'after')"/>
+      <div style="display:none;margin-top:4px;gap:4px;flex-direction:column" id="bk-after-actions">
+        <button type="button" class="sm" onclick="bkCropPhoto('after')">✂️ Crop</button>
+        <button type="button" class="sm danger" onclick="bkRemovePhoto('after')">Remove</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row-end"><button onclick="closeBkModal()">Cancel</button><button class="primary" onclick="saveBkModal()">Save booking</button></div>
+</div>
+</div>
+
+<div id="modal-pet" class="modal-bg">
+<div class="modal" style="width:500px">
+<h2 id="pt-title">New pet profile</h2>
+<div class="mb10" style="display:flex;align-items:center;gap:14px">
+  <div id="pt-photo-preview" onclick="document.getElementById('pt-photo-input').click()" style="width:72px;height:72px;border-radius:50%;border:0.5px solid #d0d0d0;background:#f6f6f6;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;flex-shrink:0;font-size:28px">🐾</div>
+  <div>
+    <div style="font-size:12px;font-weight:500;margin-bottom:3px">Pet photo</div>
+    <div style="font-size:11px;color:#888;margin-bottom:6px">Click the circle to upload</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button type="button" class="sm" onclick="document.getElementById('pt-photo-input').click()">Upload photo</button>
+      <button type="button" class="sm" id="pt-photo-edit" style="display:none" onclick="ptEditPhoto()">✂️ Edit</button>
+      <button type="button" class="sm danger" id="pt-photo-remove" style="display:none" onclick="ptRemovePhoto()">Remove</button>
+    </div>
+    <input type="file" id="pt-photo-input" accept="image/*" style="display:none" onchange="ptPhotoSelected(this)"/>
+  </div>
+</div>
+<div class="grid2">
+  <div><label class="lbl">Pet name</label><input type="text" id="pt-name" placeholder="Buddy"/></div>
+  <div>
+    <label class="lbl">Breed</label>
+    <div id="pt-breed-tags" style="display:flex;flex-wrap:wrap;gap:4px;min-height:24px;margin-bottom:4px"></div>
+    <div style="position:relative">
+      <input type="text" id="pt-breed-search" placeholder="Type to search breeds..." autocomplete="off" oninput="ptBreedSearchInput()" onfocus="ptBreedSearchInput()" onblur="ptScheduleCloseBreedDropdown()" style="width:100%"/>
+      <div id="pt-breed-dropdown" style="display:none;position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:8px;margin-top:2px;max-height:220px;overflow-y:auto;z-index:5;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
+    </div>
+    <div id="pt-brachy-toggle" style="display:none;margin-top:6px">
+      <label style="display:flex;align-items:center;gap:6px;font-size:11px;color:var(--text-muted);font-weight:500;cursor:pointer">
+        <input type="checkbox" id="pt-hide-brachy" style="margin:0;width:auto"/> Don't show "Brachy" label for this pet
+      </label>
+    </div>
+    <div id="pt-oodle-wrap" style="display:none;margin-top:6px">
+      <label class="lbl" style="margin-bottom:2px">Oodle mix name to show on card</label>
+      <select id="pt-oodle-name" style="width:100%">
+        <option value="">Show full breed names</option>
+      </select>
+    </div>
+  </div>
+</div>
+<div class="grid2">
+  <div>
+    <label class="lbl">Date of birth</label>
+    <input type="date" id="pt-dob" oninput="ptDobChanged()"/>
+    <div style="display:flex;align-items:center;gap:6px;margin-top:4px">
+      <input type="checkbox" id="pt-approx-age" onchange="ptToggleApproxAge()" style="margin:0"/>
+      <label for="pt-approx-age" style="font-size:11px;color:var(--text-muted);cursor:pointer">Approx. age</label>
+    </div>
+    <div id="pt-approx-age-fields" style="display:none;gap:6px;margin-top:6px;align-items:center">
+      <input type="number" id="pt-age-years" min="0" max="30" placeholder="yrs" style="width:60px"/>
+      <span style="font-size:12px;color:var(--text-muted)">y</span>
+      <input type="number" id="pt-age-months" min="0" max="11" placeholder="mo" style="width:60px"/>
+      <span style="font-size:12px;color:var(--text-muted)">mo</span>
+    </div>
+  </div>
+  <div><label class="lbl">Sex</label><select id="pt-sex"><option>Male</option><option>Female</option></select></div>
+  <div><label class="lbl">Desexed</label><select id="pt-desexed"><option value="yes">Yes</option><option value="no">No</option></select></div>
+  <div><label class="lbl">Size</label><select id="pt-size"><option>Mini</option><option>Small</option><option selected>Medium</option><option>Large</option><option>Extra large</option></select></div>
+</div>
+<div class="mb10"><label class="lbl">Coat type(s)</label><div id="pt-coats" class="multi-toggle"></div></div>
+<div class="mb10"><label class="lbl" style="color:#E8534A;font-weight:600">⚠️ Special handling</label><div id="pt-special" class="multi-toggle"></div><input type="text" id="pt-special-custom" placeholder="e.g. owner must stay in waiting area" style="margin-top:6px"/></div>
+<div class="mb10"><label class="lbl">Behaviour traits</label><div id="pt-behaviour" class="multi-toggle"></div></div>
+<div class="mb10"><label class="lbl">Behaviour notes</label><textarea id="pt-behavnote" rows="2" placeholder="e.g. settles after first 10 mins"></textarea></div>
+<div class="mb10"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="pt-no-allergies" onchange="ptToggleNoAllergies()"/> No known allergies or medical conditions</label></div>
+<div id="pt-medconditions-section">
+<div class="mb10"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><label class="lbl" style="margin:0;white-space:nowrap">Medical conditions</label><div id="pt-medical" class="multi-toggle" style="display:inline-flex;flex-wrap:wrap;gap:4px"></div></div></div>
+<div class="mb10"><label class="lbl">Medical notes</label><textarea id="pt-mednotes" rows="2" placeholder="e.g. sensitive skin"></textarea></div>
+</div>
+<div id="pt-allergies-section">
+<div class="mb10"><label class="lbl" style="color:#92620A;font-weight:600">Allergies</label><div id="pt-allergies" class="multi-toggle"></div><input type="text" id="pt-allergies-custom" placeholder="e.g. specific brand of shampoo" style="margin-top:6px"/></div>
+</div>
+<div class="mb10"><label class="lbl">Preferred style</label><input type="text" id="pt-prefstyle" placeholder="e.g. teddy bear trim, summer cut..."/></div>
+<div class="mb10"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="pt-treats" checked/> OK to give treats</label></div>
+<div class="mb10"><div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">Linked owners</label><button type="button" class="sm" onclick="openOwModalFromPet()">+ New owner</button></div><div id="pt-owners" class="multi-toggle" style="margin-top:4px"></div></div>
+<div class="row-end"><button onclick="closePtModal()">Cancel</button><button class="primary" onclick="savePtModal()">Save pet profile</button></div>
+</div>
+</div>
+
+<div id="modal-owner" class="modal-bg">
+<div class="modal" style="width:360px">
+<h2 id="ow-title">New owner</h2>
+<div class="mb10"><label class="lbl">Name</label><input type="text" id="ow-name" placeholder="Jane Smith"/></div>
+<div class="mb10"><label class="lbl">Phone</label><input type="text" id="ow-phone" placeholder="04xx xxx xxx"/></div>
+<div class="mb10"><label class="lbl">Email (optional)</label><input type="text" id="ow-email" placeholder="jane@email.com"/></div>
+<div class="mb10"><label class="lbl">Preferred contact</label><div id="ow-contact-toggle" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:2px"></div><input type="hidden" id="ow-contact" value=""/></div>
+<div class="mb10"><label class="lbl">Notes</label><textarea id="ow-notes" rows="2" placeholder="e.g. prefers morning appointments..."></textarea></div>
+<div class="row-end"><button onclick="closeOwModal()">Cancel</button><button class="primary" onclick="saveOwModal()">Save owner</button></div>
+</div>
+</div>
+
+<div id="modal-price" class="modal-bg">
+<div class="modal" style="width:340px">
+<h2 id="mp-title">Edit service</h2>
+<div class="mb10"><label class="lbl">Base price ($)</label><input type="number" id="mp-price"/></div>
+<div class="mb10"><label class="lbl">Base duration (min)</label><input type="number" id="mp-dur"/></div>
+<div class="row-end"><button onclick="closePriceModal()">Cancel</button><button class="primary" onclick="savePriceModal()">Save</button></div>
+</div>
+</div>
+
+<div id="modal-bkdetails" class="modal-bg">
+<div class="modal" style="width:420px">
+<h2>📝 Add booking details</h2>
+<div class="mb10">
+  <label class="lbl">Products used</label>
+  <div id="bkd-products" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px"></div>
+</div>
+<div class="mb10">
+  <label class="lbl">Blades used</label>
+  <div id="bkd-blades" class="multi-toggle"></div>
+</div>
+<div class="mb10">
+  <label class="lbl">Extension combs used</label>
+  <div id="bkd-combs" class="multi-toggle"></div>
+</div>
+<div class="mb10"><label class="lbl">Time spent</label><select id="bkd-timespent"></select></div>
+<div class="mb10"><label class="lbl">Completion notes</label><textarea id="bkd-notes" rows="2" placeholder="e.g. notes added after the groom was done"></textarea></div>
+<div class="mb10"><label class="lbl">For next time</label><textarea id="bkd-nextnote" rows="2" placeholder="e.g. trim nails shorter next visit"></textarea></div>
+<div class="row-end"><button onclick="closeBkDetailsModal()">Cancel</button><button class="primary" onclick="saveBkDetailsModal()">Save details</button></div>
+</div>
+</div>
+
+<div id="confirm-modal" class="confirm-bg">
+<div class="confirm-box">
+<p id="confirm-msg"></p>
+<div style="display:flex;justify-content:flex-end;gap:8px">
+<button onclick="closeConfirm()">Cancel</button>
+<button id="confirm-ok" class="danger" onclick="confirmOk()">Delete</button>
+</div>
+</div>
+</div>
+
+<script>
+const SERVICES=["Full groom","Bath & brush","Nail trim","Puppy groom"];
+const ADD_ONS=["De-shedding treatment","Poodle point","De-matting"];
+const BLADES=["#10","#7F","#4F","#3F","#15"];
+const BLADE_AREAS=["Head","Body"];
+// Standard Wahl clipper-guard comb colour coding, used so the comb picker and chips match
+// the physical colour on the guard itself (easier to grab the right one at a glance).
+const COMBS=[
+  {size:"#1",mm:"3mm",colorName:"Red",bg:"#E53935",text:"#fff"},
+  {size:"#2",mm:"6mm",colorName:"Purple",bg:"#8E44AD",text:"#fff"},
+  {size:"#3",mm:"10mm",colorName:"Blue",bg:"#1E88E5",text:"#fff"},
+  {size:"#4",mm:"13mm",colorName:"Orange",bg:"#FB8C00",text:"#fff"},
+  {size:"#5",mm:"16mm",colorName:"Yellow",bg:"#FDD835",text:"#5c4b00"},
+  {size:"#6",mm:"19mm",colorName:"Lilac",bg:"#D1A3E0",text:"#4a1a5c"},
+  {size:"#7",mm:"22mm",colorName:"Green",bg:"#43A047",text:"#fff"},
+  {size:"#8",mm:"25mm",colorName:"Light blue",bg:"#81D4FA",text:"#01527a"}
+];
+const COMB_LABELS=COMBS.map(c=>`${c.size} (${c.mm})`);
+function combInfo(label){return COMBS.find(c=>`${c.size} (${c.mm})`===label);}
+// Blades are stored as {blade, area} objects so a groomer can note "#4F on head" vs body;
+// normalizeBlades upgrades any older bookings that saved a plain string array.
+function normalizeBlades(arr){return(arr||[]).map(x=>typeof x==="string"?{blade:x,area:""}:{...x});}
+function bladeLabel(entry){return entry.area?`${entry.blade} [${entry.area}]`:entry.blade;}
+// Combs are stored as {comb, area} objects, same pattern as blades, so a groomer can note
+// a comb used on head vs body; normalizeCombs upgrades any older bookings saved as plain strings.
+function normalizeCombs(arr){return(arr||[]).map(x=>typeof x==="string"?{comb:x,area:""}:{...x});}
+function combChipLabel(entry){return entry.area?`${entry.comb} [${entry.area}]`:entry.comb;}
+// Time spent is logged in 30-minute increments (up to 5 hours) so groomers can track how
+// long a booking actually took, separate from the estimated service duration.
+const TIME_SPENT_OPTIONS=[15,30,45,60,75,90,105,120,135,150,165,180,195,210,225,240,255,270,285,300];
+function fmtDuration(mins){
+  if(!mins)return"";
+  const h=Math.floor(mins/60),m=mins%60;
+  if(h&&m)return`${h}h ${m}m`;
+  if(h)return`${h}h`;
+  return`${m} min`;
+}
+function timeSpentOptionsHtml(selected){
+  return`<option value="">Not logged</option>`+TIME_SPENT_OPTIONS.map(m=>`<option value="${m}"${Number(selected)===m?" selected":""}>${fmtDuration(m)}</option>`).join("");
+}
+const PRODUCT_KEYWORDS=["shampoo","conditioner","treatment","spray","rinse"];
+const PRODUCT_EXCLUDE=["spray bottle","shampoo bottles x 4"];
+function getProductsFromExpenses(){
+  const found=[];
+  const seen=new Set();
+  expenses.forEach(e=>{
+    const desc=(e.desc||"").trim();
+    if(!desc)return;
+    const lower=desc.toLowerCase();
+    PRODUCT_KEYWORDS.forEach(kw=>{
+      if(lower.includes(kw)&&!seen.has(desc)&&!PRODUCT_EXCLUDE.some(ex=>lower===ex.toLowerCase())){seen.add(desc);found.push(desc);}
+    });
+  });
+  return found;
+}
+function toggleEmptyProduct(name){
+  if(emptyProducts.includes(name)){emptyProducts=emptyProducts.filter(x=>x!==name);}
+  else{emptyProducts=[...emptyProducts,name];}
+  lss("pg_emptyProducts2",emptyProducts);
+  renderBkProducts(bkActiveProducts);
+}
+const DEF_PRICES={"Full groom":95,"Bath & brush":65,"Nail trim":25,"Puppy groom":75,"De-shedding treatment":30,"Poodle point":20,"De-matting":0};
+const DEF_DUR={"Full groom":90,"Bath & brush":45,"Nail trim":15,"Puppy groom":60,"De-shedding treatment":30,"Poodle point":20,"De-matting":0};
+const DISC_PCT=10,MATTING_RATE=50,BEH_SURCHARGE=15,BEH_DUR_ADD=30;
+const BEH_SURCHARGE_TRAITS=["Requires muzzle","Bite risk"];
+const BEH_DUR_TRAITS=["Anxious","Separation anxiety","Fear of clippers","Resists handling","Sensitive feet","Requires muzzle","Eats air","Table active","Requires breaks"];
+const SIZE_MULT={"Mini":1,"Small":1,"Medium":1,"Large":1.2,"Extra large":1.4};
+const SIZE_DUR={"Mini":-10,"Small":0,"Medium":0,"Large":15,"Extra large":30};
+const BEHAVIOUR_TRAITS=["Food motivated","Friendly","Good with Bruce","Good with handling","High energy","Patient / tolerant","Timid","Vocal","Eats air","Sensitive feet","Sitter","Table active","Anxious","Fear of clippers","Head sensitive","Noise sensitive","Separation anxiety","Bite risk","Escape risk","Flight risk","Resists handling","Requires breaks","Requires multiple sessions","Requires muzzle","Dog reactive"];
+// Legacy breed name migration: earlier versions of this list used shorthand names, "(breed) X"
+// entries, "Unknown mix", and hardcoded designer-mix nicknames as selectable breeds. Any pet
+// saved under those older names needs to keep resolving correctly, so we normalise old tokens
+// to their current equivalents before doing any matching/display logic.
+const BREED_ALIASES={ // old single-breed shorthand -> current full name
+  "Cavalier":"Cavalier King Charles Spaniel","Staffy":"Staffordshire Bull Terrier","Husky":"Siberian Husky",
+  "Corgi":"Pembroke Welsh Corgi","Kelpie":"Australian Kelpie","Shar Pei":"Chinese Shar Pei",
+  "West Highland Terrier":"West Highland White Terrier","Bull Mastiff":"Bullmastiff","Vizsla":"Hungarian Vizsla",
+  "Labrador":"Labrador Retriever","German Shepherd":"German Shepherd Dog","Springer Spaniel":"English Springer Spaniel",
+  "Jack Russell":"Jack Russell Terrier","Dobermann":"Dobermann Pinscher","Maremma":"Maremma Sheepdog"
+};
+const BREED_EXPAND_ALIASES={ // old token -> tokens it expands into
+  "Beagle X":["Beagle","Unknown"],"Kelpie X":["Australian Kelpie","Unknown"],"Lab X":["Labrador Retriever","Unknown"],
+  "Retriever X":["Golden Retriever","Unknown"],"Staffy X":["Staffordshire Bull Terrier","Unknown"],
+  "Unknown mix":["Unknown"],
+  "Bernedoodle":["Poodle","Bernese Mountain Dog"],"Bordoodle":["Poodle","Border Collie"],
+  "Cavoodle":["Poodle","Cavalier King Charles Spaniel"],"Cockerpoo":["Poodle","Cocker Spaniel"],
+  "Groodle":["Poodle","Golden Retriever"],"Havapoo":["Poodle","Havanese"],
+  "Labradoodle":["Poodle","Labrador Retriever"],"Maltipoo":["Poodle","Maltese"],"Moodle":["Poodle","Maltese"],
+  "Poochon":["Poodle","Bichon Frise"],"Pugapoo":["Poodle","Pug"],"Schnoodle":["Poodle","Miniature Schnauzer"],
+  "Shihpoo":["Poodle","Shih Tzu"],"Spoodle":["Poodle","Cocker Spaniel"],
+  "Toy Cavoodle":["Poodle","Cavalier King Charles Spaniel"],"Toy Groodle":["Poodle","Golden Retriever"],
+  "Toy Labradoodle":["Poodle","Labrador Retriever"],"Westiepoo":["Poodle","West Highland White Terrier"]
+};
+function canonicalBreedTokens(tok){
+  if(BREED_ALIASES[tok])return[BREED_ALIASES[tok]];
+  if(BREED_EXPAND_ALIASES[tok])return BREED_EXPAND_ALIASES[tok];
+  return[tok];
+}
+// Normalises a stored breed string (which may use an older naming scheme) into the current
+// canonical " X "-joined breed string, deduping any repeated tokens the migration introduces.
+function canonicalizeBreedString(breedStr){
+  if(!breedStr)return breedStr;
+  const raw=breedStr.split(" X ").map(s=>s.trim()).filter(Boolean);
+  const tokens=[];
+  raw.forEach(t=>canonicalBreedTokens(t).forEach(x=>{if(!tokens.includes(x))tokens.push(x);}));
+  return tokens.join(" X ");
+}
+
+const BREEDS=[
+  "American Staffordshire Terrier","Australian Kelpie","Australian Shepherd","Australian Terrier","Basset Hound","Beagle",
+  "Bernese Mountain Dog","Bichon Frise","Border Collie","Border Terrier","Boston Terrier",
+  "Boxer","Bull Arab","Bullmastiff","Bulldog","Bull Terrier","Cane Corso","Cavalier King Charles Spaniel","Chihuahua","Chinese Shar Pei","Chow Chow","Cocker Spaniel","Pembroke Welsh Corgi",
+  "Dachshund","Dalmatian","Dobermann Pinscher","English Bulldog","English Springer Spaniel","French Bulldog","German Shepherd Dog","Golden Retriever",
+  "Great Dane","Greyhound","Unknown","Havanese","Hungarian Vizsla","Jack Russell Terrier","Labrador Retriever",
+  "Lhasa Apso","Maltese","Maremma Sheepdog","Miniature Schnauzer","Mixed breed","Newfoundland","Papillon","Pekingese","Pomeranian","Poodle","Pug",
+  "Rhodesian Ridgeback","Rottweiler","Samoyed","Shetland Sheepdog","Shih Tzu","Siberian Husky","Staffordshire Bull Terrier",
+  "Weimaraner","West Highland White Terrier","Whippet","Yorkshire Terrier"
+].sort((a,b)=>a.localeCompare(b));
+
+// Common Australian poodle-mix (designer breed) display names, keyed by the non-Poodle breed
+const POODLE_MIX_NAMES={
+  "Bichon Frise":"Poochon","Border Collie":"Bordoodle","Bernese Mountain Dog":"Bernedoodle",
+  "Cavalier King Charles Spaniel":"Cavoodle","Cocker Spaniel":"Spoodle","Golden Retriever":"Groodle",
+  "Havanese":"Havapoo","Labrador Retriever":"Labradoodle","Maltese":"Moodle",
+  "Miniature Schnauzer":"Schnoodle","Pug":"Pugapoo","Shih Tzu":"Shihpoo",
+  "West Highland White Terrier":"Westiepoo"
+};
+// Given a stored breed string (e.g. "Poodle X Golden Retriever"), return the display name:
+//  - a single breed is shown as-is
+//  - "Unknown" alone is shown as "Unknown"
+//  - a breed paired with "Unknown" is shown as "(breed) X"
+//  - Poodle + one recognised breed shows the common Australian designer name (e.g. "Groodle")
+//  - Poodle + 2+ other breeds uses the custom oodle name (customName) if one was chosen,
+//    otherwise falls back to the full breed names
+//  - any other combination (or unresolved oodle mix) lists breeds alphabetically
+function displayBreed(breedStr,customName){
+  if(!breedStr)return breedStr;
+  breedStr=canonicalizeBreedString(breedStr);
+  const parts=breedStr.split(" X ").map(s=>s.trim()).filter(Boolean);
+  const namedParts=parts.filter(p=>p!=="Unknown");
+  const hasUnknownMix=namedParts.length<parts.length&&namedParts.length>0;
+  if(namedParts.length===0)return breedStr;
+  const poodleIdx=namedParts.findIndex(p=>p==="Poodle");
+  if(poodleIdx!==-1){
+    const others=namedParts.filter((p,i)=>i!==poodleIdx);
+    if(others.length===1){
+      const mix=POODLE_MIX_NAMES[others[0]];
+      if(mix)return mix+(hasUnknownMix?" X":"");
+    }else if(others.length>=2&&customName){
+      return customName+(hasUnknownMix?" X":"");
+    }
+  }
+  const sorted=[...namedParts].sort((a,b)=>a.localeCompare(b));
+  return sorted.join(" X ")+(hasUnknownMix?" X":"");
+}
+
+// Typical adult size for each breed, used to auto-suggest the Size field when breeds are
+// picked on a pet profile. The dropdown remains fully editable — this only sets a default.
+const BREED_SIZE={
+  "Chihuahua":"Mini","Yorkshire Terrier":"Mini","Maltese":"Mini","Pomeranian":"Mini","Papillon":"Mini","Pekingese":"Mini",
+  "Bichon Frise":"Small","Boston Terrier":"Small","Cavalier King Charles Spaniel":"Small","Dachshund":"Small","Havanese":"Small",
+  "Jack Russell Terrier":"Small","Lhasa Apso":"Small","Miniature Schnauzer":"Small","Pug":"Small","Shih Tzu":"Small",
+  "West Highland White Terrier":"Small","French Bulldog":"Small","Australian Terrier":"Small","Border Terrier":"Small",
+  "Australian Kelpie":"Medium","Australian Shepherd":"Medium","Beagle":"Medium","Border Collie":"Medium","Bulldog":"Medium",
+  "English Bulldog":"Medium","Cocker Spaniel":"Medium","English Springer Spaniel":"Medium","Whippet":"Medium",
+  "Staffordshire Bull Terrier":"Medium","American Staffordshire Terrier":"Medium","Shetland Sheepdog":"Medium",
+  "Chinese Shar Pei":"Medium","Chow Chow":"Medium","Basset Hound":"Medium","Bull Terrier":"Medium","Samoyed":"Medium",
+  "Poodle":"Medium","Pembroke Welsh Corgi":"Medium","Dalmatian":"Medium",
+  "Boxer":"Large","Bull Arab":"Large","Dobermann Pinscher":"Large","German Shepherd Dog":"Large","Golden Retriever":"Large",
+  "Greyhound":"Large","Hungarian Vizsla":"Large","Labrador Retriever":"Large","Rhodesian Ridgeback":"Large","Rottweiler":"Large",
+  "Siberian Husky":"Large","Weimaraner":"Large","Maremma Sheepdog":"Large",
+  "Bernese Mountain Dog":"Extra large","Bullmastiff":"Extra large","Cane Corso":"Extra large","Great Dane":"Extra large",
+  "Newfoundland":"Extra large"
+};
+const SIZE_ORDER=["Mini","Small","Medium","Large","Extra large"];
+// Sets the Size dropdown to the largest typical size among the currently selected breeds.
+// Only called from explicit breed add/remove actions, never on modal open, so it never
+// overwrites a size the user already saved or manually picked.
+function ptAutoSelectSize(){
+  const sizes=ptSelectedBreeds.map(b=>BREED_SIZE[b]).filter(Boolean);
+  if(!sizes.length)return;
+  const maxIdx=Math.max(...sizes.map(s=>SIZE_ORDER.indexOf(s)));
+  const sizeSel=document.getElementById("pt-size");
+  if(sizeSel)sizeSel.value=SIZE_ORDER[maxIdx];
+}
+
+let ptSelectedBreeds=[];
+
+function ptInitBreeds(){
+  // With the typeahead, there's no persistent option list to rebuild — just make sure
+  // the search box is cleared and the dropdown closed whenever selections change.
+  const input=document.getElementById("pt-breed-search");
+  if(input)input.value="";
+  ptCloseBreedDropdown();
+}
+
+let _ptBreedBlurTimer=null;
+function ptBreedSearchInput(){
+  const input=document.getElementById("pt-breed-search");
+  const dd=document.getElementById("pt-breed-dropdown");
+  if(!input||!dd)return;
+  const q=input.value.trim().toLowerCase();
+  if(!q){dd.style.display="none";dd.innerHTML="";return;}
+  const matches=BREEDS.filter(b=>!ptSelectedBreeds.includes(b)&&b.toLowerCase().includes(q)).slice(0,8);
+  if(!matches.length){dd.style.display="none";dd.innerHTML="";return;}
+  dd.innerHTML=matches.map(b=>`<div onmousedown="event.preventDefault();ptSelectBreedMatch('${b.replace(/'/g,"\\'")}')" style="padding:7px 10px;font-size:12px;cursor:pointer;border-bottom:1px solid var(--border)" onmouseover="this.style.background='var(--bg)'" onmouseout="this.style.background='transparent'">${b}</div>`).join("");
+  dd.style.display="block";
+}
+function ptSelectBreedMatch(b){
+  ptAddBreed(b);
+  const input=document.getElementById("pt-breed-search");
+  if(input){input.value="";input.focus();}
+}
+function ptCloseBreedDropdown(){
+  const dd=document.getElementById("pt-breed-dropdown");
+  if(dd){dd.style.display="none";dd.innerHTML="";}
+}
+function ptScheduleCloseBreedDropdown(){
+  // Delay so a click on a dropdown item (which blurs the input) still registers first.
+  clearTimeout(_ptBreedBlurTimer);
+  _ptBreedBlurTimer=setTimeout(ptCloseBreedDropdown,150);
+}
+
+function ptAddBreed(val){
+  if(!val||ptSelectedBreeds.includes(val))return;
+  ptSelectedBreeds.push(val);
+  ptRenderBreedTags();ptInitBreeds();ptUpdateBrachyToggle();ptUpdateOodleOptions();ptAutoSelectSize();
+}
+
+function ptRemoveBreed(idx){
+  ptSelectedBreeds.splice(idx,1);
+  ptRenderBreedTags();ptInitBreeds();ptUpdateBrachyToggle();ptUpdateOodleOptions();ptAutoSelectSize();
+}
+
+function ptUpdateBrachyToggle(){
+  const el=document.getElementById("pt-brachy-toggle");
+  if(!el)return;
+  const show=isBrachy(ptGetBreedString());
+  el.style.display=show?"block":"none";
+  if(!show)document.getElementById("pt-hide-brachy").checked=false;
+}
+
+function ptUpdateOodleOptions(){
+  const wrap=document.getElementById("pt-oodle-wrap");
+  if(!wrap)return;
+  const sel=document.getElementById("pt-oodle-name");
+  const named=ptSelectedBreeds.filter(b=>b!=="Unknown");
+  const poodleIdx=named.indexOf("Poodle");
+  const others=poodleIdx===-1?[]:named.filter((b,i)=>i!==poodleIdx);
+  const show=poodleIdx!==-1&&others.length>=2;
+  wrap.style.display=show?"block":"none";
+  if(!show){sel.innerHTML='<option value="">Show full breed names</option>';return;}
+  const current=sel.value;
+  // For each "other" breed with a known Poodle-mix name, offer combining that breed with
+  // Poodle into its designer name, keeping the remaining breed(s) as plain names.
+  // e.g. Shih Tzu + Poodle + West Highland White Terrier ->
+  //   "Shihpoo + West Highland White Terrier" or "Westiepoo + Shih Tzu"
+  const choices=others.map((o,i)=>{
+    const mix=POODLE_MIX_NAMES[o];
+    if(!mix)return null;
+    const rest=others.filter((_,j)=>j!==i);
+    return mix+" + "+rest.join(" + ");
+  }).filter(Boolean);
+  sel.innerHTML='<option value="">Show full breed names</option>'+choices.map(c=>`<option value="${c}">${c}</option>`).join("");
+  if(choices.includes(current))sel.value=current;
+}
+
+function ptRenderBreedTags(){
+  const el=document.getElementById("pt-breed-tags");
+  if(!el)return;
+  el.innerHTML=ptSelectedBreeds.map((b,i)=>`<span style="display:inline-flex;align-items:center;gap:3px;background:#E8F3FF;color:#185FA5;border-radius:12px;padding:2px 8px;font-size:11px;font-weight:500">${b}<span onclick="ptRemoveBreed(${i})" style="cursor:pointer;font-size:14px;line-height:1;opacity:0.6">×</span></span>`).join("");
+}
+
+function ptGetBreedString(){return ptSelectedBreeds.join(" X ");}
+
+function ptDobChanged(){
+  document.getElementById("pt-approx-age").checked=false;
+  document.getElementById("pt-approx-age-fields").style.display="none";
+}
+
+function ptToggleApproxAge(){
+  const checked=document.getElementById("pt-approx-age").checked;
+  document.getElementById("pt-approx-age-fields").style.display=checked?"flex":"none";
+  if(checked)document.getElementById("pt-dob").value="";
+}
+
+function ptApproxDob(){
+  const y=parseInt(document.getElementById("pt-age-years").value)||0;
+  const m=parseInt(document.getElementById("pt-age-months").value)||0;
+  const now=new Date();
+  now.setFullYear(now.getFullYear()-y);now.setMonth(now.getMonth()-m);
+  return now.toISOString().slice(0,10);
+}
+
+const MEDICAL_TAGS=["Senior / fragile","Arthritis","Blind","Vision impaired","Heart condition","Diabetes","Allergies","Hip dysplasia","Recent surgery","Ear infection","Cancer","Kidney disease","Thyroid condition","Hearing Impaired","Deaf","Seizure History","Skin condition / sensitive skin","Lumps, bumps and skin tags"];
+const ALLERGENS=["Chicken","Beef","Fish","Eggs","Dairy","Wheat / Gluten","Corn","Soy","Grain-free sensitivity","Fleas / Flea saliva","Certain shampoos","Fragrances / Perfumes","Certain flea/tick products","Latex","Pollen","Grass","Dust mites","Wool"];
+const allergyColor=t=>({bg:"#FFF3CD",text:"#92620A"});
+
+const COAT_TYPES=["Curly Coat","Silky Coat","Wire Coat","Double Coat","Smooth Coat","Wavy Coat","Wool Coat","Medium Coat","Long Coat"];
+const SPECIAL_HANDLING_TRAITS=["Requires multiple sessions","Requires breaks","Requires muzzle"];
+const BADGE_STYLE={confirmed:{bg:"#EAF7EE",color:"#5BAF7A"},pending:{bg:"#FAEEDA",color:"#854F0B"},done:{bg:"#E6F1FB",color:"#185FA5"},cancelled:{bg:"#FDECEA",color:"#E8534A"}};
+
+const lastName=n=>{if(!n)return"";const parts=n.trim().split(/\s+/);return parts[parts.length-1];};
+const pad=n=>String(n).padStart(2,"0");
+const todayStr=()=>{const t=new Date();return`${t.getFullYear()}-${pad(t.getMonth()+1)}-${pad(t.getDate())}`;};
+const fmtDate=d=>{if(!d)return"—";const[y,m,day]=d.split("-");return`${day}/${m}/${y}`;};
+const fmtTime=t=>{if(!t)return"";const[h,mi]=t.split(":");const hr=parseInt(h,10);return`${hr%12||12}:${mi} ${hr<12?"AM":"PM"}`;};
+const fmtMoney=n=>"$"+Math.round(n*100)/100;
+const fmtPhone=v=>{const d=v.replace(/\D/g,"").slice(0,10);if(d.length<=4)return d;if(d.length<=7)return`${d.slice(0,4)} ${d.slice(4)}`;return`${d.slice(0,4)} ${d.slice(4,7)} ${d.slice(7,10)}`;};
+const fmtAge=(dob,approx)=>{if(!dob)return"—";const b=new Date(dob),n=new Date();let y=n.getFullYear()-b.getFullYear(),m=n.getMonth()-b.getMonth();if(m<0){y--;m+=12;}if(approx)return y<=0?`~${m}mo`:`~${y}`;return y<=0?`${m}mo`:`${y}y ${m}mo`;};
+const isBrachy=breed=>["Bulldog","English Bulldog","French Bulldog","Pug","Boston Terrier","Shih Tzu","Lhasa Apso","Pekingese","Cavalier King Charles Spaniel","Boxer","Chow Chow","Shar Pei","Maltese Shih Tzu","Puggle","Affenpinscher","Brussels Griffon"].some(b=>breed&&canonicalizeBreedString(breed).toLowerCase().includes(b.toLowerCase()));
+const BEH_COLOR_GREEN=["Friendly","Food motivated","Good with Bruce","Good with handling"];
+const BEH_COLOR_BLUE=["Sensitive feet","Eats air","Table active","Sitter","Vocal","High energy","Patient / tolerant","Timid"];
+const BEH_COLOR_ORANGE=["Anxious","Separation anxiety","Fear of clippers","Head sensitive","Noise sensitive"];
+const BEH_COLOR_RED=["Bite risk","Flight risk","Resists handling","Escape risk"];
+const behColor=t=>BEH_COLOR_GREEN.includes(t)?{bg:"#EAF7EE",text:"#5BAF7A",rank:0}:BEH_COLOR_BLUE.includes(t)?{bg:"#E8F3FF",text:"#185FA5",rank:1}:BEH_COLOR_ORANGE.includes(t)?{bg:"#FAEEDA",text:"#854F0B",rank:2}:BEH_COLOR_RED.includes(t)?{bg:"#FDECEA",text:"#E8534A",rank:3}:{bg:"#E8F3FF",text:"#185FA5",rank:4};
+const sortBehTraits=arr=>[...arr].sort((a,b)=>behColor(a).rank-behColor(b).rank||a.localeCompare(b));
+const medColor=t=>({bg:"#FDECEA",text:"#E8534A"});
+
+// ── GOOGLE SHEETS SYNC ─────────────────────────────────────────────────
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx_ynXODB2AT9oXF_etXln8VxCJLxixmt0ILJvj7gWuG-corJsoJ2fIIqjEzk6AD1ub/exec";
+
+let _saveTimer=null;
+// Tracks pending Drive photo uploads so we know when everything is truly synced
+let _pendingPhotoUploads=0;
+let _photoUploadError=false;
+let _sheetsWriteOk=false;
+
+function photoUploadStarted(){
+  _pendingPhotoUploads++;
+  _photoUploadError=false;
+  setSyncStatus("saving");
+}
+function photoUploadFinished(ok){
+  _pendingPhotoUploads=Math.max(0,_pendingPhotoUploads-1);
+  if(!ok){
+    _photoUploadError=true;
+    setSyncStatus("⚠️ Photo upload failed — data saved");
+    return;
+  }
+  checkAllSynced();
+}
+function checkAllSynced(){
+  if(_pendingPhotoUploads>0)return; // still waiting on photos
+  if(_photoUploadError){setSyncStatus("⚠️ Photo upload failed — data saved");return;}
+  if(_sheetsWriteOk){setSyncStatus("saved");}
+}
+
+async function pushToSheets(){
+  _sheetsWriteOk=false;
+  try{
+    // Include Drive URLs in sheet data (skip base64 to keep data small)
+    const cleanBookings=bookings.map(b=>{
+      const {beforePhoto,afterPhoto,...rest}=b;
+      if(beforePhoto&&beforePhoto.startsWith("http"))rest.beforePhoto=beforePhoto;
+      if(afterPhoto&&afterPhoto.startsWith("http"))rest.afterPhoto=afterPhoto;
+      return rest;
+    });
+    const cleanPets=pets.map(p=>{const {photo,photos,...rest}=p;if(photo&&photo.startsWith("http"))rest.photo=photo;return rest;});
+    const data={action:"write",data:{Bookings:cleanBookings,Pets:cleanPets,Owners:owners,Expenses:expenses,Prices:prices,Durations:durations,Meta:{nextId,nextPetId,nextOId,nextExpId}}};
+    const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify(data),headers:{"Content-Type":"text/plain"}});
+    const text=await res.text();
+    let json={};
+    try{json=JSON.parse(text);}catch(e){
+      console.error("Sheet write response not JSON:",text);
+      setSyncStatus("error");
+      return false;
+    }
+    if(json.error){
+      console.error("Sheet write error:",json.error);
+      setSyncStatus("error");
+      return false;
+    }
+    if(json.ok){
+      _sheetsWriteOk=true;
+      checkAllSynced();
+      return true;
+    }
+    setSyncStatus("error");return false;
+  }catch(e){
+    console.error("pushToSheets fetch error:",e);
+    setSyncStatus("error");return false;
+  }
+}
+function save(){
+  // Store photos separately so main data stays small
+  const bookingPhotos={};bookings.forEach(b=>{if(b.beforePhoto||b.afterPhoto)bookingPhotos[b.id]={beforePhoto:b.beforePhoto||null,afterPhoto:b.afterPhoto||null};});
+  const petPhotos={};pets.forEach(p=>{if(p.photo)petPhotos[p.id]=p.photo;});
+  lss("pg_bkPhotos2",bookingPhotos);lss("pg_petPhotos2",petPhotos);
+  const cleanBookings=bookings.map(b=>{const {beforePhoto,afterPhoto,...rest}=b;return rest;});
+  const cleanPets=pets.map(p=>{const {photo,...rest}=p;return rest;});
+  lss("pg_bookings2",cleanBookings);lss("pg_pets2",cleanPets);lss("pg_owners2",owners);
+  lss("pg_expenses2",expenses);lss("pg_prices2",prices);lss("pg_dur2",durations);
+  lss("pg_nextId2",nextId);lss("pg_nextPetId2",nextPetId);lss("pg_nextOId2",nextOId);lss("pg_nextExpId2",nextExpId);
+  lss("pg_emptyProducts2",emptyProducts);
+  _sheetsWriteOk=false;
+  _photoUploadError=false;
+  clearTimeout(_saveTimer);
+  _saveTimer=setTimeout(()=>{setSyncStatus("saving");pushToSheets();},700);
+}
+function setSyncStatus(s){
+  const el=document.getElementById("sync-status");if(!el)return;
+  if(s==="saving"){el.textContent="⏳ Saving...";el.style.color="#888";}
+  else if(s==="saved"){el.textContent="✓ Saved";el.style.color="#5BAF7A";setTimeout(()=>{el.textContent="";},2500);}
+  else if(s==="error"){el.textContent="⚠️ Sync error — check URL";el.style.color="#E8534A";}
+  else{el.textContent=s;el.style.color="#888";}
+}
+async function manualSync(){
+  const btn=document.getElementById("sync-btn");
+  if(btn){btn.disabled=true;btn.textContent="⏳ Syncing...";}
+  setSyncStatus("saving");
+  await pushToSheets();
+  if(btn){btn.disabled=false;btn.textContent="☁️ Sync";}
+}
+async function loadFromSheets(){
+  if(SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE"){setSyncStatus("⚠️ Paste your Apps Script URL to enable sync");return false;}
+  setSyncStatus("⏳ Loading...");
+  try{
+    const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"read"}),headers:{"Content-Type":"text/plain"}});
+    const text=await res.text();
+    let json;
+    try{json=JSON.parse(text);}catch(e){
+      setSyncStatus("⚠️ Load failed");
+      console.error("Sheet response not JSON:",text);
+      alert("Could not load from Sheets — unexpected response:\n"+text.slice(0,200));
+      return false;
+    }
+    if(json.ok&&json.data){
+      const d=json.data;
+      if(d.Bookings){const seen=new Set();bookings=d.Bookings.filter(b=>{if(seen.has(b.id))return false;seen.add(b.id);return true;});}
+      if(d.Pets)pets=d.Pets;
+      if(d.Owners)owners=d.Owners;
+      if(d.Expenses&&d.Expenses.length)expenses=d.Expenses;
+      if(d.Prices)prices=d.Prices;
+      if(d.Durations)durations=d.Durations;
+      if(d.Meta){nextId=d.Meta.nextId||nextId;nextPetId=d.Meta.nextPetId||nextPetId;nextOId=d.Meta.nextOId||nextOId;nextExpId=d.Meta.nextExpId||nextExpId;}
+      reattachPhotos(true);
+      // Save Sheet data to localStorage so it persists on reload
+      lss("pg_bookings2",bookings.map(b=>{const{beforePhoto,afterPhoto,...r}=b;return r;}));
+      lss("pg_pets2",pets.map(p=>{const{photo,...r}=p;return r;}));
+      lss("pg_owners2",owners);lss("pg_expenses2",expenses);
+      lss("pg_prices2",prices);lss("pg_dur2",durations);
+      lss("pg_nextId2",nextId);lss("pg_nextPetId2",nextPetId);lss("pg_nextOId2",nextOId);lss("pg_nextExpId2",nextExpId);
+      setSyncStatus("✓ Loaded");setTimeout(()=>setSyncStatus(""),2000);
+      render();return true;
+    }else{
+      setSyncStatus("⚠️ Sheets returned no data");
+      console.warn("Sheets responded but returned no data:",json);
+      // Don't alert — fall back to localStorage silently
+    }
+  }catch(e){
+    setSyncStatus("⚠️ Could not reach Sheets");
+    console.error("Load error:",e.message);
+    // Don't alert — fall back to localStorage silently
+  }
+  return false;
+}
+// ───────────────────────────────────────────────────────────────────────
+
+// ───────────────────────────────────────────────────────────────────────
+// Intake form pipeline: reads new client/pet submissions posted by the
+// public intake form (via the "addIntake" Apps Script action), auto-adds
+// them as real owners/pets flagged needsReview, then clears them from the
+// Intake sheet so they aren't re-imported next time.
+//
+// The intake form's field names/taxonomy don't exactly match this app's
+// (e.g. its behaviour/medical checkbox wording differs from BEHAVIOUR_TRAITS/
+// MEDICAL_TAGS here), so rather than risk mis-tagging, anything that doesn't
+// map 1:1 gets folded into free-text notes fields for the groomer to tidy up
+// during review.
+// Exact-match translation from the intake form's client-friendly checkbox
+// wording to this app's own tag vocab, so selections land as real
+// structured tags (pet.behaviour[] / pet.medicalTags[]) instead of notes.
+// One intake checkbox can expand to more than one app tag (e.g. the form
+// asks "hearing or vision impaired" as a single box; the app tracks them
+// as two separate tags, so both get applied).
+const INTAKE_BEHAVIOUR_MAP={
+  "High energy / excitable":["High energy"],
+  "Anxious / nervous":["Anxious"],
+  "May bark, lunge or growl at other dogs":["Dog reactive"],
+  "May bite when stressed or uncomfortable":["Bite risk"]
+};
+const INTAKE_MEDICAL_MAP={
+  "Arthritis / joint problems":["Arthritis"],
+  "Recent surgery":["Recent surgery"],
+  "Skin condition / sensitive skin":["Skin condition / sensitive skin"],
+  "Lumps, bumps and skin tags":["Lumps, bumps and skin tags"],
+  "Hearing or vision impaired":["Hearing Impaired","Vision impaired"]
+};
+function mapIntakeContact_(item){
+  const pref=(item.contactPref||"").toLowerCase();
+  if(pref==="phone call")return"Phone";
+  if(pref==="text")return"SMS";
+  if(pref==="email")return"Email";
+  if(pref==="other"){
+    const plat=(item.socialPlatform||"").toLowerCase();
+    if(plat.includes("whatsapp"))return"WhatsApp";
+    if(plat.includes("facebook")||plat.includes("fb"))return"Facebook";
+  }
+  return"";
+}
+async function checkIntake(){
+  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return;
+  try{
+    const res=await fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"readIntake"}),headers:{"Content-Type":"text/plain"}});
+    const text=await res.text();
+    let json;try{json=JSON.parse(text);}catch(e){console.error("Intake response not JSON:",text);return;}
+    if(!json.ok||!json.items||!json.items.length)return;
+    const processedIds=[];
+    json.items.forEach(item=>{
+      if(!item.id)return;
+      const phone=item.ownerPhone?fmtPhone(item.ownerPhone):"";
+      let owner=phone?owners.find(o=>o.phone&&fmtPhone(o.phone)===phone):null;
+      const ownerNoteParts=[];
+      if(item.contactPref==="Other"&&(item.socialPlatform||item.socialHandle)){
+        ownerNoteParts.push(`Contact via ${item.socialPlatform||"social media"}${item.socialHandle?": "+item.socialHandle:""}`);
+      }
+      if(item.signature||item.consentDate){
+        ownerNoteParts.push(`Consent form signed by ${item.signature||"?"}${item.consentDate?" on "+item.consentDate:""}.`);
+      }
+      if(!owner){
+        owner={id:nextOId++,name:item.ownerName||"Unknown",phone,email:item.ownerEmail||"",
+          contact:mapIntakeContact_(item),notes:ownerNoteParts.join(" "),needsReview:true};
+        owners.push(owner);
+      }else if(ownerNoteParts.length){
+        owner.notes=[owner.notes,...ownerNoteParts].filter(Boolean).join(" ");
+      }
+
+      const approxAge=!item.petDob&&!!item.petApproxAge;
+      const petNoteParts=[];
+      if(item.behaviourNotes)petNoteParts.push(item.behaviourNotes);
+      if(item.extraNotes)petNoteParts.push(item.extraNotes);
+      if(item.limitTreats)petNoteParts.push("Please don't give too many treats.");
+      if(approxAge)petNoteParts.push(`Approx age at intake: ${item.petApproxAge}`);
+
+      // Structured tags: every intake checkbox with a mapping above becomes
+      // a real tag. Anything unmapped (shouldn't happen unless the form
+      // adds new options later) falls back to the note so nothing gets lost.
+      const behaviourTags=[];
+      (item.behaviour||[]).forEach(t=>{
+        const mapped=INTAKE_BEHAVIOUR_MAP[t];
+        if(mapped)mapped.forEach(m=>{if(!behaviourTags.includes(m))behaviourTags.push(m);});
+        else petNoteParts.push(t);
+      });
+
+      const medicalTags=[];
+      (item.medical||[]).filter(t=>t!=="No known conditions").forEach(t=>{
+        const mapped=INTAKE_MEDICAL_MAP[t];
+        if(mapped)mapped.forEach(m=>{if(!medicalTags.includes(m))medicalTags.push(m);});
+        else petNoteParts.push(t);
+      });
+
+      pets.push({id:nextPetId++,name:item.petName||"Unknown",breed:item.petBreed||"",
+        dob:approxAge?"":(item.petDob||""),approxAge:approxAge,
+        sex:item.petSex||"Male",desexed:(item.petDesexed||"")==="Yes",size:item.petSize||"Medium",
+        coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:item.medicalNotes||"",
+        allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",
+        treatsOk:item.treatsOk!==false,
+        lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
+        customSpecialHandling:"",hideBrachy:false,oodleName:null,needsReview:true});
+      processedIds.push(item.id);
+    });
+    if(processedIds.length){
+      save();
+      fetch(SCRIPT_URL,{method:"POST",body:JSON.stringify({action:"clearIntake",ids:processedIds}),headers:{"Content-Type":"text/plain"}}).catch(()=>{});
+      render();
+    }
+  }catch(e){console.error("checkIntake error:",e.message);}
+  updateIntakeBanner();
+}
+function updateIntakeBanner(){
+  const el=document.getElementById("intake-banner");if(!el)return;
+  const n=owners.filter(o=>o.needsReview).length+pets.filter(p=>p.needsReview).length;
+  if(n){el.style.display="inline-flex";el.textContent=`🆕 ${n} new from intake — Review`;}
+  else{el.style.display="none";}
+}
+function markOwnerReviewed(id){owners=owners.map(o=>o.id===id?{...o,needsReview:false}:o);save();render();}
+function markPetReviewed(id){pets=pets.map(p=>p.id===id?{...p,needsReview:false}:p);save();render();}
+// ───────────────────────────────────────────────────────────────────────
+
+function lss(key,val){
+  try{ localStorage.setItem(key, JSON.stringify(val)); }
+  catch(e){ console.error("Failed to save", key, e); }
+}
+function lsg(key,fallback){
+  try{
+    const raw = localStorage.getItem(key);
+    return raw===null ? fallback : JSON.parse(raw);
+  }catch(e){
+    console.error("Failed to load", key, e);
+    return fallback;
+  }
+}
+
+// Reattach photos after loading.
+// fromSheets=true means the bookings/pets arrays came fresh from Sheets and are authoritative —
+// don't resurrect deleted photos from the local cache.
+function reattachPhotos(fromSheets=false){
+  const bkPhotos=lsg("pg_bkPhotos2",{});
+  bookings=bookings.map(b=>{
+    const ph=bkPhotos[b.id]||{};
+    // If data came from Sheets, the Sheets value is authoritative (null means deleted).
+    // Only fall back to local cache when loading purely from localStorage (offline).
+    const beforePhoto=fromSheets ? (b.beforePhoto||null) : (b.beforePhoto||ph.beforePhoto||null);
+    const afterPhoto=fromSheets  ? (b.afterPhoto||null)  : (b.afterPhoto||ph.afterPhoto||null);
+    if(beforePhoto||afterPhoto){bkPhotos[b.id]={beforePhoto,afterPhoto};}
+    else{delete bkPhotos[b.id];}  // prune stale cache entries
+    return{...b,beforePhoto,afterPhoto};
+  });
+  lss("pg_bkPhotos2",bkPhotos);
+  const petPhotos=lsg("pg_petPhotos2",{});
+  pets=pets.map(p=>{
+    const url=fromSheets ? (p.photo||null) : (p.photo||petPhotos[p.id]||null);
+    if(url){petPhotos[p.id]=url;}
+    else{delete petPhotos[p.id];}  // prune stale cache entries
+    return{...p,photo:url};
+  });
+  lss("pg_petPhotos2",petPhotos);
+}
+let bookings=lsg("pg_bookings2",[]);
+let pets=lsg("pg_pets2",[]);
+// Migrate existing pet data: move "Senior / fragile" from behaviour to medicalTags,
+// rename "Head shy" -> "Head sensitive", "Barks/howls" -> "Vocal"
+pets=pets.map(p=>{
+  let beh=[...(p.behaviour||[])];
+  let med=[...(p.medicalTags||[])];
+  beh=beh.map(t=>t==="Head shy"?"Head sensitive":t==="Barks/howls"?"Vocal":t);
+  if(beh.includes("Senior / fragile")){
+    beh=beh.filter(t=>t!=="Senior / fragile");
+    if(!med.includes("Senior / fragile"))med=["Senior / fragile",...med];
+  }
+  return{...p,behaviour:beh,medicalTags:med};
+});
+let owners=lsg("pg_owners2",[]);
+let expenses=lsg("pg_expenses2",[
+  {id:1,date:"2026-04-02",desc:"Petway Curly Coat & Oodle Shampoo",amount:0,category:"supplies"},
+  {id:2,date:"2026-04-02",desc:"Petway De-Shedding Shampoo",amount:0,category:"supplies"},
+  {id:3,date:"2026-04-02",desc:"ProGroom Black Shampoo 125ml x 2",amount:0,category:"supplies"},
+  {id:4,date:"2026-04-02",desc:"ProGroom Everyday Easy Rinse Conditioner 125ml",amount:0,category:"supplies"},
+  {id:5,date:"2026-04-02",desc:"ProGroom Everyday Shampoo 125ml",amount:0,category:"supplies"},
+  {id:6,date:"2026-04-02",desc:"ProGroom Hydrate Conditioner 125ml",amount:0,category:"supplies"},
+  {id:7,date:"2026-05-06",desc:"Petway Everyday Pink Shampoo 250ml",amount:0,category:"supplies"},
+  {id:8,date:"2026-05-06",desc:"Petway Gentle Protein Shampoo 250ml",amount:0,category:"supplies"}
+]);
+let prices=lsg("pg_prices2",{...DEF_PRICES});reattachPhotos();
+let durations=lsg("pg_dur2",{...DEF_DUR});
+let nextId=lsg("pg_nextId2",6);
+let nextPetId=lsg("pg_nextPetId2",6);
+let nextOId=lsg("pg_nextOId2",7);
+let nextExpId=lsg("pg_nextExpId2",9);
+let emptyProducts=lsg("pg_emptyProducts2",[]);
+
+function petById(id){return pets.find(p=>p.id===id);}
+function ownerById(id){return owners.find(o=>o.id===id);}
+
+function computeCost(service,addOns,pet){
+  const base=prices[service]||0,baseDur=durations[service]||0;
+  const addOnCost=(addOns||[]).reduce((s,a)=>s+(prices[a]||0),0);
+  const addOnDur=(addOns||[]).reduce((s,a)=>s+(durations[a]||0),0);
+  if(!pet)return{base,addOnCost,sizeAdj:0,behAdj:0,behDurAdj:0,total:base+addOnCost,duration:baseDur+addOnDur};
+  const sizeAdj=Math.round(base*(SIZE_MULT[pet.size]||1))-base;
+  const behAdj=(pet.behaviour||[]).some(t=>BEH_SURCHARGE_TRAITS.includes(t))?BEH_SURCHARGE:0;
+  const behDurAdj=(pet.behaviour||[]).some(t=>BEH_DUR_TRAITS.includes(t))?BEH_DUR_ADD:0;
+  return{base,addOnCost,sizeAdj,behAdj,behDurAdj,total:base+sizeAdj+behAdj+addOnCost,duration:Math.max(baseDur+(SIZE_DUR[pet.size]||0)+behDurAdj+addOnDur,15)};
+}
+function mattingCost(mins){return(Number(mins)||0)/60*MATTING_RATE;}
+function bkPrice(b){
+  const pet=petById(b.petId);
+  const cost=computeCost(b.service,b.addOns||[],pet);
+  const matting=mattingCost(b.mattingMinutes);
+  const duration=cost.duration+(Number(b.mattingMinutes)||0);
+  const hasCustom=b.customPrice!==null&&b.customPrice!==undefined&&b.customPrice!=="";
+  const subtotal=hasCustom?Number(b.customPrice):cost.total+matting;
+  if(b.waived)return{...cost,matting,duration,disc:0,subtotal,finalTotal:0,waived:true,isCustom:hasCustom};
+  const disc=b.discount?subtotal*DISC_PCT/100:0;
+  return{...cost,matting,duration,disc,subtotal,finalTotal:subtotal-disc,waived:false,isCustom:hasCustom};
+}
+
+let currentTab="dashboard";
+let confirmCb=null;
+
+function badge(status){const s=BADGE_STYLE[status]||BADGE_STYLE.pending;return`<span class="badge" style="background:${s.bg};color:${s.color}">${status.charAt(0).toUpperCase()+status.slice(1)}</span>`;}
+function tag(text,bg,color){return`<span class="tag" style="background:${bg};color:${color}">${text}</span>`;}
+function medTag(text,bg,color){return`<span class="tag" style="background:${bg};color:${color};font-weight:500">${text}</span>`;}
+function avatar(name,size=32){const i=name.split(" ").map(w=>w[0]).join("").slice(0,2).toUpperCase();return`<div style="width:${size}px;height:${size}px;border-radius:50%;background:#EEEDFE;color:#534AB7;display:inline-flex;align-items:center;justify-content:center;font-size:${Math.round(size*0.38)}px;font-weight:500;flex-shrink:0">${i}</div>`;}
+function specialHandlingTags(pet){if(!pet)return[];return[...(pet.medicalTags||[]),...(pet.behaviour||[])].filter(t=>SPECIAL_HANDLING_TRAITS.includes(t));}
+function specialHandlingBox(pet,marginBottom=4,marginTop=0){const tags=specialHandlingTags(pet);const custom=pet?.customSpecialHandling||"";if(!tags.length&&!custom)return"";return`<div style="background:#fff;border:1px solid #E8534A;border-radius:6px;padding:6px 9px;margin-bottom:${marginBottom}px;margin-top:${marginTop}px"><div style="font-weight:600;color:#E8534A;font-size:11px;margin-bottom:3px">⚠️ Special handling required</div>${tags.map(t=>tag(t,"#FDECEA","#E8534A")).join("")}${custom?`<div style="font-size:11px;color:#E8534A;margin-top:4px">${custom}</div>`:""}</div>`;}
+
+function openConfirm(msg,label,cb){
+  document.getElementById("confirm-msg").textContent=msg;
+  document.getElementById("confirm-ok").textContent=label||"Delete";
+  document.getElementById("confirm-modal").classList.add("open");
+  confirmCb=cb;
+}
+function closeConfirm(){document.getElementById("confirm-modal").classList.remove("open");confirmCb=null;}
+function confirmOk(){if(confirmCb)confirmCb();closeConfirm();}
+document.addEventListener("click",function(e){
+  if(e.target && e.target.id==="confirm-ok"){
+    if(confirmCb)confirmCb();
+    closeConfirm();
+  }
+});
+
+function render(){renderMetrics();renderPage();updateIntakeBanner();}
+
+function renderMetrics(){
+  const td=todayStr();const now=new Date();const sw=new Date();sw.setDate(now.getDate()-((now.getDay()+6)%7));const ew2=new Date(sw);ew2.setDate(sw.getDate()+6);
+  const m={today:bookings.filter(b=>b.date===td).length,week:bookings.filter(b=>{const d=new Date(b.date);return d>=sw&&d<=ew2;}).length,clients:owners.length,pending:bookings.filter(b=>b.status==="pending").length};
+  const et=document.getElementById("m-today");const eww=document.getElementById("m-week");const ec=document.getElementById("m-clients");const ep=document.getElementById("m-pending");
+  if(et)et.textContent=m.today;if(eww)eww.textContent=m.week;if(ec)ec.textContent=m.clients;if(ep)ep.textContent=m.pending;
+}
+
+function renderPage(){
+  const page=document.getElementById("page");
+  if(currentTab==="dashboard")page.innerHTML=renderDashboard();
+  else if(currentTab==="bookings")page.innerHTML=renderBookings();
+  else if(currentTab==="calendar")page.innerHTML=renderCalendar();
+  else if(currentTab==="pets")page.innerHTML=renderPets();
+  else if(currentTab==="clients")page.innerHTML=renderClients();
+  else if(currentTab==="pricing")page.innerHTML=renderPricing();
+  else if(currentTab==="finances")page.innerHTML=renderFinances();
+}
+
+function renderDashboard(){
+  const td=todayStr();const now=new Date();const nowTime=`${pad(now.getHours())}:${pad(now.getMinutes())}`;
+  const upcoming=bookings.filter(b=>b.status!=="cancelled"&&b.status!=="done").sort((a,b)=>(a.date+a.time).localeCompare(b.date+b.time));
+  const next=upcoming[0];
+  let nextHtml="";
+  if(!next){
+    nextHtml=`<div class="card" style="text-align:center;color:#888">No upcoming appointments.</div>`;
+  } else {
+    const pet=petById(next.petId),owner=ownerById(next.ownerId);
+    const brachy=pet&&isBrachy(pet.breed)&&!pet.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:8px">Brachy</span>`:"";
+    const behTags=(pet?.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
+    const petPhoto=pet?.photo?`<img src="${pet.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="font-size:24px">🐾</div>`;
+    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:#E8534A;box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button><button class="sm" onclick="openBkDetailsModal(${next.id})">📝 Details</button></div></div></div>`;
+  }
+  let upcomingMore="";
+  if(upcoming.length>1){
+    upcomingMore=`<div style="font-size:12px;font-weight:500;color:#888;margin-bottom:6px">Then coming up</div>`;
+    upcoming.slice(1,4).forEach(b=>{const pet=petById(b.petId),owner=ownerById(b.ownerId);upcomingMore+=`<div style="display:flex;justify-content:space-between;font-size:12px;background:#f6f6f6;border-radius:8px;padding:6px 10px;margin-bottom:4px"><span>${pet?.name||"?"} (${owner?.name||"?"}) — ${b.service}</span><span style="color:#888">${fmtDate(b.date)} ${fmtTime(b.time)}</span></div>`;});
+  }
+  return`<div style="font-size:14px;font-weight:500;margin-bottom:10px">Next appointment</div>${nextHtml}<div style="margin-top:14px">${upcomingMore}</div>`;
+}
+
+function renderBookings(){
+  const cards=[...bookings].sort((a,b)=>(b.date+b.time).localeCompare(a.date+a.time)).map(b=>{
+    const owner=ownerById(b.ownerId),pet=petById(b.petId),p=bkPrice(b);
+    const priceHtml=b.waived?`<em style="color:#534AB7">Waived</em>`:b.discount&&p.disc>0?`<span style="text-decoration:line-through;color:#aaa;font-size:11px;margin-right:4px">${fmtMoney(p.subtotal)}</span><strong>${fmtMoney(p.finalTotal)}</strong>`:`<strong>${fmtMoney(p.finalTotal)}</strong>`;
+    const payHtml=b.waived?tag("Waived","#EEEDFE","#534AB7"):b.paid?tag("Paid ✓","#EAF7EE","#5BAF7A"):b.status!=="done"?tag("Not due yet","#F0F0F0","#888"):`${tag("Outstanding","#FDECEA","#E8534A")}<div style="margin-top:4px;display:flex;gap:4px"><button class="sm" onclick="togglePaid(${b.id})">Mark paid</button><button class="sm" onclick="waiveBk(${b.id})">Waive</button></div>`;
+    const petPhoto=pet?.photo?`<img src="${pet.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:avatar(pet?.name||"?",36);
+    return`<div class="card bk-card" data-id="${b.id}">
+      <div style="display:flex;align-items:flex-start;gap:10px">
+        ${petPhoto}
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
+            <div>
+              <div style="font-weight:500;font-size:13px">${pet?.name||"—"} <span style="color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span></div>
+              <div style="font-size:12px;color:#888;margin-top:1px">${owner?.name||"—"} &middot; ${owner?.phone||""}</div>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${badge(b.status)}<button class="sm" onclick="openBkDetailsModal(${b.id})">📝 Details</button><button class="sm" onclick="editBk(${b.id})">&#9998;</button><button class="sm" onclick="deleteBk(${b.id})">&#128465;</button></div>
+          </div>
+          <div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
+            <div style="min-width:120px">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Service</div>
+              <div style="font-size:13px">${b.service}</div>
+              ${(b.addOns||[]).length?`<div style="font-size:10px;color:#534AB7">+${b.addOns.join(", ")}</div>`:""}
+            </div>
+            <div style="min-width:90px">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Date & time</div>
+              <div style="font-size:13px">${fmtDate(b.date)}</div>
+              <div style="font-size:11px;color:#888">${fmtTime(b.time)}</div>
+            </div>
+            <div style="min-width:70px">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Price</div>
+              <div style="font-size:13px">${priceHtml}</div>
+            </div>
+            <div style="min-width:110px">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Payment</div>
+              <div style="font-size:13px">${payHtml}</div>
+            </div>
+            <div style="min-width:80px">
+              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Time spent</div>
+              <div style="font-size:13px">${b.timeSpent?fmtDuration(b.timeSpent):"—"}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      ${(b.blades||[]).length||(b.combs||[]).length?`<div style="margin-left:46px;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${normalizeBlades(b.blades).map(bl=>tag(bladeLabel(bl),"#E8F3FF","#185FA5")).join("")}${normalizeCombs(b.combs).map(c=>{const info=combInfo(c.comb);return info?tag(combChipLabel(c),info.bg,info.text):tag(combChipLabel(c),"#EAF7EE","#2f7a4a");}).join("")}</div>`:""}
+      ${b.notes||b.completionNotes||b.nextnote||b.beforePhoto||b.afterPhoto?`<div style="margin-left:46px">${b.notes?`<div style="background:#EEEDFE;border-left:3px solid #534AB7;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#534AB7;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Booking notes</strong><br>${b.notes}</div>`:""}${b.completionNotes?`<div style="background:#E6F1FB;border-left:3px solid #185FA5;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#185FA5;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Completion notes</strong><br>${b.completionNotes}</div>`:""}${b.nextnote?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#92400E;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">For next time</strong><br>${b.nextnote}</div>`:""}${(b.beforePhoto||b.afterPhoto)?`<div style="display:flex;gap:8px;margin-top:8px">${b.beforePhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">Before</div><img src="${b.beforePhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}${b.afterPhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">After</div><img src="${b.afterPhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}</div>`:""}</div>`:""}
+    </div>`;
+  }).join("");
+  return`<div class="search-row"><span style="font-size:14px;font-weight:500">All bookings</span><div class="right"><input type="text" id="bk-search" placeholder="Search..." style="width:140px" oninput="filterBookings()"/><select id="bk-status-filter" onchange="filterBookings()" style="width:auto"><option value="">All statuses</option><option>confirmed</option><option>pending</option><option>done</option><option>cancelled</option></select></div></div><div id="bk-cards">${cards||`<p style="text-align:center;color:#888;padding:2rem">No bookings yet.</p>`}</div>`;
+}
+
+function filterBookings(){
+  const q=(document.getElementById("bk-search")?.value||"").toLowerCase();
+  const st=document.getElementById("bk-status-filter")?.value||"";
+  document.querySelectorAll(".bk-card").forEach(card=>{
+    const id=Number(card.dataset.id);
+    const b=bookings.find(x=>x.id===id);if(!b)return;
+    const owner=ownerById(b.ownerId),pet=petById(b.petId);
+    const match=(!q||(owner&&owner.name.toLowerCase().includes(q))||(pet&&pet.name.toLowerCase().includes(q)))&&(!st||b.status===st);
+    card.style.display=match?"":"none";
+  });
+}
+
+function renderCalendar(){
+  const now=new Date();const y=now.getFullYear(),m=now.getMonth();
+  const MONTHS=["January","February","March","April","May","June","July","August","September","October","November","December"];
+  const firstDay=(new Date(y,m,1).getDay()+6)%7,daysInMonth=new Date(y,m+1,0).getDate();
+  const td=todayStr();let cells="";
+  for(let i=0;i<firstDay;i++)cells+=`<div style="border-radius:8px;padding:5px 4px;min-height:52px;border:0.5px solid #eee;opacity:0.3"><div style="font-size:11px;color:#888">${new Date(y,m,-firstDay+i+1).getDate()}</div></div>`;
+  for(let d=1;d<=daysInMonth;d++){
+    const dateStr=`${y}-${pad(m+1)}-${pad(d)}`;
+    const bks=bookings.filter(b=>b.date===dateStr);
+    const isT=dateStr===td;
+    let bkHtml=bks.slice(0,2).map(b=>`<div style="background:#EEEDFE;color:#534AB7;border-radius:3px;padding:1px 4px;font-size:10px;margin-bottom:1px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis">${fmtTime(b.time)} ${petById(b.petId)?.name||"?"}</div>`).join("");
+    if(bks.length>2)bkHtml+=`<div style="font-size:10px;color:#888">+${bks.length-2}</div>`;
+    cells+=`<div style="border-radius:8px;padding:5px 4px;min-height:52px;border:${isT?"1.5px solid #1a1a1a":"0.5px solid #eee"}"><div style="font-size:11px;color:#888;font-weight:${isT?500:400};margin-bottom:2px">${d}</div>${bkHtml}</div>`;
+  }
+  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><span style="font-size:14px;font-weight:500">${MONTHS[m]} ${y}</span></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div style="text-align:center;font-size:11px;color:#888;padding:4px 0">${d}</div>`).join("")}${cells}</div>`;
+}
+
+function renderPets(){
+  const rows=[...pets].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>{
+    const linkedOwners=owners.filter(o=>p.ownerIds.includes(o.id));
+    const last=bookings.filter(b=>b.petId===p.id).sort((a,b)=>b.date.localeCompare(a.date))[0];
+    const brachy=isBrachy(p.breed)&&!p.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">Brachy</span>`:"";
+    const reviewBadge=p.needsReview?`<span class="badge" style="background:#EEEBFA;color:#534AB7;margin-left:6px">🆕 New</span>`:"";
+    const treatsBadge=p.treatsOk===false?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">No treats</span>`:`<span class="badge" style="background:#EAF7EE;color:#5BAF7A;margin-left:6px">Treats OK</span>`;
+    const behTags=sortBehTraits((p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)&&BEHAVIOUR_TRAITS.includes(t))).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
+    const medTags=(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)&&MEDICAL_TAGS.includes(t)).map(t=>{const c=medColor(t);return tag(t,c.bg,c.text);}).join("");
+    const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
+    const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
+    const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${p.lastNote}</div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
+  }).join("");
+  return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
+}
+
+function renderClients(){
+  const rows=[...owners].sort((a,b)=>a.name.localeCompare(b.name)).map(o=>{
+    const op=pets.filter(p=>p.ownerIds.includes(o.id));
+    const bks=bookings.filter(b=>b.ownerId===o.id&&b.status!=="cancelled");
+    const spent=bks.filter(b=>!b.waived).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
+    const last=bks.reduce((acc,b)=>(!acc||b.date>acc)?b.date:acc,"");
+    const petTags=op.map(p=>tag("🐾 "+p.name,"#EEEDFE","#534AB7")).join("");
+    const reviewBadge=o.needsReview?`<span class="badge" style="background:#EEEBFA;color:#534AB7;margin-left:6px">🆕 New</span>`:"";
+    const contactIcon=o.contact==="WhatsApp"?OW_CONTACT_ICONS.WhatsApp:o.contact==="SMS"?OW_CONTACT_ICONS.SMS:o.contact==="Facebook"?"📘":o.contact==="Email"?"✉️":o.contact==="Phone"?"📞":"";
+    const contactBadge=o.contact?`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;background:#EEEBFA;color:#534AB7;border-radius:20px;padding:3px 10px;margin-left:7px;vertical-align:middle;font-weight:500">${OW_CONTACT_ICONS[o.contact]||""} ${o.contact}</span>`:"";
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${avatar(o.name,36)}<div style="flex:1"><div style="font-size:14px;font-weight:500">${o.name}${reviewBadge}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${contactBadge}${o.email?" &middot; "+o.email:""}</div>${o.notes?`<div style="font-size:12px;color:#854F0B;background:#FAEEDA;border-radius:6px;padding:4px 8px;margin-top:5px">${o.notes}</div>`:""}<div style="margin-top:6px">${petTags||`<span style="font-size:12px;color:#888">No pets linked</span>`}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">${bks.length} visit${bks.length!==1?"s":""} &middot; ${fmtMoney(spent)}</div><div style="font-size:12px;color:#888">Last: ${last?fmtDate(last):"—"}</div><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px">${o.needsReview?`<button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editOwner(${o.id})">&#9998; Edit</button><button class="sm" onclick="deleteOwner(${o.id})">&#128465;</button></div></div></div></div>`;
+  }).join("");
+  return`<div class="search-row"><span style="font-size:14px;font-weight:500">Client directory</span><div class="right"><button class="accent" onclick="openOwModal(null)">+ New owner</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No clients yet.</p>`}`;
+}
+
+function renderPricing(){
+  const svcRows=SERVICES.map(s=>`<tr><td style="padding:7px 0;font-weight:500">${s}</td><td style="padding:7px 0">${fmtMoney(prices[s]||0)}</td><td style="padding:7px 0;color:#888">${durations[s]||0} min</td><td style="padding:7px 0;text-align:right"><button class="sm" onclick="openPriceModal('${s.replace(/'/g,"\\'")}')">&#9998; Edit</button></td></tr>`).join("");
+  const addOnRows=ADD_ONS.filter(s=>s!=="De-matting").map(s=>`<tr><td style="padding:7px 0;font-weight:500">${s}</td><td style="padding:7px 0">${fmtMoney(prices[s]||0)}</td><td style="padding:7px 0;color:#888">${durations[s]||0} min</td><td style="padding:7px 0;text-align:right"><button class="sm" onclick="openPriceModal('${s.replace(/'/g,"\\'")}')">&#9998; Edit</button></td></tr>`).join("");
+  return`
+  <div style="font-size:18px;font-weight:500;margin-bottom:1.25rem">Pricing & duration rules</div>
+
+  <div class="rule-card">
+    <div class="rule-card-title">Services</div>
+    <table style="font-size:13px"><thead><tr><th style="padding:5px 0;width:40%">Name</th><th style="padding:5px 0;width:25%">Base price</th><th style="padding:5px 0;width:25%">Duration</th><th></th></tr></thead><tbody>${svcRows}</tbody></table>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-card-title">Add-ons</div>
+    <table style="font-size:13px"><thead><tr><th style="padding:5px 0;width:40%">Name</th><th style="padding:5px 0;width:25%">Base price</th><th style="padding:5px 0;width:25%">Duration</th><th></th></tr></thead><tbody>${addOnRows}</tbody></table>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-card-title">By size (multiplies base price, adjusts duration)</div>
+    <table style="font-size:13px"><thead><tr><th style="padding:5px 0;width:33%;font-weight:400;color:#888">Size</th><th style="padding:5px 0;width:33%;font-weight:400;color:#888">Price multiplier</th><th style="padding:5px 0;font-weight:400;color:#888">Duration adjustment</th></tr></thead>
+    <tbody>
+      <tr><td style="padding:5px 0">Mini</td><td style="padding:5px 0">×1</td><td style="padding:5px 0;color:#888">-10 min</td></tr>
+      <tr><td style="padding:5px 0">Small</td><td style="padding:5px 0">×1</td><td style="padding:5px 0;color:#888">+0 min</td></tr>
+      <tr><td style="padding:5px 0">Medium</td><td style="padding:5px 0">×1</td><td style="padding:5px 0;color:#888">+0 min</td></tr>
+      <tr><td style="padding:5px 0">Large</td><td style="padding:5px 0">×1.2</td><td style="padding:5px 0;color:#888">+15 min</td></tr>
+      <tr><td style="padding:5px 0">Extra large</td><td style="padding:5px 0">×1.4</td><td style="padding:5px 0;color:#888">+30 min</td></tr>
+    </tbody></table>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-card-title">By behaviour (handling surcharge)</div>
+    <p style="font-size:13px;color:#888;margin-bottom:10px">A flat <strong style="color:#1a1a1a">$${BEH_SURCHARGE}</strong> surcharge is added if a pet has any of:</p>
+    <div>${BEH_SURCHARGE_TRAITS.map(t=>`<span class="rule-pill" style="background:#FDECEA;color:#E8534A">${t}</span>`).join("")}</div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-card-title">By behaviour (extra time, no charge)</div>
+    <p style="font-size:13px;color:#888;margin-bottom:10px">An extra <strong style="color:#1a1a1a">${BEH_DUR_ADD} min</strong> is added to the appointment duration (no price change) if a pet has any of:</p>
+    <div>${BEH_DUR_TRAITS.map(t=>`<span class="rule-pill" style="background:#FAEEDA;color:#854F0B">${t}</span>`).join("")}</div>
+  </div>
+
+  <div class="rule-card">
+    <div class="rule-card-title">Matting surcharge</div>
+    <p style="font-size:13px;color:#888">De-matting time is billed at <strong style="color:#1a1a1a">$${MATTING_RATE}/hour</strong>. Select the <strong style="color:#1a1a1a">De-matting</strong> add-on on a booking to reveal the de-matting minutes field — it's added to both the price and the appointment duration automatically.</p>
+  </div>`;
+}
+
+function renderFinances(){
+  const fi=bookings.filter(b=>b.status!=="cancelled"&&!b.waived);
+  const totalIncome=fi.filter(b=>b.paid).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
+  const totalExp=expenses.reduce((s,e)=>s+e.amount,0);
+  const profit=totalIncome-totalExp;
+  const outstanding=bookings.filter(b=>b.status==="done"&&!b.waived&&!b.paid);
+  const outTotal=outstanding.reduce((s,b)=>s+bkPrice(b).finalTotal,0);
+  const sortedExp=[...expenses].sort((a,b)=>b.date.localeCompare(a.date)||a.desc.localeCompare(b.desc));
+  const expRows=sortedExp.map(e=>`<tr${e.id===expEditing?' style="background:var(--teal-bg)"':""}><td>${fmtDate(e.date)}</td><td>${e.desc}</td><td style="text-align:right;color:#E8534A;font-weight:500">-${fmtMoney(e.amount)}</td><td style="white-space:nowrap"><button class="sm" onclick="editExp(${e.id})">&#9998;</button> <button class="sm" onclick="deleteExp(${e.id})">&#128465;</button></td></tr>`).join("");
+  const incRows=fi.map(b=>{const owner=ownerById(b.ownerId),pet=petById(b.petId),p=bkPrice(b);const payTag=b.paid?tag("Paid","#EAF7EE","#5BAF7A"):b.status!=="done"?tag("Not due yet","#F0F0F0","#888"):tag("Outstanding","#FDECEA","#E8534A");return`<tr><td>${fmtDate(b.date)}</td><td>${pet?.name||"?"} (${owner?.name||"?"})</td><td style="text-align:right;color:#5BAF7A;font-weight:500">+${fmtMoney(p.finalTotal)}</td><td>${payTag}</td></tr>`;}).join("");
+  const editingExp=expenses.find(e=>e.id===expEditing);
+  return`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem"><div class="stat"><div class="slabel">Income</div><div class="sval" style="color:#5BAF7A">${fmtMoney(totalIncome)}</div></div><div class="stat"><div class="slabel">Expenses</div><div class="sval" style="color:#E8534A">${fmtMoney(totalExp)}</div></div><div class="stat"><div class="slabel">Net profit</div><div class="sval" style="color:${profit>=0?"#185FA5":"#E8534A"}">${fmtMoney(Math.abs(profit))}</div></div><div class="stat"><div class="slabel">Outstanding</div><div class="sval" style="color:#854F0B">${fmtMoney(outTotal)}</div></div></div><div style="font-size:14px;font-weight:600;margin-bottom:10px">${editingExp?"Edit expense":"Add expense"}</div><div class="card" style="margin-bottom:1.5rem"><div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap"><div style="flex:2;min-width:120px"><label class="lbl">Description</label><input type="text" id="exp-desc" placeholder="e.g. shampoo supplies" value="${editingExp?editingExp.desc:""}"/></div><div style="flex:1;min-width:90px"><label class="lbl">Amount ($)</label><input type="number" id="exp-amt" placeholder="0.00" value="${editingExp?editingExp.amount:""}"/></div><div style="flex:1;min-width:120px"><label class="lbl">Date</label><input type="date" id="exp-date" value="${editingExp?editingExp.date:todayStr()}"/></div><button class="primary" onclick="addExp()" style="flex-shrink:0;height:56px;width:64px;padding:0;font-size:13px;font-weight:700;border-radius:12px;line-height:1.3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;align-self:flex-end">${editingExp?'<span style="font-size:16px;line-height:1">&#10003;</span><span>Save</span>':'<span style="font-size:16px;line-height:1">+</span><span>Add</span>'}</button>${editingExp?'<button type="button" onclick="cancelEditExp()" style="flex-shrink:0;height:56px;align-self:flex-end">Cancel</button>':""}</div></div><div style="font-size:14px;font-weight:600;margin-bottom:8px">Income</div><div style="overflow-x:auto;margin-bottom:1.5rem"><table><thead><tr><th>Date</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment</th></tr></thead><tbody>${incRows}</tbody></table></div><div style="font-size:14px;font-weight:600;margin-bottom:8px">Expenses</div><div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Description</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>${expRows}</tbody></table></div>`;
+}
+
+let bkEditing=null,bkActiveAddons=[],bkActiveProducts=[],bkActiveBlades=[],bkActiveCombs=[],bkBeforePhoto=null,bkAfterPhoto=null;
+let _bkCompletionMode=false; // true when the modal is being opened right after marking a booking "done"
+let _pendingBeforeUpload=null,_pendingAfterUpload=null; // Promises that resolve to Drive URL or null
+let bkBeforePreCropUrl=null,bkAfterPreCropUrl=null; // Drive URLs superseded by a crop, pending deletion
+
+// Compress an image file to a JPEG data URL small enough for localStorage
+function compressPhoto(file,maxW,maxH,quality){
+  return new Promise((resolve,reject)=>{
+    const reader=new FileReader();
+    reader.onerror=()=>reject(new Error("FileReader failed"));
+    reader.onload=e=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("Image load failed"));
+      img.onload=()=>{
+        let w=img.width,h=img.height;
+        const ratio=Math.min(maxW/w,maxH/h,1);
+        w=Math.round(w*ratio);h=Math.round(h*ratio);
+        const canvas=document.createElement("canvas");
+        canvas.width=w;canvas.height=h;
+        canvas.getContext("2d").drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL("image/jpeg",quality||0.82));
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+async function bkPhotoSelected(input,slot){
+  const file=input.files[0];if(!file)return;
+  // Delete the old Drive photo if it's being replaced
+  const oldPhoto=slot==="before"?bkBeforePhoto:bkAfterPhoto;
+  deletePhotoFromDrive(oldPhoto);
+  // Step 1: compress locally immediately — fast, always works
+  if(slot==="before")bkBeforePhoto=null;else bkAfterPhoto=null;
+  renderBkPhotos(slot,"uploading");
+  let compressed;
+  try{
+    compressed=await compressPhoto(file,800,1000,0.82);
+  }catch(err){
+    console.error("Photo compress error:",err);
+    renderBkPhotos(slot,"error");
+    input.value="";return;
+  }
+  // Save compressed version locally straight away
+  if(slot==="before")bkBeforePhoto=compressed;
+  else bkAfterPhoto=compressed;
+  renderBkPhotos(slot,"done");
+  input.value="";
+  // Step 2: attempt Drive upload in background to get a persistent URL
+  if(SCRIPT_URL&&SCRIPT_URL!=="YOUR_APPS_SCRIPT_URL_HERE"){
+    photoUploadStarted();
+    // Store the upload promise so saveBkModal can await it for new bookings
+    const uploadPromise=(async()=>{
+      try{
+        const base64=compressed.split(",")[1];
+        const res=await fetch(SCRIPT_URL,{method:"POST",
+          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64}),
+          headers:{"Content-Type":"text/plain"}});
+        const json=await res.json().catch(()=>({}));
+        if(json.ok&&json.url){
+          // Replace local base64 with Drive URL
+          if(slot==="before")bkBeforePhoto=json.url;
+          else bkAfterPhoto=json.url;
+          renderBkPhotos(slot,"done");
+          console.log("Photo uploaded to Drive:",json.url);
+          // If editing an existing booking, update it now
+          if(bkEditing){
+            bookings=bookings.map(b=>b.id===bkEditing.id?{...b,[slot+"Photo"]:json.url}:b);
+            const bookingPhotos=JSON.parse(localStorage.getItem("pg_bkPhotos2")||"{}");
+            bookingPhotos[bkEditing.id]={...(bookingPhotos[bkEditing.id]||{}),[slot+"Photo"]:json.url};
+            lss("pg_bkPhotos2",bookingPhotos);
+            save();
+          }
+          photoUploadFinished(true);
+          return json.url;
+        }else{
+          console.error("Drive upload failed:",JSON.stringify(json));
+          photoUploadFinished(false);
+          return null;
+        }
+      }catch(err){
+        console.error("Drive upload fetch error:",err.message);
+        photoUploadFinished(false);
+        return null;
+      }
+    })();
+    if(slot==="before")_pendingBeforeUpload=uploadPromise;
+    else _pendingAfterUpload=uploadPromise;
+  }
+}
+function deletePhotoFromDrive(url){
+  if(!url||!url.startsWith("http"))return; // only Drive URLs, not local base64
+  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return;
+  fetch(SCRIPT_URL,{method:"POST",
+    body:JSON.stringify({action:"deletePhoto",url}),
+    headers:{"Content-Type":"text/plain"}
+  }).then(r=>r.json()).then(j=>{
+    if(j.ok)console.log("Drive photo deleted:",url);
+    else console.warn("Drive photo delete failed:",j);
+  }).catch(e=>console.warn("Drive photo delete error:",e.message));
+}
+function bkRemovePhoto(slot){
+  const old=slot==="before"?bkBeforePhoto:bkAfterPhoto;
+  deletePhotoFromDrive(old);
+  if(slot==="before")bkBeforePhoto=null;else bkAfterPhoto=null;
+  renderBkPhotos();
+}
+function renderBkPhotos(onlySlot,status){
+  const slots=onlySlot?[onlySlot]:["before","after"];
+  slots.forEach(slot=>{
+    const data=slot==="before"?bkBeforePhoto:bkAfterPhoto;
+    const prev=document.getElementById("bk-"+slot+"-preview");
+    const actions=document.getElementById("bk-"+slot+"-actions");
+    if(!prev)return;
+    if(status==="uploading"){
+      // Show spinner while compressing — no image data yet
+      prev.style.position="relative";
+      prev.innerHTML=`<div style="display:flex;flex-direction:column;align-items:center;gap:6px;color:#888"><span style="font-size:20px">⏳</span><span style="font-size:11px">Processing...</span></div>`;
+      prev.style.border="1.5px dashed var(--border)";
+      if(actions)actions.style.display="none";
+    }else if(data){
+      const overlay=status==="error"?`<div style="position:absolute;inset:0;background:rgba(232,83,74,0.7);display:flex;align-items:center;justify-content:center;color:#fff;font-size:12px;border-radius:8px">⚠️ Failed</div>`:"";
+      prev.style.position="relative";
+      prev.innerHTML=`<img src="${data}" style="width:100%;height:100%;object-fit:cover"/>${overlay}`;
+      prev.style.border="none";
+      if(actions)actions.style.display="flex";
+    }else{
+      prev.innerHTML=`<span style="font-size:20px">📷</span>Upload`;
+      prev.style.border="1.5px dashed var(--border)";
+      if(actions)actions.style.display="none";
+    }
+  });
+}
+/* Crop modal */
+let bkCropSlot=null,bkCropImg=null;
+// ── Before/After photo crop ────────────────────────────────────────────────
+let _bkCropPanX=0,_bkCropPanY=0,_bkCropZoom=1,_bkCropImgW=0,_bkCropImgH=0;
+const BK_CROP_W=280,BK_CROP_H=350;
+
+async function bkCropPhoto(slot){
+  let data=slot==="before"?bkBeforePhoto:bkAfterPhoto;
+  if(!data)return;
+  // If the photo is a remote URL (already uploaded to Drive), fetch and convert to data URI first
+  if(data.startsWith("http")){
+    try{
+      renderBkPhotos(slot,"uploading"); // show spinner while fetching
+      const preCropUrl=data; // remember so we can delete it after the new crop uploads
+      const res=await fetch(data);
+      const blob=await res.blob();
+      data=await new Promise((resolve,reject)=>{const r=new FileReader();r.onload=e=>resolve(e.target.result);r.onerror=reject;r.readAsDataURL(blob);});
+      if(slot==="before"){bkBeforePhoto=data;bkBeforePreCropUrl=preCropUrl;}
+      else{bkAfterPhoto=data;bkAfterPreCropUrl=preCropUrl;}
+      renderBkPhotos();
+    }catch(e){
+      alert("Could not load photo for cropping. Check your connection and try again.");
+      renderBkPhotos();
+      return;
+    }
+  }
+  bkCropSlot=slot;
+  let overlay=document.getElementById("bk-crop-overlay");
+  if(!overlay){
+    overlay=document.createElement("div");
+    overlay.id="bk-crop-overlay";
+    overlay.style.cssText="position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px";
+    overlay.innerHTML=`
+      <div style="color:#fff;font-size:13px;font-weight:500">Drag to reposition · Scroll to zoom</div>
+      <div id="bk-crop-vp" style="width:${BK_CROP_W}px;height:${BK_CROP_H}px;overflow:hidden;border-radius:10px;position:relative;background:#000;cursor:grab;touch-action:none;flex-shrink:0">
+        <img id="bk-crop-img" draggable="false" style="position:absolute;transform-origin:0 0;user-select:none;pointer-events:none"/>
+      </div>
+      <input type="range" id="bk-crop-zoom" min="1" max="5" step="0.01" value="1" style="width:200px" oninput="bkCropZoomChange()"/>
+      <div style="display:flex;gap:10px">
+        <button onclick="closeBkCropOverlay()" style="padding:8px 20px;border-radius:8px;border:1px solid #555;background:transparent;color:#fff;cursor:pointer">Cancel</button>
+        <button onclick="applyBkCrop()" style="padding:8px 20px;border-radius:8px;border:none;background:#185FA5;color:#fff;cursor:pointer;font-weight:500">Apply</button>
+      </div>`;
+    document.body.appendChild(overlay);
+    const vp=overlay.querySelector("#bk-crop-vp");
+    let drag=false,sx=0,sy=0,startPanX=0,startPanY=0;
+    vp.addEventListener("mousedown",e=>{drag=true;sx=e.clientX;sy=e.clientY;startPanX=_bkCropPanX;startPanY=_bkCropPanY;vp.style.cursor="grabbing";e.preventDefault();});
+    window.addEventListener("mousemove",e=>{if(!drag)return;_bkCropPanX=startPanX+(e.clientX-sx);_bkCropPanY=startPanY+(e.clientY-sy);bkCropClamp();bkCropApplyTransform();});
+    window.addEventListener("mouseup",()=>{drag=false;vp.style.cursor="grab";});
+    let t0bk;
+    vp.addEventListener("touchstart",e=>{if(e.touches.length===1){t0bk={x:e.touches[0].clientX,y:e.touches[0].clientY,panX:_bkCropPanX,panY:_bkCropPanY};}e.preventDefault();},{passive:false});
+    vp.addEventListener("touchmove",e=>{if(e.touches.length===1&&t0bk){_bkCropPanX=t0bk.panX+(e.touches[0].clientX-t0bk.x);_bkCropPanY=t0bk.panY+(e.touches[0].clientY-t0bk.y);bkCropClamp();bkCropApplyTransform();}e.preventDefault();},{passive:false});
+    vp.addEventListener("wheel",e=>{e.preventDefault();const zEl=document.getElementById("bk-crop-zoom");zEl.value=Math.min(5,Math.max(1,parseFloat(zEl.value)-e.deltaY*0.005));bkCropZoomChange();},{passive:false});
+  }
+  // Reset pan/zoom state for each new crop session
+  _bkCropPanX=0;_bkCropPanY=0;_bkCropZoom=1;_bkCropImgW=0;_bkCropImgH=0;
+  const img=document.getElementById("bk-crop-img");
+  img.onload=()=>{
+    _bkCropImgW=img.naturalWidth;_bkCropImgH=img.naturalHeight;
+    const minZ=Math.max(BK_CROP_W/_bkCropImgW,BK_CROP_H/_bkCropImgH);
+    _bkCropZoom=minZ;
+    const zEl=document.getElementById("bk-crop-zoom");
+    zEl.min=minZ;zEl.max=minZ*6;zEl.value=minZ;
+    _bkCropPanX=(BK_CROP_W-_bkCropImgW*minZ)/2;
+    _bkCropPanY=(BK_CROP_H-_bkCropImgH*minZ)/2;
+    bkCropApplyTransform();
+  };
+  // Clear src first so onload always fires even if the same image is cropped again
+  img.src="";
+  img.src=data;
+  overlay.style.display="flex";
+}
+function bkCropClamp(){
+  // Keep image covering the viewport
+  _bkCropPanX=Math.min(0,Math.max(BK_CROP_W-_bkCropImgW*_bkCropZoom,_bkCropPanX));
+  _bkCropPanY=Math.min(0,Math.max(BK_CROP_H-_bkCropImgH*_bkCropZoom,_bkCropPanY));
+}
+function bkCropApplyTransform(){
+  const img=document.getElementById("bk-crop-img");
+  if(img)img.style.transform=`translate(${_bkCropPanX}px,${_bkCropPanY}px) scale(${_bkCropZoom})`;
+}
+function bkCropZoomChange(){
+  const prev=_bkCropZoom;
+  _bkCropZoom=parseFloat(document.getElementById("bk-crop-zoom").value);
+  // Zoom toward centre of viewport
+  _bkCropPanX=BK_CROP_W/2-(_bkCropZoom/prev)*(BK_CROP_W/2-_bkCropPanX);
+  _bkCropPanY=BK_CROP_H/2-(_bkCropZoom/prev)*(BK_CROP_H/2-_bkCropPanY);
+  bkCropClamp();bkCropApplyTransform();
+}
+function closeBkCropOverlay(){document.getElementById("bk-crop-overlay").style.display="none";}
+function applyBkCrop(){
+  const canvas=document.createElement("canvas");
+  canvas.width=400;canvas.height=500;
+  const ctx=canvas.getContext("2d");
+  // Source coords: what part of the original image is visible in the viewport
+  const sx=-_bkCropPanX/_bkCropZoom;
+  const sy=-_bkCropPanY/_bkCropZoom;
+  const sw=BK_CROP_W/_bkCropZoom;
+  const sh=BK_CROP_H/_bkCropZoom;
+  ctx.drawImage(document.getElementById("bk-crop-img"),sx,sy,sw,sh,0,0,400,500);
+  const result=canvas.toDataURL("image/jpeg",0.92);
+  if(bkCropSlot==="before")bkBeforePhoto=result;
+  else bkAfterPhoto=result;
+  closeBkCropOverlay();
+  renderBkPhotos();
+  // Re-upload cropped result to Drive (replaces old URL) if we have a script endpoint
+  if(SCRIPT_URL&&SCRIPT_URL!=="YOUR_APPS_SCRIPT_URL_HERE"){
+    const slot=bkCropSlot;
+    photoUploadStarted();
+    renderBkPhotos(slot,"uploading");
+    const uploadPromise=(async()=>{
+      try{
+        const base64=result.split(",")[1];
+        const res=await fetch(SCRIPT_URL,{method:"POST",
+          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64}),
+          headers:{"Content-Type":"text/plain"}});
+        const json=await res.json().catch(()=>({}));
+        if(json.ok&&json.url){
+          // Delete the Drive file that existed before this crop
+          const preCropUrl=slot==="before"?bkBeforePreCropUrl:bkAfterPreCropUrl;
+          deletePhotoFromDrive(preCropUrl);
+          if(slot==="before"){bkBeforePhoto=json.url;bkBeforePreCropUrl=null;}else{bkAfterPhoto=json.url;bkAfterPreCropUrl=null;}
+          if(bkEditing){
+            bookings=bookings.map(b=>b.id===bkEditing.id?{...b,[slot+"Photo"]:json.url}:b);
+            const bookingPhotos=JSON.parse(localStorage.getItem("pg_bkPhotos2")||"{}");
+            bookingPhotos[bkEditing.id]={...(bookingPhotos[bkEditing.id]||{}),[slot+"Photo"]:json.url};
+            lss("pg_bkPhotos2",bookingPhotos);
+            save();
+          }
+          renderBkPhotos(slot,"done");
+          photoUploadFinished(true);
+          return json.url;
+        }else{photoUploadFinished(false);return null;}
+      }catch(err){photoUploadFinished(false);return null;}
+    })();
+    if(slot==="before")_pendingBeforeUpload=uploadPromise;
+    else _pendingAfterUpload=uploadPromise;
+  }
+}
+function openBkModal(b){
+  bkEditing=b||null;bkActiveAddons=[...(b?.addOns||[])];bkActiveProducts=[...(b?.products||[])];bkActiveBlades=normalizeBlades(b?.blades);bkActiveCombs=normalizeCombs(b?.combs);bkBeforePhoto=b?.beforePhoto||null;bkAfterPhoto=b?.afterPhoto||null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
+  document.getElementById("bk-title").textContent=b?"Edit booking":"New booking";
+  // Populate all pets (sorted alphabetically)
+  const petSel=document.getElementById("bk-pet");
+  petSel.innerHTML=`<option value="">Select pet...</option>`+[...pets].sort((a,z)=>a.name.localeCompare(z.name)).map(p=>{const ow=owners.find(o=>p.ownerIds.includes(o.id));return`<option value="${p.id}">${p.name} — ${displayBreed(p.breed,p.oodleName)}${ow?" ("+ow.name+")":""}`;}).join("");
+  document.getElementById("bk-service").innerHTML=SERVICES.map(s=>`<option>${s}</option>`).join("");
+  document.getElementById("bk-service").value=b?.service||"Full groom";
+  document.getElementById("bk-date").value=b?.date||todayStr();
+  document.getElementById("bk-time").value=b?.time||"09:00";
+  document.getElementById("bk-status").value=b?.status??"confirmed";
+  document.getElementById("bk-notes").value=b?.notes||"";
+  document.getElementById("bk-completionnotes").value=b?.completionNotes||"";
+  document.getElementById("bk-nextnote").value=b?.nextnote||"";
+  document.getElementById("bk-matting").value=b?.mattingMinutes||0;
+  document.getElementById("bk-custom").value=b?.customPrice??"";
+  document.getElementById("bk-waived").checked=b?.waived||false;
+  document.getElementById("bk-paid").checked=b?.paid||false;
+  document.getElementById("bk-timespent").innerHTML=timeSpentOptionsHtml(b?.timeSpent);
+  document.getElementById("bk-completion-banner").style.display=_bkCompletionMode?"block":"none";
+  _bkCompletionMode=false;
+  // New bookings only show the essentials (pet, owner, service, add-ons, date/time, status,
+  // booking notes, price estimate); once a booking exists, editing it instead shows only the
+  // remaining sections (products/blades/combs/matting/time spent/payment/photos/completion notes),
+  // since the core details were already set when it was created.
+  const isCreate=!b;
+  document.querySelectorAll("#modal-booking .bk-postonly").forEach(el=>{el.style.display=isCreate?"none":"";});
+  document.querySelectorAll("#modal-booking .bk-core-only").forEach(el=>{el.style.display=isCreate?"":"none";});
+  updateBkMattingVisibility();
+  renderBkAddons(bkActiveAddons);
+  renderBkProducts(bkActiveProducts);
+  renderBkBlades(bkActiveBlades);
+  renderBkCombs(bkActiveCombs);
+  renderBkPhotos();
+  if(b?.petId){petSel.value=b.petId;updateBkOwnerFromPet(b.petId,b.ownerId);}else{updateBkOwnerFromPet("","");}
+  updateBkPrice();
+  document.getElementById("modal-booking").classList.add("open");
+  petSel.onchange=()=>{updateBkOwnerFromPet(petSel.value,"");updateBkPrice();};
+  document.getElementById("bk-service").onchange=updateBkPrice;
+  document.getElementById("bk-matting").oninput=updateBkPrice;
+  document.getElementById("bk-custom").oninput=updateBkPrice;
+  document.getElementById("bk-waived").onchange=updateBkPrice;
+}
+function updateBkOwnerFromPet(petId,preferOwnerId){
+  const pet=petById(Number(petId));
+  const ownerHidden=document.getElementById("bk-owner");
+  const ownerDisplay=document.getElementById("bk-owner-display");
+  if(!pet){ownerHidden.value="";if(ownerDisplay)ownerDisplay.textContent="—";return;}
+  // Pick preferred owner or first linked owner
+  const oid=preferOwnerId&&pet.ownerIds.includes(Number(preferOwnerId))?Number(preferOwnerId):pet.ownerIds[0];
+  const owner=ownerById(oid);
+  ownerHidden.value=oid||"";
+  if(ownerDisplay)ownerDisplay.textContent=owner?`${owner.name} · ${owner.phone}`:"—";
+  // If multiple owners, show a small selector
+  if(pet.ownerIds.length>1){
+    const opts=pet.ownerIds.map(id=>{const o=ownerById(id);return`<option value="${id}"${id===oid?" selected":""}>${o?.name||id}</option>`;}).join("");
+    ownerDisplay.innerHTML=`<select onchange="bkOwnerChanged(this)" style="border:none;background:transparent;padding:0;font-size:13px;width:100%;outline:none">${opts}</select>`;
+  }
+}
+function renderBkAddons(active){
+  document.getElementById("bk-addons").innerHTML=ADD_ONS.map(a=>`<button type="button" onclick="toggleAddon('${a}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${active.includes(a)?"var(--teal)":"transparent"};color:${active.includes(a)?"#fff":"#666"};border:${active.includes(a)?"1px solid var(--teal)":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${active.includes(a)?"✓ ":""}${a} (+${fmtMoney(prices[a]||0)})</button>`).join("");
+}
+function renderBkProducts(active){
+  const el=document.getElementById("bk-products");if(!el)return;
+  const prods=getProductsFromExpenses();
+  const available=prods.filter(p=>!emptyProducts.includes(p));
+  const empty=prods.filter(p=>emptyProducts.includes(p));
+  let html="";
+  if(!prods.length){
+    html=`<span style="font-size:11px;color:#aaa">Add product expenses to populate this list.</span>`;
+  } else {
+    available.forEach(p=>{
+      const isActive=active.includes(p);
+      html+=`<div style="display:inline-flex;align-items:center;gap:0;margin-bottom:4px;border-radius:14px;border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};overflow:hidden">`;
+      html+=`<button type="button" onclick="toggleProduct('${p.replace(/'/g,"\\'")}')" style="padding:3px 8px;font-size:10px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#555"};border:none;font-family:inherit;font-weight:500;cursor:pointer;border-radius:0;white-space:nowrap">${isActive?"✓ ":""}${p}</button>`;
+      html+=`<button type="button" title="Mark as empty (hides from picker)" onclick="toggleEmptyProduct('${p.replace(/'/g,"\\'")}')" style="padding:3px 6px;font-size:9px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"rgba(255,255,255,0.7)":"#aaa"};border:none;border-left:1px solid ${isActive?"rgba(255,255,255,0.3)":"var(--border)"};font-family:inherit;cursor:pointer;border-radius:0" title="Mark empty">∅</button>`;
+      html+=`</div>`;
+    });
+    if(empty.length){
+      html+=`<div style="width:100%;margin-top:6px;margin-bottom:3px;font-size:10px;color:#aaa;font-weight:500;text-transform:uppercase;letter-spacing:0.04em">Empty — tap to restore</div>`;
+      empty.forEach(p=>{
+        html+=`<button type="button" onclick="toggleEmptyProduct('${p.replace(/'/g,"\\'")}')" style="padding:3px 8px;font-size:9px;border-radius:14px;background:#f5f5f5;color:#aaa;border:1px dashed #ddd;font-family:inherit;cursor:pointer;margin-bottom:4px;text-decoration:line-through;white-space:nowrap">${p}</button>`;
+      });
+    }
+  }
+  el.innerHTML=html;
+}
+function renderBkBlades(active){
+  const el=document.getElementById("bk-blades");if(!el)return;
+  el.innerHTML=BLADES.map(b=>{
+    const entry=active.find(x=>x.blade===b);
+    const isActive=!!entry;
+    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkBladeArea('${b}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
+    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="toggleBlade('${b}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#666"};border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${isActive?"✓ ":""}${b}</button>${areaBtns}</span>`;
+  }).join("");
+}
+function toggleBlade(b){
+  const idx=bkActiveBlades.findIndex(x=>x.blade===b);
+  if(idx>=0)bkActiveBlades.splice(idx,1);else bkActiveBlades.push({blade:b,area:""});
+  renderBkBlades(bkActiveBlades);
+}
+function setBkBladeArea(b,area){
+  const entry=bkActiveBlades.find(x=>x.blade===b);if(!entry)return;
+  entry.area=entry.area===area?"":area;
+  renderBkBlades(bkActiveBlades);
+}
+function renderBkCombs(active){
+  const el=document.getElementById("bk-combs");if(!el)return;
+  el.innerHTML=COMBS.map(info=>{
+    const label=`${info.size} (${info.mm})`;
+    const entry=active.find(x=>x.comb===label);
+    const isActive=!!entry;
+    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkCombArea('${label}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
+    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="toggleComb('${label}')" title="${info.colorName}" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;font-size:11px;border-radius:20px;background:${isActive?info.bg:"transparent"};color:${isActive?info.text:"#666"};border:${isActive?`1px solid ${info.bg}`:"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer"><span style="width:9px;height:9px;border-radius:50%;background:${info.bg};border:1px solid rgba(0,0,0,0.15);flex-shrink:0"></span>${isActive?"✓ ":""}${label}</button>${areaBtns}</span>`;
+  }).join("");
+}
+function toggleComb(label){
+  const idx=bkActiveCombs.findIndex(x=>x.comb===label);
+  if(idx>=0)bkActiveCombs.splice(idx,1);else bkActiveCombs.push({comb:label,area:""});
+  renderBkCombs(bkActiveCombs);
+}
+function setBkCombArea(label,area){
+  const entry=bkActiveCombs.find(x=>x.comb===label);if(!entry)return;
+  entry.area=entry.area===area?"":area;
+  renderBkCombs(bkActiveCombs);
+}
+function isDeshedProduct(p){return/deshed|de-shed/i.test(p)&&/david|rinse/i.test(p);}
+const DESHED_ADDON="De-shedding treatment";
+const MATTING_ADDON="De-matting";
+function updateBkMattingVisibility(){
+  const wrap=document.getElementById("bk-matting-wrap");if(!wrap)return;
+  const show=bkActiveAddons.includes(MATTING_ADDON);
+  wrap.style.display=show?"":"none";
+  if(!show)document.getElementById("bk-matting").value=0;
+}
+function toggleAddon(a){
+  if(bkActiveAddons.includes(a))bkActiveAddons=bkActiveAddons.filter(x=>x!==a);else bkActiveAddons.push(a);
+  // Auto-link: toggling the deshed addon syncs the David deshed rinse product
+  if(a===DESHED_ADDON){
+    const adding=bkActiveAddons.includes(DESHED_ADDON);
+    const deshedProd=getProductsFromExpenses().find(isDeshedProduct);
+    if(deshedProd){
+      if(adding&&!bkActiveProducts.includes(deshedProd))bkActiveProducts.push(deshedProd);
+      else if(!adding)bkActiveProducts=bkActiveProducts.filter(x=>x!==deshedProd);
+    }
+  }
+  if(a===MATTING_ADDON)updateBkMattingVisibility();
+  renderBkAddons(bkActiveAddons);renderBkProducts(bkActiveProducts);updateBkPrice();
+}
+function toggleProduct(p){
+  if(bkActiveProducts.includes(p))bkActiveProducts=bkActiveProducts.filter(x=>x!==p);else bkActiveProducts.push(p);
+  // Auto-link: toggling the David deshed rinse product syncs the deshed addon
+  if(isDeshedProduct(p)){
+    const adding=bkActiveProducts.includes(p);
+    if(adding&&!bkActiveAddons.includes(DESHED_ADDON))bkActiveAddons.push(DESHED_ADDON);
+    else if(!adding)bkActiveAddons=bkActiveAddons.filter(x=>x!==DESHED_ADDON);
+  }
+  renderBkAddons(bkActiveAddons);renderBkProducts(bkActiveProducts);updateBkPrice();
+}
+function bkOwnerChanged(sel){document.getElementById("bk-owner").value=sel.value;updateBkPrice();}
+function renderBkPets(ownerId,selPetId){/* legacy no-op */}
+function updateBkPrice(){
+  const svc=document.getElementById("bk-service").value;
+  const petId=Number(document.getElementById("bk-pet").value);
+  const pet=petById(petId);
+  const cost=computeCost(svc,bkActiveAddons,pet);
+  const mattingMins=Number(document.getElementById("bk-matting").value)||0;
+  const matting=mattingCost(mattingMins);
+  const customRaw=document.getElementById("bk-custom").value;
+  const useCustom=customRaw!=="";
+  const calcSub=cost.total+matting;
+  const subtotal=useCustom?Number(customRaw):calcSub;
+  const waived=document.getElementById("bk-waived").checked;
+  const disc=0;
+  const total=waived?0:subtotal-disc;
+  const duration=cost.duration+mattingMins;
+  let html=`<div class="price-row"><span style="color:#888">Base (${svc})</span><span>${fmtMoney(cost.base)}</span></div>`;
+  if(bkActiveAddons.length)html+=`<div class="price-row"><span style="color:#534AB7">Add-ons</span><span>+${fmtMoney(cost.addOnCost)}</span></div>`;
+  if(cost.sizeAdj)html+=`<div class="price-row"><span style="color:${cost.sizeAdj>0?"#E8534A":"#5BAF7A"}">Size adj. (${pet?.size})</span><span>${cost.sizeAdj>0?"+":""}${fmtMoney(cost.sizeAdj)}</span></div>`;
+  if(cost.behAdj)html+=`<div class="price-row" style="color:#E8534A"><span>Handling surcharge</span><span>+${fmtMoney(cost.behAdj)}</span></div>`;
+  if(matting)html+=`<div class="price-row" style="color:#E8534A"><span>Matting (${mattingMins} min)</span><span>+${fmtMoney(matting)}</span></div>`;
+  if(disc)html+=`<div class="price-row" style="color:#5BAF7A"><span>Discount (${DISC_PCT}%)</span><span>-${fmtMoney(disc)}</span></div>`;
+  html+=`<div class="price-row total"><span>Total</span><span>${waived?"Waived":fmtMoney(total)}</span></div><div class="price-row"><span style="color:#888;font-size:11px">Est. duration</span><span style="color:#888;font-size:11px">${duration} min</span></div>`;
+  document.getElementById("bk-price-box").innerHTML=html;
+}
+function closeBkModal(){
+  document.getElementById("modal-booking").classList.remove("open");
+  // If user cancels, delete Drive photos uploaded this session that won't be saved
+  const savedBefore=bkEditing?.beforePhoto||null;
+  const savedAfter=bkEditing?.afterPhoto||null;
+  Promise.all([_pendingBeforeUpload||Promise.resolve(null),_pendingAfterUpload||Promise.resolve(null)]).then(([b,a])=>{
+    if(b&&b!==savedBefore)deletePhotoFromDrive(b);
+    if(a&&a!==savedAfter)deletePhotoFromDrive(a);
+  });
+  if(bkBeforePhoto&&bkBeforePhoto.startsWith("http")&&bkBeforePhoto!==savedBefore)deletePhotoFromDrive(bkBeforePhoto);
+  if(bkAfterPhoto&&bkAfterPhoto.startsWith("http")&&bkAfterPhoto!==savedAfter)deletePhotoFromDrive(bkAfterPhoto);
+  deletePhotoFromDrive(bkBeforePreCropUrl);
+  deletePhotoFromDrive(bkAfterPreCropUrl);
+  bkEditing=null;bkActiveAddons=[];bkActiveProducts=[];bkActiveBlades=[];bkActiveCombs=[];
+  bkBeforePhoto=null;bkAfterPhoto=null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
+  _bkCompletionMode=false;
+}
+async function saveBkModal(){
+  const ownerId=Number(document.getElementById("bk-owner").value);
+  const petId=Number(document.getElementById("bk-pet").value);
+  if(!petId){alert("Please select a pet.");return;}
+  if(!ownerId){alert("The selected pet has no linked owner. Please link an owner to the pet first.");return;}
+  // Wait for any in-flight Drive uploads to finish so we save the URL not base64
+  if(_pendingBeforeUpload||_pendingAfterUpload){
+    setSyncStatus("saving");
+    const [before,after]=await Promise.all([_pendingBeforeUpload||Promise.resolve(null),_pendingAfterUpload||Promise.resolve(null)]);
+    if(before)bkBeforePhoto=before;
+    if(after)bkAfterPhoto=after;
+    _pendingBeforeUpload=null;_pendingAfterUpload=null;
+  }
+  const customRaw=document.getElementById("bk-custom").value;
+  const obj={ownerId,petId,service:document.getElementById("bk-service").value,addOns:[...bkActiveAddons],products:[...bkActiveProducts],blades:[...bkActiveBlades],combs:[...bkActiveCombs],date:document.getElementById("bk-date").value,time:document.getElementById("bk-time").value,status:document.getElementById("bk-status").value,notes:document.getElementById("bk-notes").value,completionNotes:document.getElementById("bk-completionnotes").value,nextnote:document.getElementById("bk-nextnote").value,mattingMinutes:Number(document.getElementById("bk-matting").value)||0,customPrice:customRaw!==""?Number(customRaw):null,discount:false,waived:document.getElementById("bk-waived").checked,paid:document.getElementById("bk-paid").checked,timeSpent:document.getElementById("bk-timespent").value?Number(document.getElementById("bk-timespent").value):null,beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
+  if(bkEditing){bookings=bookings.map(b=>b.id===bkEditing.id?{...b,...obj}:b);}else{bookings.push({id:nextId++,...obj});}
+  // Clean up any Drive URLs superseded by crops during this session
+  deletePhotoFromDrive(bkBeforePreCropUrl);deletePhotoFromDrive(bkAfterPreCropUrl);
+  bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
+  // Mark current photos as "saved" so closeBkModal doesn't delete them
+  bkEditing={...(bkEditing||{}),beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
+  save();closeBkModal();render();
+}
+let bkdEditing=null,bkdActiveProducts=[],bkdActiveBlades=[],bkdActiveCombs=[];
+function openBkDetailsModal(id){
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  bkdEditing=b;
+  bkdActiveProducts=[...(b.products||[])];
+  bkdActiveBlades=normalizeBlades(b.blades);
+  bkdActiveCombs=normalizeCombs(b.combs);
+  document.getElementById("bkd-notes").value=b.completionNotes||"";
+  document.getElementById("bkd-nextnote").value=b.nextnote||"";
+  document.getElementById("bkd-timespent").innerHTML=timeSpentOptionsHtml(b.timeSpent);
+  renderBkdProducts();
+  renderBkdBlades();
+  renderBkdCombs();
+  document.getElementById("modal-bkdetails").classList.add("open");
+}
+function closeBkDetailsModal(){
+  document.getElementById("modal-bkdetails").classList.remove("open");
+  bkdEditing=null;bkdActiveProducts=[];bkdActiveBlades=[];bkdActiveCombs=[];
+}
+function renderBkdProducts(){
+  const el=document.getElementById("bkd-products");if(!el)return;
+  const prods=getProductsFromExpenses();
+  const available=prods.filter(p=>!emptyProducts.includes(p));
+  let html="";
+  if(!prods.length){
+    html=`<span style="font-size:11px;color:#aaa">Add product expenses to populate this list.</span>`;
+  } else {
+    available.forEach(p=>{
+      const isActive=bkdActiveProducts.includes(p);
+      html+=`<button type="button" onclick="bkdToggleProduct('${p.replace(/'/g,"\\'")}')" style="padding:4px 10px;font-size:11px;border-radius:20px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#555"};border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer;margin-right:5px;margin-bottom:5px">${isActive?"✓ ":""}${p}</button>`;
+    });
+  }
+  el.innerHTML=html;
+}
+function bkdToggleProduct(p){
+  bkdActiveProducts=bkdActiveProducts.includes(p)?bkdActiveProducts.filter(x=>x!==p):[...bkdActiveProducts,p];
+  renderBkdProducts();
+}
+function renderBkdBlades(){
+  const el=document.getElementById("bkd-blades");if(!el)return;
+  el.innerHTML=BLADES.map(b=>{
+    const entry=bkdActiveBlades.find(x=>x.blade===b);
+    const isActive=!!entry;
+    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkdBladeArea('${b}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
+    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="bkdToggleBlade('${b}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#666"};border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${isActive?"✓ ":""}${b}</button>${areaBtns}</span>`;
+  }).join("");
+}
+function bkdToggleBlade(b){
+  const idx=bkdActiveBlades.findIndex(x=>x.blade===b);
+  if(idx>=0)bkdActiveBlades.splice(idx,1);else bkdActiveBlades.push({blade:b,area:""});
+  renderBkdBlades();
+}
+function setBkdBladeArea(b,area){
+  const entry=bkdActiveBlades.find(x=>x.blade===b);if(!entry)return;
+  entry.area=entry.area===area?"":area;
+  renderBkdBlades();
+}
+function renderBkdCombs(){
+  const el=document.getElementById("bkd-combs");if(!el)return;
+  el.innerHTML=COMBS.map(info=>{
+    const label=`${info.size} (${info.mm})`;
+    const entry=bkdActiveCombs.find(x=>x.comb===label);
+    const isActive=!!entry;
+    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkdCombArea('${label}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
+    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="bkdToggleComb('${label}')" title="${info.colorName}" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;font-size:11px;border-radius:20px;background:${isActive?info.bg:"transparent"};color:${isActive?info.text:"#666"};border:${isActive?`1px solid ${info.bg}`:"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer"><span style="width:9px;height:9px;border-radius:50%;background:${info.bg};border:1px solid rgba(0,0,0,0.15);flex-shrink:0"></span>${isActive?"✓ ":""}${label}</button>${areaBtns}</span>`;
+  }).join("");
+}
+function bkdToggleComb(label){
+  const idx=bkdActiveCombs.findIndex(x=>x.comb===label);
+  if(idx>=0)bkdActiveCombs.splice(idx,1);else bkdActiveCombs.push({comb:label,area:""});
+  renderBkdCombs();
+}
+function setBkdCombArea(label,area){
+  const entry=bkdActiveCombs.find(x=>x.comb===label);if(!entry)return;
+  entry.area=entry.area===area?"":area;
+  renderBkdCombs();
+}
+function saveBkDetailsModal(){
+  if(!bkdEditing)return;
+  const obj={products:[...bkdActiveProducts],blades:[...bkdActiveBlades],combs:[...bkdActiveCombs],completionNotes:document.getElementById("bkd-notes").value,nextnote:document.getElementById("bkd-nextnote").value,timeSpent:document.getElementById("bkd-timespent").value?Number(document.getElementById("bkd-timespent").value):null};
+  bookings=bookings.map(b=>b.id===bkdEditing.id?{...b,...obj}:b);
+  save();closeBkDetailsModal();render();
+}
+function markBkStatus(id,status){
+  if(status==="done"){
+    // Save the status change immediately so it's reflected everywhere, then reopen the
+    // full booking editor pre-filled so the groomer can log final details right away.
+    bookings=bookings.map(b=>b.id===id?{...b,status:"done"}:b);
+    save();render();
+    _bkCompletionMode=true;
+    openBkModal(bookings.find(b=>b.id===id));
+    return;
+  }
+  bookings=bookings.map(b=>b.id===id?{...b,status}:b);save();render();
+}
+function editBk(id){const b=bookings.find(x=>x.id===id);if(!b)return;openBkModal(b);}
+function deleteBk(id){openConfirm("Delete this booking?","Delete",()=>{bookings=bookings.filter(b=>b.id!==id);save();render();});}
+function togglePaid(id){bookings=bookings.map(b=>b.id===id?{...b,paid:!b.paid,waived:false}:b);save();render();}
+function waiveBk(id){openConfirm("Waive payment for this booking?","Waive",()=>{bookings=bookings.map(b=>b.id===id?{...b,waived:true,paid:false}:b);save();render();});}
+
+let ptEditing=null,ptActiveBehaviour=[],ptActiveCoats=[],ptActiveMedical=[],ptActiveAllergies=[],ptActiveOwners=[],ptPhotoData=null,_pendingPetPhotoUpload=null;
+function ptPhotoSelected(input){
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{openCropModal(e.target.result);};
+  reader.readAsDataURL(file);
+}
+function ptRemovePhoto(){deletePhotoFromDrive(ptPhotoData);ptPhotoData=null;renderPtPhoto();}
+function renderPtPhoto(){
+  const preview=document.getElementById("pt-photo-preview");
+  const removeBtn=document.getElementById("pt-photo-remove");
+  const editBtn=document.getElementById("pt-photo-edit");
+  if(!preview)return;
+  if(ptPhotoData){
+    preview.innerHTML=`<img src="${ptPhotoData}" style="width:100%;height:100%;object-fit:cover"/>`;
+    if(removeBtn)removeBtn.style.display="";
+    if(editBtn)editBtn.style.display="";
+  }else{
+    preview.innerHTML="🐾";
+    if(removeBtn)removeBtn.style.display="none";
+    if(editBtn)editBtn.style.display="none";
+  }
+}
+async function ptEditPhoto(){
+  if(!ptPhotoData)return;
+  // If it is already a data URL we can open the crop modal directly
+  if(ptPhotoData.startsWith("data:")){openCropModal(ptPhotoData);return;}
+  // Otherwise it is a remote Drive URL — fetch and convert to base64 first
+  try{
+    const res=await fetch(ptPhotoData);
+    const blob=await res.blob();
+    const dataUrl=await new Promise((resolve,reject)=>{
+      const r=new FileReader();r.onload=e=>resolve(e.target.result);r.onerror=reject;r.readAsDataURL(blob);
+    });
+    openCropModal(dataUrl);
+  }catch(e){alert("Could not load photo for editing. Check your connection and try again.");}
+}
+function openPtModal(pet){
+  ptEditing=pet||null;
+  document.getElementById("pt-title").textContent=pet?"Edit pet profile":"New pet profile";
+  document.getElementById("pt-name").value=pet?.name||"";
+  document.getElementById("pt-dob").value=(pet?.approxAge?"":(pet?.dob||""));
+  document.getElementById("pt-sex").value=pet?.sex||"Male";
+  document.getElementById("pt-desexed").value=pet?(pet.desexed?"yes":"no"):"yes";
+  document.getElementById("pt-size").value=pet?.size||"Medium";
+  document.getElementById("pt-mednotes").value=pet?.medicalNotes||"";
+  document.getElementById("pt-prefstyle").value=pet?.preferredStyle||"";
+  document.getElementById("pt-treats").checked=pet?(pet.treatsOk!==false):true;
+  document.getElementById("pt-behavnote").value=pet?.lastNote||"";
+  ptActiveBehaviour=[...(pet?.behaviour||[])];
+  ptActiveCoats=[...(pet?.coatTypes||[])];
+  ptActiveMedical=[...(pet?.medicalTags||[])];
+  ptActiveAllergies=[...(pet?.allergies||[])];
+  ptActiveOwners=[...(pet?.ownerIds||[])];
+  ptPhotoData=pet?.photo||null;_pendingPetPhotoUpload=null;
+  document.getElementById("pt-special-custom").value=pet?.customSpecialHandling||"";
+  document.getElementById("pt-allergies-custom").value=pet?.customAllergies||"";
+  // Load breeds
+  ptSelectedBreeds=pet?.breed?canonicalizeBreedString(pet.breed).split(" X ").map(s=>s.trim()).filter(Boolean):[];
+  ptRenderBreedTags();ptInitBreeds();
+  document.getElementById("pt-hide-brachy").checked=pet?.hideBrachy||false;
+  ptUpdateBrachyToggle();
+  ptUpdateOodleOptions();
+  document.getElementById("pt-oodle-name").value=pet?.oodleName||"";
+  // Load approx age
+  const isApprox=pet?.approxAge||false;
+  document.getElementById("pt-approx-age").checked=isApprox;
+  document.getElementById("pt-approx-age-fields").style.display=isApprox?"flex":"none";
+  if(isApprox&&pet?.dob){
+    const d=new Date(pet.dob);const now=new Date();
+    let yrs=now.getFullYear()-d.getFullYear();let mos=now.getMonth()-d.getMonth();
+    if(mos<0){yrs--;mos+=12;}
+    document.getElementById("pt-age-years").value=yrs;
+    document.getElementById("pt-age-months").value=mos;
+  }else{
+    document.getElementById("pt-age-years").value="";
+    document.getElementById("pt-age-months").value="";
+  }
+  renderPtPhoto();
+  renderPtToggles();
+  const hasNone=!(pet&&((pet.medicalTags||[]).length||pet.medicalNotes||(pet.allergies||[]).length||pet.customAllergies));
+  document.getElementById("pt-no-allergies").checked=hasNone;
+  document.getElementById("pt-medconditions-section").style.display=hasNone?"none":"";
+  document.getElementById("pt-allergies-section").style.display=hasNone?"none":"";
+  document.getElementById("modal-pet").classList.add("open");
+}
+function ptToggleNoAllergies(){
+  const checked=document.getElementById("pt-no-allergies").checked;
+  document.getElementById("pt-medconditions-section").style.display=checked?"none":"";
+  document.getElementById("pt-allergies-section").style.display=checked?"none":"";
+  if(checked){
+    ptActiveMedical=[];ptActiveAllergies=[];
+    document.getElementById("pt-mednotes").value="";
+    document.getElementById("pt-allergies-custom").value="";
+    renderPtToggles();
+  }
+}
+function renderPtToggles(){
+  renderToggle("pt-behaviour",BEHAVIOUR_TRAITS.filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)),ptActiveBehaviour.filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)),t=>{const c=behColor(t);return{bg:c.bg,text:c.text};},"ptBeh");
+  renderToggle("pt-coats",COAT_TYPES,ptActiveCoats,null,"ptCoat");
+  renderToggle("pt-special",SPECIAL_HANDLING_TRAITS,ptActiveBehaviour.filter(t=>SPECIAL_HANDLING_TRAITS.includes(t)),()=>({bg:"#FDECEA",text:"#E8534A"}),"ptSH");
+  renderToggle("pt-medical",MEDICAL_TAGS,ptActiveMedical,t=>{const c=medColor(t);return{bg:c.bg,text:c.text};},"ptMed");
+  renderToggle("pt-allergies",ALLERGENS,ptActiveAllergies,t=>{const c=allergyColor(t);return{bg:c.bg,text:c.text};},"ptAllergy");
+  renderToggle("pt-owners",owners.map(o=>o.name),owners.filter(o=>ptActiveOwners.includes(o.id)).map(o=>o.name),null,"ptOwn");
+}
+function renderToggle(elId,opts,active,colorFn,prefix){
+  const el=document.getElementById(elId);if(!el)return;
+  el.innerHTML=opts.map((opt,i)=>{
+    const isActive=active.includes(opt);
+    const c=colorFn&&isActive?colorFn(opt):null;
+    const bg=isActive?(c?c.bg:"var(--teal)"):"transparent";
+    const color=isActive?(c?c.text:"#fff"):"#666";
+    const border=isActive?(c?`1px solid ${c.text}`:"1px solid var(--teal)"):"1px solid var(--border)";
+    return`<button type="button" style="padding:3px 9px;font-size:11px;border-radius:20px;background:${bg};color:${color};border:${border}" onclick="${prefix}Toggle(${i})">${opt}</button>`;
+  }).join("");
+}
+function ptBehToggle(i){const t=BEHAVIOUR_TRAITS.filter(x=>!SPECIAL_HANDLING_TRAITS.includes(x))[i];if(!t)return;ptActiveBehaviour=ptActiveBehaviour.includes(t)?ptActiveBehaviour.filter(x=>x!==t):[...ptActiveBehaviour,t];renderPtToggles();}
+function ptSHToggle(i){const t=SPECIAL_HANDLING_TRAITS[i];if(!t)return;ptActiveBehaviour=ptActiveBehaviour.includes(t)?ptActiveBehaviour.filter(x=>x!==t):[...ptActiveBehaviour,t];renderPtToggles();}
+function ptCoatToggle(i){const t=COAT_TYPES[i];ptActiveCoats=ptActiveCoats.includes(t)?ptActiveCoats.filter(x=>x!==t):[...ptActiveCoats,t];renderPtToggles();}
+function ptMedToggle(i){const t=MEDICAL_TAGS[i];ptActiveMedical=ptActiveMedical.includes(t)?ptActiveMedical.filter(x=>x!==t):[...ptActiveMedical,t];renderPtToggles();}
+function ptAllergyToggle(i){const t=ALLERGENS[i];ptActiveAllergies=ptActiveAllergies.includes(t)?ptActiveAllergies.filter(x=>x!==t):[...ptActiveAllergies,t];renderPtToggles();}
+function ptOwnToggle(i){const oid=owners[i]?.id;if(!oid)return;ptActiveOwners=ptActiveOwners.includes(oid)?ptActiveOwners.filter(x=>x!==oid):[...ptActiveOwners,oid];renderPtToggles();}
+function closePtModal(){document.getElementById("modal-pet").classList.remove("open");ptEditing=null;}
+async function savePtModal(){
+  const name=document.getElementById("pt-name").value.trim();
+  const breed=ptGetBreedString();
+  if(!name||!breed){alert("Please enter name and at least one breed.");return;}
+  const approxAge=document.getElementById("pt-approx-age").checked;
+  const dob=approxAge?ptApproxDob():document.getElementById("pt-dob").value;
+  if(!ptActiveOwners.length){alert("Please link at least one owner.");return;}
+  // Wait for Drive upload to finish so we save the URL, not a large base64 blob
+  if(_pendingPetPhotoUpload){
+    setSyncStatus("saving");
+    const url=await _pendingPetPhotoUpload;
+    if(url)ptPhotoData=url;
+    _pendingPetPhotoUpload=null;
+  }
+  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").checked,lastNote:document.getElementById("pt-behavnote").value,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
+  if(ptEditing){pets=pets.map(p=>p.id===ptEditing.id?{...p,...obj}:p);}else{pets.push({id:nextPetId++,...obj});}
+  save();closePtModal();render();
+}
+function editPet(id){const p=pets.find(x=>x.id===id);if(p)openPtModal(p);}
+function deletePet(id){openConfirm("Delete this pet profile?","Delete",()=>{pets=pets.filter(p=>p.id!==id);save();render();});}
+
+let owEditing=null;
+let _owLinkToPetOnSave=false;
+function openOwModalFromPet(){
+  _owLinkToPetOnSave=true;
+  openOwModal(null);
+}
+function openOwModal(owner){
+  owEditing=owner||null;
+  document.getElementById("ow-title").textContent=owner?"Edit owner":"New owner";
+  document.getElementById("ow-name").value=owner?.name||"";
+  document.getElementById("ow-phone").value=owner?.phone||"";
+  document.getElementById("ow-email").value=owner?.email||"";
+  renderOwContactToggle(owner?.contact||"");
+  document.getElementById("ow-notes").value=owner?.notes||"";
+  document.getElementById("modal-owner").classList.add("open");
+}
+const OW_CONTACT_OPTS=["SMS","Email","Phone","WhatsApp","Facebook"];
+const OW_CONTACT_ICONS={
+  SMS:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>',
+  Email:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 6-10 7L2 6"/></svg>',
+  Phone:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45c.907.339 1.85.573 2.81.7A2 2 0 0 1 22 16.92z"/></svg>',
+  WhatsApp:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M14.7 13.5c-.2-.1-.9-.4-1.05-.5-.15-.05-.25-.07-.35.08s-.4.5-.49.6c-.09.1-.18.12-.33.04a4.18 4.18 0 0 1-1.23-.76 4.6 4.6 0 0 1-.85-1.06c-.09-.15 0-.24.07-.31l.23-.27a.97.97 0 0 0 .15-.26.27.27 0 0 0-.01-.26c-.04-.08-.35-.84-.48-1.14-.12-.3-.25-.25-.35-.26h-.3c-.1 0-.27.04-.41.19-.14.15-.54.52-.54 1.28s.55 1.48.63 1.58c.08.1 1.08 1.65 2.62 2.31.97.42 1.35.45 1.84.38.3-.04.9-.37 1.03-.72.13-.36.13-.66.09-.73-.04-.06-.14-.1-.3-.18z" stroke-width="1.3"/></svg>',
+  Facebook:'<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:-2px"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/><path d="M8.5 13.8 10.8 11l2.2 1.8 2.5-2.8" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.6"/></svg>'
+};
+function renderOwContactToggle(selected){
+  const el=document.getElementById("ow-contact-toggle");if(!el)return;
+  document.getElementById("ow-contact").value=selected||"";
+  el.innerHTML=OW_CONTACT_OPTS.map(opt=>{
+    const isActive=selected===opt;
+    return`<button type="button" onclick="owContactSelect('${opt}')" style="display:inline-flex;align-items:center;gap:5px;padding:5px 13px;font-size:12px;border-radius:20px;border:none;background:${isActive?"#534AB7":"#EEEBFA"};color:${isActive?"#fff":"#534AB7"};cursor:pointer;font-family:inherit;font-weight:500">${OW_CONTACT_ICONS[opt]} ${opt}</button>`;
+  }).join("");
+}
+function owContactSelect(val){
+  const cur=document.getElementById("ow-contact").value;
+  const next=cur===val?"":val;
+  renderOwContactToggle(next);
+}
+function closeOwModal(){document.getElementById("modal-owner").classList.remove("open");owEditing=null;_owLinkToPetOnSave=false;}
+function saveOwModal(){
+  const name=document.getElementById("ow-name").value.trim();
+  const phone=document.getElementById("ow-phone").value.trim();
+  if(!name||!phone){alert("Please enter name and phone.");return;}
+  const obj={name,phone:fmtPhone(phone),email:document.getElementById("ow-email").value.trim(),contact:document.getElementById("ow-contact").value,notes:document.getElementById("ow-notes").value.trim()};
+  let newOwnerId=null;
+  if(owEditing){owners=owners.map(o=>o.id===owEditing.id?{...o,...obj}:o);}else{newOwnerId=nextOId;owners.push({id:nextOId++,...obj});}
+  const linkToPet=_owLinkToPetOnSave;
+  if(linkToPet&&newOwnerId){
+    if(!ptActiveOwners.includes(newOwnerId))ptActiveOwners.push(newOwnerId);
+  }
+  _owLinkToPetOnSave=false;
+  save();closeOwModal();render();
+  if(linkToPet&&newOwnerId)renderPtToggles();
+}
+function editOwner(id){const o=owners.find(x=>x.id===id);if(o)openOwModal(o);}
+function deleteOwner(id){openConfirm("Delete this owner?","Delete",()=>{owners=owners.filter(o=>o.id!==id);pets=pets.map(p=>({...p,ownerIds:p.ownerIds.filter(oid=>oid!==id)}));save();render();});}
+
+let priceEditing=null;
+function openPriceModal(s){
+  priceEditing=s;
+  document.getElementById("mp-title").textContent=`Edit — ${s}`;
+  document.getElementById("mp-price").value=prices[s]||0;
+  document.getElementById("mp-dur").value=durations[s]||0;
+  document.getElementById("modal-price").classList.add("open");
+}
+function closePriceModal(){document.getElementById("modal-price").classList.remove("open");priceEditing=null;}
+function savePriceModal(){
+  if(!priceEditing)return;
+  prices[priceEditing]=parseFloat(document.getElementById("mp-price").value)||0;
+  durations[priceEditing]=parseInt(document.getElementById("mp-dur").value)||0;
+  save();closePriceModal();render();
+}
+
+let expEditing=null;
+function addExp(){
+  const desc=document.getElementById("exp-desc")?.value?.trim();
+  const amt=parseFloat(document.getElementById("exp-amt")?.value);
+  const date=document.getElementById("exp-date")?.value;
+  if(!desc||isNaN(amt)||amt<0||!date){alert("Please fill in all expense fields.");return;}
+  if(expEditing){
+    expenses=expenses.map(e=>e.id===expEditing?{...e,desc,amount:amt,date}:e);
+    expEditing=null;
+  }else{
+    expenses.push({id:nextExpId++,desc,amount:amt,date});
+  }
+  save();render();
+  // Refresh product buttons if booking modal is open
+  if(document.getElementById("modal-booking").classList.contains("open"))renderBkProducts(bkActiveProducts);
+}
+function editExp(id){
+  if(!expenses.find(e=>e.id===id))return;
+  expEditing=id;
+  render();
+  document.getElementById("exp-desc")?.focus();
+}
+function cancelEditExp(){expEditing=null;render();}
+function deleteExp(id){openConfirm("Remove this expense?","Remove",()=>{expenses=expenses.filter(e=>e.id!==id);if(expEditing===id)expEditing=null;save();render();});}
+
+// Build tabs row
+document.getElementById("tabs-row").innerHTML=["dashboard","bookings","calendar","pets","clients","pricing","finances"].map(t=>`<button class="tab-btn" onclick="switchTab('${t}')" id="tab-${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join("");
+
+document.getElementById("tab-dashboard").classList.add("active");
+
+function switchTab(t){
+  currentTab=t;
+  document.querySelectorAll(".tab-btn").forEach(b=>b.classList.remove("active"));
+  document.getElementById("tab-"+t)?.classList.add("active");
+  render();
+}
+
+// Load data from Google Sheets on startup, fall back to localStorage if unavailable
+document.body.style.opacity="0";
+loadFromSheets().then(loaded=>{
+  if(!loaded){
+    // Sheet failed — keep whatever is already in memory from localStorage (loaded at top of script)
+    // Don't wipe local data; just render with what we have
+    setSyncStatus("⚠️ Loaded from local cache");
+    setTimeout(()=>setSyncStatus(""),3000);
+  }
+  render();
+  document.body.style.opacity="1";
+  checkIntake();
+}).catch(()=>{
+  // Same: don't wipe data on error, just render local
+  setSyncStatus("⚠️ Loaded from local cache");
+  setTimeout(()=>setSyncStatus(""),3000);
+  render();
+  document.body.style.opacity="1";
+  checkIntake();
+});
+</script>
+
+<!-- Crop Modal -->
+<div id="modal-crop" class="modal-bg">
+<div class="modal" style="width:500px">
+<h2>Crop & adjust photo</h2>
+<div style="color:#aaa;font-size:11px;text-align:center;margin-bottom:6px">Drag image to reposition · Scroll or pinch to zoom</div>
+<div style="position:relative;width:100%;height:320px;background:#111;border-radius:10px;overflow:hidden;margin-bottom:12px;cursor:grab;touch-action:none" id="crop-container">
+  <img id="crop-img" style="position:absolute;transform-origin:0 0;user-select:none;pointer-events:none" draggable="false"/>
+  <div id="crop-box" style="position:absolute;border:2px solid #fff;box-shadow:0 0 0 9999px rgba(0,0,0,0.45);pointer-events:none"></div>
+</div>
+<div style="display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+  <label class="lbl" style="margin:0;white-space:nowrap">Zoom</label>
+  <input type="range" id="crop-zoom" min="0.5" max="3" step="0.01" value="1" style="flex:1;min-width:100px" oninput="cropZoomChanged()"/>
+  <span id="crop-zoom-val" style="font-size:12px;color:#888;min-width:30px">1×</span>
+</div>
+<div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+  <button type="button" onclick="cropRotate(-90)" style="flex:1">↺ Rotate left</button>
+  <button type="button" onclick="cropRotate(90)" style="flex:1">↻ Rotate right</button>
+  <button type="button" onclick="cropFlip()" style="flex:1">⇌ Flip</button>
+</div>
+<div class="row-end"><button onclick="closeCropModal()">Cancel</button><button class="primary" onclick="applyCrop()">Use photo</button></div>
+</div>
+</div>
+
+<script>
+// ── IMAGE CROP ──────────────────────────────────────────────────────────
+// Pan-image, fixed-box cropper. _cropPanX/Y = image top-left position in container.
+let _cropRaw=null,_cropScale=1,_cropRot=0,_cropFlipH=false;
+let _cropPanX=0,_cropPanY=0;
+let _cropBoxX=0,_cropBoxY=0,_cropBoxW=200,_cropBoxH=200;
+let _imgW=0,_imgH=0;
+let _cropDrag=false,_cropDragSX=0,_cropDragSY=0,_cropDragPX=0,_cropDragPY=0;
+let _cropPinchDist=0,_cropPinchScale=1;
+
+function openCropModal(src){
+  _cropRaw=src;_cropScale=1;_cropRot=0;_cropFlipH=false;
+  document.getElementById("crop-zoom").value=1;
+  document.getElementById("crop-zoom-val").textContent="1×";
+  // Show modal first so the container has real layout dimensions
+  document.getElementById("modal-crop").classList.add("open");
+  document.getElementById("modal-pet").classList.remove("open");
+  const ci=document.getElementById("crop-img");
+  // Clear src first so onload always fires, even for the same image
+  ci.src="";
+  ci.onload=()=>{ _imgW=ci.naturalWidth;_imgH=ci.naturalHeight; initCrop(); };
+  // Defer setting src until the modal is painted and clientWidth is valid
+  requestAnimationFrame(()=>{ requestAnimationFrame(()=>{ ci.src=src; }); });
+}
+function closeCropModal(){
+  document.getElementById("modal-crop").classList.remove("open");
+  document.getElementById("modal-pet").classList.add("open");
+}
+function initCrop(){
+  const cont=document.getElementById("crop-container");
+  const cW=cont.clientWidth,cH=cont.clientHeight;
+  // Fit image to container
+  const s=Math.min(cW/_imgW,cH/_imgH,1);
+  _cropScale=s;
+  const zEl=document.getElementById("crop-zoom");
+  zEl.min=s*0.5; zEl.max=s*6; zEl.value=s;
+  document.getElementById("crop-zoom-val").textContent="1.0×";
+  // Fixed crop box: centred square 70% of shorter side
+  const size=Math.min(cW,cH)*0.7;
+  _cropBoxW=size; _cropBoxH=size;
+  _cropBoxX=(cW-size)/2; _cropBoxY=(cH-size)/2;
+  updateCropBox();
+  // Centre image in container
+  _cropPanX=(cW-_imgW*s)/2; _cropPanY=(cH-_imgH*s)/2;
+  applyImgTransform();
+}
+function applyImgTransform(){
+  const ci=document.getElementById("crop-img");
+  let tr=`translate(${_cropPanX}px,${_cropPanY}px) scale(${_cropScale})`;
+  if(_cropFlipH) tr+=` scaleX(-1)`;
+  if(_cropRot)   tr+=` rotate(${_cropRot}deg)`;
+  ci.style.transform=tr;
+  ci.style.transformOrigin="0 0";
+  ci.style.width=_imgW+"px";
+  ci.style.height=_imgH+"px";
+}
+function cropZoomChanged(){
+  const prev=_cropScale;
+  _cropScale=parseFloat(document.getElementById("crop-zoom").value);
+  const cont=document.getElementById("crop-container");
+  const cX=cont.clientWidth/2, cY=cont.clientHeight/2;
+  // Zoom toward container centre
+  _cropPanX=cX-(_cropScale/prev)*(cX-_cropPanX);
+  _cropPanY=cY-(_cropScale/prev)*(cY-_cropPanY);
+  const baseS=Math.min(cont.clientWidth/_imgW,cont.clientHeight/_imgH,1);
+  document.getElementById("crop-zoom-val").textContent=(_cropScale/baseS).toFixed(1)+"×";
+  applyImgTransform();
+}
+function cropRotate(deg){_cropRot=(_cropRot+deg+360)%360;applyImgTransform();}
+function cropFlip(){_cropFlipH=!_cropFlipH;applyImgTransform();}
+function updateCropBox(){
+  const box=document.getElementById("crop-box");
+  box.style.left=_cropBoxX+"px"; box.style.top=_cropBoxY+"px";
+  box.style.width=_cropBoxW+"px"; box.style.height=_cropBoxH+"px";
+}
+
+// ── Drag image to pan ──
+(()=>{
+  const cont=document.getElementById("crop-container");
+  // Mouse
+  cont.addEventListener("mousedown",e=>{
+    _cropDrag=true;_cropDragSX=e.clientX;_cropDragSY=e.clientY;
+    _cropDragPX=_cropPanX;_cropDragPY=_cropPanY;
+    cont.style.cursor="grabbing";e.preventDefault();
+  });
+  document.addEventListener("mousemove",e=>{
+    if(!_cropDrag)return;
+    _cropPanX=_cropDragPX+(e.clientX-_cropDragSX);
+    _cropPanY=_cropDragPY+(e.clientY-_cropDragSY);
+    applyImgTransform();
+  });
+  document.addEventListener("mouseup",()=>{_cropDrag=false;cont.style.cursor="grab";});
+  // Scroll to zoom
+  cont.addEventListener("wheel",e=>{
+    e.preventDefault();
+    const zEl=document.getElementById("crop-zoom");
+    const newVal=Math.min(parseFloat(zEl.max),Math.max(parseFloat(zEl.min),_cropScale-e.deltaY*0.002));
+    zEl.value=newVal;
+    cropZoomChanged();
+  },{passive:false});
+  // Touch: single-finger pan, two-finger pinch-zoom
+  cont.addEventListener("touchstart",e=>{
+    if(e.touches.length===1){
+      const t=e.touches[0];
+      _cropDrag=true;_cropDragSX=t.clientX;_cropDragSY=t.clientY;
+      _cropDragPX=_cropPanX;_cropDragPY=_cropPanY;
+    } else if(e.touches.length===2){
+      _cropDrag=false;
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      _cropPinchDist=Math.hypot(dx,dy);
+      _cropPinchScale=_cropScale;
+    }
+    e.preventDefault();
+  },{passive:false});
+  cont.addEventListener("touchmove",e=>{
+    if(e.touches.length===1&&_cropDrag){
+      const t=e.touches[0];
+      _cropPanX=_cropDragPX+(t.clientX-_cropDragSX);
+      _cropPanY=_cropDragPY+(t.clientY-_cropDragSY);
+      applyImgTransform();
+    } else if(e.touches.length===2){
+      const dx=e.touches[0].clientX-e.touches[1].clientX;
+      const dy=e.touches[0].clientY-e.touches[1].clientY;
+      const dist=Math.hypot(dx,dy);
+      const zEl=document.getElementById("crop-zoom");
+      const newVal=Math.min(parseFloat(zEl.max),Math.max(parseFloat(zEl.min),_cropPinchScale*(dist/_cropPinchDist)));
+      zEl.value=newVal;
+      cropZoomChanged();
+    }
+    e.preventDefault();
+  },{passive:false});
+  cont.addEventListener("touchend",e=>{if(e.touches.length===0)_cropDrag=false;});
+})();
+
+function applyCrop(){
+  const ci=document.getElementById("crop-img");
+  // Map crop box corners back to original image pixels via pan+scale
+  // _cropPanX/Y is where the image top-left sits in the container
+  const sx=(_cropBoxX-_cropPanX)/_cropScale;
+  const sy=(_cropBoxY-_cropPanY)/_cropScale;
+  const sw=_cropBoxW/_cropScale;
+  const sh=_cropBoxH/_cropScale;
+  const OUT=300;
+  const canvas=document.createElement("canvas");
+  canvas.width=OUT;canvas.height=OUT;
+  const ctx=canvas.getContext("2d");
+  ctx.fillStyle="#000";ctx.fillRect(0,0,OUT,OUT);
+  ctx.save();
+  if(_cropFlipH){ctx.translate(OUT,0);ctx.scale(-1,1);}
+  if(_cropRot){ctx.translate(OUT/2,OUT/2);ctx.rotate(_cropRot*Math.PI/180);ctx.translate(-OUT/2,-OUT/2);}
+  // Clamp to image bounds, preserve position in output
+  const srcX=Math.max(0,sx),         srcY=Math.max(0,sy);
+  const srcX2=Math.min(sx+sw,_imgW),  srcY2=Math.min(sy+sh,_imgH);
+  const srcW=srcX2-srcX,              srcH=srcY2-srcY;
+  if(srcW>0&&srcH>0){
+    const dstX=(srcX-sx)/sw*OUT, dstY=(srcY-sy)/sh*OUT;
+    const dstW=srcW/sw*OUT,       dstH=srcH/sh*OUT;
+    ctx.drawImage(ci,srcX,srcY,srcW,srcH,dstX,dstY,dstW,dstH);
+  }
+  ctx.restore();
+  const _oldPetPhoto=ptPhotoData;
+  ptPhotoData=canvas.toDataURL("image/jpeg",0.92);
+  deletePhotoFromDrive(_oldPetPhoto);
+  renderPtPhoto();
+  closeCropModal();
+  // Upload pet photo to Drive in background so it syncs across devices
+  if(SCRIPT_URL&&SCRIPT_URL!=="YOUR_APPS_SCRIPT_URL_HERE"){
+    _pendingPetPhotoUpload=(async()=>{
+      try{
+        const base64=ptPhotoData.split(",")[1];
+        const res=await fetch(SCRIPT_URL,{method:"POST",
+          body:JSON.stringify({action:"uploadPhoto",filename:"pet_"+Date.now()+".jpg",mimeType:"image/jpeg",base64}),
+          headers:{"Content-Type":"text/plain"}});
+        const json=await res.json().catch(()=>({}));
+        if(json.ok&&json.url){
+          ptPhotoData=json.url;
+          renderPtPhoto();
+          // If editing, immediately persist Drive URL
+          if(ptEditing){
+            pets=pets.map(p=>p.id===ptEditing.id?{...p,photo:json.url}:p);
+            const petPhotos=JSON.parse(localStorage.getItem("pg_petPhotos2")||"{}");
+            petPhotos[ptEditing.id]=json.url;
+            lss("pg_petPhotos2",petPhotos);
+            save();
+          }
+          console.log("Pet photo uploaded to Drive:",json.url);
+          return json.url;
+        }
+        return null;
+      }catch(e){console.warn("Pet photo Drive upload failed:",e.message);return null;}
+    })();
+  }
+}
+// ───────────────────────────────────────────────────────────────────────
+</script>
+</body>
+</html>
