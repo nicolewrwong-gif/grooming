@@ -134,7 +134,7 @@ tr:hover td{background:#fafbfc}
 <div class="mb10 bk-core-only"><label class="lbl">Owner</label><div id="bk-owner-display" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#f6f6f6;color:#888;font-size:13px;min-height:34px">—</div><input type="hidden" id="bk-owner"/></div>
 <div class="mb10 bk-core-only"><label class="lbl">Service</label><select id="bk-service"></select></div>
 <div class="mb10 bk-core-only"><label class="lbl">Add-ons</label><div id="bk-addons" class="multi-toggle"></div></div>
-<div class="grid2 bk-core-only">
+<div class="grid2">
   <div><label class="lbl">Date</label><input type="date" id="bk-date"/></div>
   <div><label class="lbl">Time</label><input type="time" id="bk-time"/></div>
 </div>
@@ -332,8 +332,8 @@ tr:hover td{background:#fafbfc}
 </div>
 
 <script>
-const SERVICES=["Full groom","Bath & brush","Nail trim","Puppy groom"];
-const ADD_ONS=["De-shedding treatment","Poodle point","De-matting"];
+const SERVICES=["Full groom","Bath & brush","Nail trim"];
+const ADD_ONS=["De-shedding treatment","Poodle point","De-matting","Hand stripping"];
 const BLADES=["#10","#7F","#4F","#3F","#15"];
 const BLADE_AREAS=["Head","Body"];
 // Standard Wahl clipper-guard comb colour coding, used so the comb picker and chips match
@@ -392,8 +392,8 @@ function toggleEmptyProduct(name){
   lss("pg_emptyProducts2",emptyProducts);
   renderBkProducts(bkActiveProducts);
 }
-const DEF_PRICES={"Full groom":95,"Bath & brush":65,"Nail trim":25,"Puppy groom":75,"De-shedding treatment":30,"Poodle point":20,"De-matting":0};
-const DEF_DUR={"Full groom":90,"Bath & brush":45,"Nail trim":15,"Puppy groom":60,"De-shedding treatment":30,"Poodle point":20,"De-matting":0};
+const DEF_PRICES={"Full groom":95,"Bath & brush":65,"Nail trim":25,"De-shedding treatment":30,"Poodle point":20,"De-matting":30,"Hand stripping":40};
+const DEF_DUR={"Full groom":90,"Bath & brush":45,"Nail trim":15,"De-shedding treatment":30,"Poodle point":20,"De-matting":0,"Hand stripping":45};
 const DISC_PCT=10,MATTING_RATE=50,BEH_SURCHARGE=15,BEH_DUR_ADD=30;
 const BEH_SURCHARGE_TRAITS=["Requires muzzle","Bite risk"];
 const BEH_DUR_TRAITS=["Anxious","Separation anxiety","Fear of clippers","Resists handling","Sensitive feet","Requires muzzle","Eats air","Table active","Requires breaks"];
@@ -753,9 +753,9 @@ async function loadFromSheets(){
     const text=await res.text();
     let json;
     try{json=JSON.parse(text);}catch(e){
-      setSyncStatus("⚠️ Load failed");
-      console.error("Sheet response not JSON:",text);
-      alert("Could not load from Sheets — unexpected response:\n"+text.slice(0,200));
+      setSyncStatus("⚠️ Couldn't refresh from Sheets — showing saved data");
+      setTimeout(()=>setSyncStatus(""),4000);
+      console.error("Sheet response not JSON:",text.slice(0,500));
       return false;
     }
     if(json.ok&&json.data){
@@ -887,7 +887,7 @@ async function checkIntake(){
         allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",
         treatsOk:item.treatsOk!==false,
         lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
-        customSpecialHandling:"",hideBrachy:false,oodleName:null,needsReview:true,
+        customSpecialHandling:item.noContactServices||"",hideBrachy:false,oodleName:null,needsReview:true,
         consentSigned:!!(item.agreeTerms&&item.signature),consentSignature:item.signature||"",consentDate:item.consentDate||""});
       processedIds.push(item.id);
     });
@@ -1013,6 +1013,13 @@ let nextExpId=lsg("pg_nextExpId2",9);
 let emptyProducts=lsg("pg_emptyProducts2",[]);
 
 function petById(id){return pets.find(p=>p.id===id);}
+function savePetDriveFolder(petId,folderUrl){
+  if(!petId||!folderUrl)return;
+  const pet=petById(petId);
+  if(pet&&pet.driveFolderUrl===folderUrl)return; // already saved, avoid a redundant sync
+  pets=pets.map(p=>p.id===petId?{...p,driveFolderUrl:folderUrl}:p);
+  save();
+}
 function ownerById(id){return owners.find(o=>o.id===id);}
 
 function computeCost(service,addOns,pet){
@@ -1025,7 +1032,7 @@ function computeCost(service,addOns,pet){
   const behDurAdj=(pet.behaviour||[]).some(t=>BEH_DUR_TRAITS.includes(t))?BEH_DUR_ADD:0;
   return{base,addOnCost,sizeAdj,behAdj,behDurAdj,total:base+sizeAdj+behAdj+addOnCost,duration:Math.max(baseDur+(SIZE_DUR[pet.size]||0)+behDurAdj+addOnDur,15)};
 }
-function mattingCost(mins){return(Number(mins)||0)/60*MATTING_RATE;}
+function mattingCost(mins){return 0;}// De-matting is now billed as a flat add-on fee (see prices["De-matting"]), not per-minute.
 function bkPrice(b){
   const pet=petById(b.petId);
   const cost=computeCost(b.service,b.addOns||[],pet);
@@ -1207,7 +1214,7 @@ function renderPets(){
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${p.lastNote}</div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${p.lastNote}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
@@ -1229,7 +1236,7 @@ function renderClients(){
 
 function renderPricing(){
   const svcRows=SERVICES.map(s=>`<tr><td style="padding:7px 0;font-weight:500">${s}</td><td style="padding:7px 0">${fmtMoney(prices[s]||0)}</td><td style="padding:7px 0;color:#888">${durations[s]||0} min</td><td style="padding:7px 0;text-align:right"><button class="sm" onclick="openPriceModal('${s.replace(/'/g,"\\'")}')">&#9998; Edit</button></td></tr>`).join("");
-  const addOnRows=ADD_ONS.filter(s=>s!=="De-matting").map(s=>`<tr><td style="padding:7px 0;font-weight:500">${s}</td><td style="padding:7px 0">${fmtMoney(prices[s]||0)}</td><td style="padding:7px 0;color:#888">${durations[s]||0} min</td><td style="padding:7px 0;text-align:right"><button class="sm" onclick="openPriceModal('${s.replace(/'/g,"\\'")}')">&#9998; Edit</button></td></tr>`).join("");
+  const addOnRows=ADD_ONS.map(s=>`<tr><td style="padding:7px 0;font-weight:500">${s}</td><td style="padding:7px 0">${fmtMoney(prices[s]||0)}</td><td style="padding:7px 0;color:#888">${durations[s]||0} min</td><td style="padding:7px 0;text-align:right"><button class="sm" onclick="openPriceModal('${s.replace(/'/g,"\\'")}')">&#9998; Edit</button></td></tr>`).join("");
   return`
   <div style="font-size:18px;font-weight:500;margin-bottom:1.25rem">Pricing & duration rules</div>
 
@@ -1269,7 +1276,7 @@ function renderPricing(){
 
   <div class="rule-card">
     <div class="rule-card-title">Matting surcharge</div>
-    <p style="font-size:13px;color:#888">De-matting time is billed at <strong style="color:#1a1a1a">$${MATTING_RATE}/hour</strong>. Select the <strong style="color:#1a1a1a">De-matting</strong> add-on on a booking to reveal the de-matting minutes field — it's added to both the price and the appointment duration automatically.</p>
+    <p style="font-size:13px;color:#888">De-matting is billed as a flat fee (set above, under Add-ons) whenever the <strong style="color:#1a1a1a">De-matting</strong> add-on is selected — not by the hour. The minutes field on a booking still adds that time to the appointment's scheduled duration, it just no longer affects the price.</p>
   </div>`;
 }
 
@@ -1343,8 +1350,10 @@ async function bkPhotoSelected(input,slot){
     const uploadPromise=(async()=>{
       try{
         const base64=compressed.split(",")[1];
+        const petIdNow=Number(document.getElementById("bk-pet")?.value)||null;
+        const petNow=petIdNow?petById(petIdNow):null;
         const res=await fetch(SCRIPT_URL,{method:"POST",
-          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64}),
+          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNow?.name||""}),
           headers:{"Content-Type":"text/plain"}});
         const json=await res.json().catch(()=>({}));
         if(json.ok&&json.url){
@@ -1353,6 +1362,7 @@ async function bkPhotoSelected(input,slot){
           else bkAfterPhoto=json.url;
           renderBkPhotos(slot,"done");
           console.log("Photo uploaded to Drive:",json.url);
+          if(json.folderUrl&&petIdNow)savePetDriveFolder(petIdNow,json.folderUrl);
           // If editing an existing booking, update it now
           if(bkEditing){
             bookings=bookings.map(b=>b.id===bkEditing.id?{...b,[slot+"Photo"]:json.url}:b);
@@ -1533,11 +1543,14 @@ function applyBkCrop(){
     const uploadPromise=(async()=>{
       try{
         const base64=result.split(",")[1];
+        const petIdNow=Number(document.getElementById("bk-pet")?.value)||null;
+        const petNow=petIdNow?petById(petIdNow):null;
         const res=await fetch(SCRIPT_URL,{method:"POST",
-          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64}),
+          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNow?.name||""}),
           headers:{"Content-Type":"text/plain"}});
         const json=await res.json().catch(()=>({}));
         if(json.ok&&json.url){
+          if(json.folderUrl&&petIdNow)savePetDriveFolder(petIdNow,json.folderUrl);
           // Delete the Drive file that existed before this crop
           const preCropUrl=slot==="before"?bkBeforePreCropUrl:bkAfterPreCropUrl;
           deletePhotoFromDrive(preCropUrl);
@@ -1588,15 +1601,21 @@ function openBkModal(b){
   document.querySelectorAll("#modal-booking .bk-postonly").forEach(el=>{el.style.display=isCreate?"none":"";});
   document.querySelectorAll("#modal-booking .bk-core-only").forEach(el=>{el.style.display=isCreate?"":"none";});
   updateBkMattingVisibility();
+  if(b?.petId){petSel.value=b.petId;updateBkOwnerFromPet(b.petId,b.ownerId);}else{updateBkOwnerFromPet("","");}
   renderBkAddons(bkActiveAddons);
   renderBkProducts(bkActiveProducts);
   renderBkBlades(bkActiveBlades);
   renderBkCombs(bkActiveCombs);
   renderBkPhotos();
-  if(b?.petId){petSel.value=b.petId;updateBkOwnerFromPet(b.petId,b.ownerId);}else{updateBkOwnerFromPet("","");}
   updateBkPrice();
   document.getElementById("modal-booking").classList.add("open");
-  petSel.onchange=()=>{updateBkOwnerFromPet(petSel.value,"");updateBkPrice();};
+  petSel.onchange=()=>{
+    updateBkOwnerFromPet(petSel.value,"");
+    const pet=petById(Number(petSel.value));
+    if(!isPoodleBreed(pet?.breed))bkActiveAddons=bkActiveAddons.filter(a=>a!=="Poodle point");
+    renderBkAddons(bkActiveAddons);
+    updateBkPrice();
+  };
   document.getElementById("bk-service").onchange=updateBkPrice;
   document.getElementById("bk-matting").oninput=updateBkPrice;
   document.getElementById("bk-custom").oninput=updateBkPrice;
@@ -1618,8 +1637,12 @@ function updateBkOwnerFromPet(petId,preferOwnerId){
     ownerDisplay.innerHTML=`<select onchange="bkOwnerChanged(this)" style="border:none;background:transparent;padding:0;font-size:13px;width:100%;outline:none">${opts}</select>`;
   }
 }
+function isPoodleBreed(breed){return!!(breed&&breed.toLowerCase().includes("poodle"));}
 function renderBkAddons(active){
-  document.getElementById("bk-addons").innerHTML=ADD_ONS.map(a=>`<button type="button" onclick="toggleAddon('${a}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${active.includes(a)?"var(--teal)":"transparent"};color:${active.includes(a)?"#fff":"#666"};border:${active.includes(a)?"1px solid var(--teal)":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${active.includes(a)?"✓ ":""}${a} (+${fmtMoney(prices[a]||0)})</button>`).join("");
+  const petId=Number(document.getElementById("bk-pet")?.value)||null;
+  const pet=petId?petById(petId):null;
+  const visibleAddOns=ADD_ONS.filter(a=>a!=="Poodle point"||isPoodleBreed(pet?.breed));
+  document.getElementById("bk-addons").innerHTML=visibleAddOns.map(a=>`<button type="button" onclick="toggleAddon('${a}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${active.includes(a)?"var(--teal)":"transparent"};color:${active.includes(a)?"#fff":"#666"};border:${active.includes(a)?"1px solid var(--teal)":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${active.includes(a)?"✓ ":""}${a} (+${fmtMoney(prices[a]||0)})</button>`).join("");
 }
 function renderBkProducts(active){
   const el=document.getElementById("bk-products");if(!el)return;
@@ -2353,8 +2376,10 @@ function applyCrop(){
     _pendingPetPhotoUpload=(async()=>{
       try{
         const base64=ptPhotoData.split(",")[1];
+        const petIdNow=ptEditing?.id||null;
+        const petNameNow=ptEditing?.name||document.getElementById("pt-name")?.value||"";
         const res=await fetch(SCRIPT_URL,{method:"POST",
-          body:JSON.stringify({action:"uploadPhoto",filename:"pet_"+Date.now()+".jpg",mimeType:"image/jpeg",base64}),
+          body:JSON.stringify({action:"uploadPhoto",filename:"pet_"+Date.now()+".jpg",mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNameNow}),
           headers:{"Content-Type":"text/plain"}});
         const json=await res.json().catch(()=>({}));
         if(json.ok&&json.url){
@@ -2362,7 +2387,7 @@ function applyCrop(){
           renderPtPhoto();
           // If editing, immediately persist Drive URL
           if(ptEditing){
-            pets=pets.map(p=>p.id===ptEditing.id?{...p,photo:json.url}:p);
+            pets=pets.map(p=>p.id===ptEditing.id?{...p,photo:json.url,driveFolderUrl:json.folderUrl||p.driveFolderUrl}:p);
             const petPhotos=JSON.parse(localStorage.getItem("pg_petPhotos2")||"{}");
             petPhotos[ptEditing.id]=json.url;
             lss("pg_petPhotos2",petPhotos);
