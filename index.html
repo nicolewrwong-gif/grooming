@@ -189,6 +189,13 @@ tr:hover td{background:#fafbfc}
     </div>
   </div>
 </div>
+<div class="mb10 bk-postonly">
+  <label class="lbl">Additional photo</label>
+  <p style="font-size:11px;color:#888;margin:0 0 6px">Not before/after — just extra shots from this visit, saved straight to the pet's Drive folder.</p>
+  <input type="file" id="bk-extra-photo-input" accept="image/*" style="display:none" onchange="bkExtraPhotoSelected(this)"/>
+  <button type="button" class="sm" onclick="document.getElementById('bk-extra-photo-input').click()">&#128247; Add photo</button>
+  <span id="bk-extra-photo-status" style="font-size:11px;color:#888;margin-left:8px"></span>
+</div>
 <div class="row-end"><button onclick="closeBkModal()">Cancel</button><button class="primary" onclick="saveBkModal()">Save booking</button></div>
 </div>
 </div>
@@ -1013,6 +1020,34 @@ let nextExpId=lsg("pg_nextExpId2",9);
 let emptyProducts=lsg("pg_emptyProducts2",[]);
 
 function petById(id){return pets.find(p=>p.id===id);}
+async function syncBookingToCalendar(b){
+  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return;
+  const pet=petById(b.petId);
+  const owner=owners.find(o=>o.id===b.ownerId);
+  try{
+    const res=await fetch(SCRIPT_URL,{method:"POST",
+      body:JSON.stringify({action:"syncCalendarEvent",data:{
+        eventId:b.calendarEventId||null,
+        petName:pet?.name||"Pet",ownerName:owner?.name||"",ownerPhone:owner?.phone||"",
+        service:b.service,date:b.date,time:b.time,
+        durationMinutes:bkPrice(b).duration,notes:b.notes||""
+      }}),
+      headers:{"Content-Type":"text/plain"}});
+    const json=await res.json().catch(()=>({}));
+    if(json.ok&&json.eventId&&json.eventId!==b.calendarEventId){
+      bookings=bookings.map(x=>x.id===b.id?{...x,calendarEventId:json.eventId}:x);
+      save();
+    }
+  }catch(e){console.error("Calendar sync error:",e.message);}
+}
+async function deleteBookingCalendarEvent(b){
+  if(!b?.calendarEventId||!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return;
+  try{
+    await fetch(SCRIPT_URL,{method:"POST",
+      body:JSON.stringify({action:"deleteCalendarEvent",eventId:b.calendarEventId}),
+      headers:{"Content-Type":"text/plain"}});
+  }catch(e){console.error("Calendar delete error:",e.message);}
+}
 function savePetDriveFolder(petId,folderUrl){
   if(!petId||!folderUrl)return;
   const pet=petById(petId);
@@ -1322,6 +1357,44 @@ function compressPhoto(file,maxW,maxH,quality){
   });
 }
 
+function bookingPhotoFilename(slot){
+  const date=document.getElementById("bk-date")?.value||todayStr();
+  const service=(document.getElementById("bk-service")?.value||"groom").replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
+  return`${date}_${service}_${slot}_${Date.now()}.jpg`;
+}
+async function bkExtraPhotoSelected(input){
+  const file=input.files[0];input.value="";if(!file)return;
+  const petId=Number(document.getElementById("bk-pet")?.value)||null;
+  const pet=petId?petById(petId):null;
+  const statusEl=document.getElementById("bk-extra-photo-status");
+  if(!pet){statusEl.textContent="Pick a pet first.";return;}
+  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE"){statusEl.textContent="Drive sync isn't set up.";return;}
+  statusEl.textContent="Uploading…";
+  let compressed;
+  try{compressed=await compressPhoto(file,1000,1200,0.85);}
+  catch(err){console.error("Photo compress error:",err);statusEl.textContent="Couldn't process that photo.";return;}
+  try{
+    const base64=compressed.split(",")[1];
+    const date=document.getElementById("bk-date")?.value||todayStr();
+    const service=(document.getElementById("bk-service")?.value||"groom").replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
+    const filename=`${date}_${service}.jpg`;
+    const res=await fetch(SCRIPT_URL,{method:"POST",
+      body:JSON.stringify({action:"uploadPhoto",filename,mimeType:"image/jpeg",base64,petId,petName:pet.name}),
+      headers:{"Content-Type":"text/plain"}});
+    const json=await res.json().catch(()=>({}));
+    if(json.ok&&json.url){
+      if(json.folderUrl)savePetDriveFolder(petId,json.folderUrl);
+      statusEl.textContent="Uploaded!";
+      setTimeout(()=>{statusEl.textContent="";},2500);
+    }else{
+      console.error("Extra photo upload failed:",json);
+      statusEl.textContent="Upload failed — try again.";
+    }
+  }catch(e){
+    console.error("Extra photo upload error:",e);
+    statusEl.textContent="Upload failed — try again.";
+  }
+}
 async function bkPhotoSelected(input,slot){
   const file=input.files[0];if(!file)return;
   // Delete the old Drive photo if it's being replaced
@@ -1353,7 +1426,7 @@ async function bkPhotoSelected(input,slot){
         const petIdNow=Number(document.getElementById("bk-pet")?.value)||null;
         const petNow=petIdNow?petById(petIdNow):null;
         const res=await fetch(SCRIPT_URL,{method:"POST",
-          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNow?.name||""}),
+          body:JSON.stringify({action:"uploadPhoto",filename:bookingPhotoFilename(slot),mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNow?.name||""}),
           headers:{"Content-Type":"text/plain"}});
         const json=await res.json().catch(()=>({}));
         if(json.ok&&json.url){
@@ -1546,7 +1619,7 @@ function applyBkCrop(){
         const petIdNow=Number(document.getElementById("bk-pet")?.value)||null;
         const petNow=petIdNow?petById(petIdNow):null;
         const res=await fetch(SCRIPT_URL,{method:"POST",
-          body:JSON.stringify({action:"uploadPhoto",filename:slot+"_"+Date.now()+".jpg",mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNow?.name||""}),
+          body:JSON.stringify({action:"uploadPhoto",filename:bookingPhotoFilename(slot),mimeType:"image/jpeg",base64,petId:petIdNow,petName:petNow?.name||""}),
           headers:{"Content-Type":"text/plain"}});
         const json=await res.json().catch(()=>({}));
         if(json.ok&&json.url){
@@ -1800,12 +1873,15 @@ async function saveBkModal(){
   const customRaw=document.getElementById("bk-custom").value;
   const obj={ownerId,petId,service:document.getElementById("bk-service").value,addOns:[...bkActiveAddons],products:[...bkActiveProducts],blades:[...bkActiveBlades],combs:[...bkActiveCombs],date:document.getElementById("bk-date").value,time:document.getElementById("bk-time").value,status:document.getElementById("bk-status").value,notes:document.getElementById("bk-notes").value,completionNotes:document.getElementById("bk-completionnotes").value,nextnote:document.getElementById("bk-nextnote").value,mattingMinutes:Number(document.getElementById("bk-matting").value)||0,customPrice:customRaw!==""?Number(customRaw):null,discount:false,waived:document.getElementById("bk-waived").checked,paid:document.getElementById("bk-paid").checked,timeSpent:document.getElementById("bk-timespent").value?Number(document.getElementById("bk-timespent").value):null,beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
   if(bkEditing){bookings=bookings.map(b=>b.id===bkEditing.id?{...b,...obj}:b);}else{bookings.push({id:nextId++,...obj});}
+  const savedBk=bkEditing?bookings.find(b=>b.id===bkEditing.id):bookings[bookings.length-1];
   // Clean up any Drive URLs superseded by crops during this session
   deletePhotoFromDrive(bkBeforePreCropUrl);deletePhotoFromDrive(bkAfterPreCropUrl);
   bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
   // Mark current photos as "saved" so closeBkModal doesn't delete them
   bkEditing={...(bkEditing||{}),beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
   save();closeBkModal();render();
+  if(savedBk.status==="cancelled")deleteBookingCalendarEvent(savedBk);
+  else syncBookingToCalendar(savedBk);
 }
 let bkdEditing=null,bkdActiveProducts=[],bkdActiveBlades=[],bkdActiveCombs=[];
 function openBkDetailsModal(id){
@@ -1896,14 +1972,18 @@ function markBkStatus(id,status){
     // full booking editor pre-filled so the groomer can log final details right away.
     bookings=bookings.map(b=>b.id===id?{...b,status:"done"}:b);
     save();render();
+    syncBookingToCalendar(bookings.find(b=>b.id===id));
     _bkCompletionMode=true;
     openBkModal(bookings.find(b=>b.id===id));
     return;
   }
   bookings=bookings.map(b=>b.id===id?{...b,status}:b);save();render();
+  const b=bookings.find(x=>x.id===id);
+  if(status==="cancelled")deleteBookingCalendarEvent(b);
+  else syncBookingToCalendar(b);
 }
 function editBk(id){const b=bookings.find(x=>x.id===id);if(!b)return;openBkModal(b);}
-function deleteBk(id){openConfirm("Delete this booking?","Delete",()=>{bookings=bookings.filter(b=>b.id!==id);save();render();});}
+function deleteBk(id){openConfirm("Delete this booking?","Delete",()=>{const b=bookings.find(x=>x.id===id);bookings=bookings.filter(b=>b.id!==id);save();render();deleteBookingCalendarEvent(b);});}
 function togglePaid(id){bookings=bookings.map(b=>b.id===id?{...b,paid:!b.paid,waived:false}:b);save();render();}
 function waiveBk(id){openConfirm("Waive payment for this booking?","Waive",()=>{bookings=bookings.map(b=>b.id===id?{...b,waived:true,paid:false}:b);save();render();});}
 
