@@ -1226,7 +1226,23 @@ function renderCalendar(){
     if(bks.length>2)bkHtml+=`<div style="font-size:10px;color:#888">+${bks.length-2}</div>`;
     cells+=`<div style="border-radius:8px;padding:5px 4px;min-height:52px;border:${isT?"1.5px solid #1a1a1a":"0.5px solid #eee"}"><div style="font-size:11px;color:#888;font-weight:${isT?500:400};margin-bottom:2px">${d}</div>${bkHtml}</div>`;
   }
-  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px"><button class="sm" onclick="calNavMonth(-1)">&#8249;</button><span style="font-size:14px;font-weight:500;min-width:130px;text-align:center">${MONTHS[m]} ${y}</span><button class="sm" onclick="calNavMonth(1)">&#8250;</button></div><button class="sm" onclick="calGoToday()">Today</button></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div style="text-align:center;font-size:11px;color:#888;padding:4px 0">${d}</div>`).join("")}${cells}</div>`;
+  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px"><div style="display:flex;align-items:center;gap:8px"><button class="sm" onclick="calNavMonth(-1)">&#8249;</button><span style="font-size:14px;font-weight:500;min-width:130px;text-align:center">${MONTHS[m]} ${y}</span><button class="sm" onclick="calNavMonth(1)">&#8250;</button></div><div style="display:flex;gap:8px"><button class="sm" onclick="syncAllBookingsToCalendar()" id="cal-sync-all-btn">&#128260; Sync all to Calendar</button><button class="sm" onclick="calGoToday()">Today</button></div></div><div style="display:grid;grid-template-columns:repeat(7,1fr);gap:3px">${["Mon","Tue","Wed","Thu","Fri","Sat","Sun"].map(d=>`<div style="text-align:center;font-size:11px;color:#888;padding:4px 0">${d}</div>`).join("")}${cells}</div>`;
+}
+async function syncAllBookingsToCalendar(){
+  const btn=document.getElementById("cal-sync-all-btn");
+  const toSync=bookings.filter(b=>b.status!=="cancelled");
+  if(!toSync.length){alert("No bookings to sync.");return;}
+  if(!confirm(`Sync ${toSync.length} booking${toSync.length===1?"":"s"} (past and upcoming) to Google Calendar? This can take a little while.`))return;
+  if(btn){btn.disabled=true;}
+  let done=0;
+  for(const b of toSync){
+    if(btn)btn.textContent=`Syncing… (${done+1}/${toSync.length})`;
+    await syncBookingToCalendar(b);
+    done++;
+  }
+  if(btn){btn.disabled=false;btn.textContent="🔄 Sync all to Calendar";}
+  render();
+  alert(`Done — synced ${done} booking${done===1?"":"s"} to Google Calendar.`);
 }
 function calNavMonth(delta){
   calViewMonth+=delta;
