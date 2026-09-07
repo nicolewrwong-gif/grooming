@@ -146,7 +146,7 @@ tr:hover td{background:#fafbfc}
   <label class="lbl">Products used</label>
   <div id="bk-products" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px"></div>
 </div>
-<div class="mb10 bk-postonly">
+<div class="mb10 bk-postonly" id="bk-blades-wrap">
   <label class="lbl">Blades used</label>
   <div id="bk-blades" class="multi-toggle"></div>
 </div>
@@ -192,7 +192,7 @@ tr:hover td{background:#fafbfc}
 <div class="mb10 bk-postonly">
   <label class="lbl">Additional photo</label>
   <p style="font-size:11px;color:#888;margin:0 0 6px">Not before/after — just extra shots from this visit, saved straight to the pet's Drive folder.</p>
-  <input type="file" id="bk-extra-photo-input" accept="image/*" style="display:none" onchange="bkExtraPhotoSelected(this)"/>
+  <input type="file" id="bk-extra-photo-input" accept="image/*" multiple style="display:none" onchange="bkExtraPhotoSelected(this)"/>
   <button type="button" class="sm" onclick="document.getElementById('bk-extra-photo-input').click()">&#128247; Add photo</button>
   <span id="bk-extra-photo-status" style="font-size:11px;color:#888;margin-left:8px"></span>
 </div>
@@ -1021,7 +1021,7 @@ let emptyProducts=lsg("pg_emptyProducts2",[]);
 
 function petById(id){return pets.find(p=>p.id===id);}
 async function syncBookingToCalendar(b){
-  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return;
+  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return false;
   const pet=petById(b.petId);
   const owner=owners.find(o=>o.id===b.ownerId);
   try{
@@ -1034,18 +1034,25 @@ async function syncBookingToCalendar(b){
       }}),
       headers:{"Content-Type":"text/plain"}});
     const json=await res.json().catch(()=>({}));
-    if(json.ok&&json.eventId&&json.eventId!==b.calendarEventId){
-      bookings=bookings.map(x=>x.id===b.id?{...x,calendarEventId:json.eventId}:x);
-      save();
+    if(json.ok&&json.eventId){
+      if(json.eventId!==b.calendarEventId){
+        bookings=bookings.map(x=>x.id===b.id?{...x,calendarEventId:json.eventId}:x);
+        save();
+      }
+      return true;
     }
-  }catch(e){console.error("Calendar sync error:",e.message);}
+    console.error("Calendar sync failed for booking",b.id,":",json.error||json);
+    return false;
+  }catch(e){console.error("Calendar sync error:",e.message);return false;}
 }
 async function deleteBookingCalendarEvent(b){
   if(!b?.calendarEventId||!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return;
   try{
-    await fetch(SCRIPT_URL,{method:"POST",
+    const res=await fetch(SCRIPT_URL,{method:"POST",
       body:JSON.stringify({action:"deleteCalendarEvent",eventId:b.calendarEventId}),
       headers:{"Content-Type":"text/plain"}});
+    const json=await res.json().catch(()=>({}));
+    if(!json.ok)console.error("Calendar delete failed for booking",b.id,":",json.error||json);
   }catch(e){console.error("Calendar delete error:",e.message);}
 }
 function savePetDriveFolder(petId,folderUrl){
@@ -1234,15 +1241,19 @@ async function syncAllBookingsToCalendar(){
   if(!toSync.length){alert("No bookings to sync.");return;}
   if(!confirm(`Sync ${toSync.length} booking${toSync.length===1?"":"s"} (past and upcoming) to Google Calendar? This can take a little while.`))return;
   if(btn){btn.disabled=true;}
-  let done=0;
+  let succeeded=0,failed=0;
   for(const b of toSync){
-    if(btn)btn.textContent=`Syncing… (${done+1}/${toSync.length})`;
-    await syncBookingToCalendar(b);
-    done++;
+    if(btn)btn.textContent=`Syncing… (${succeeded+failed+1}/${toSync.length})`;
+    const ok=await syncBookingToCalendar(b);
+    if(ok)succeeded++;else failed++;
   }
   if(btn){btn.disabled=false;btn.textContent="🔄 Sync all to Calendar";}
   render();
-  alert(`Done — synced ${done} booking${done===1?"":"s"} to Google Calendar.`);
+  if(failed){
+    alert(`Synced ${succeeded} of ${toSync.length} bookings. ${failed} failed — check the browser console (F12 → Console) for the specific error, or ask me for help with what it says.`);
+  }else{
+    alert(`Done — synced ${succeeded} booking${succeeded===1?"":"s"} to Google Calendar.`);
+  }
 }
 function calNavMonth(delta){
   calViewMonth+=delta;
@@ -1379,36 +1390,46 @@ function bookingPhotoFilename(slot){
   return`${date}_${service}_${slot}_${Date.now()}.jpg`;
 }
 async function bkExtraPhotoSelected(input){
-  const file=input.files[0];input.value="";if(!file)return;
+  const files=Array.from(input.files||[]);input.value="";if(!files.length)return;
   const petId=Number(document.getElementById("bk-pet")?.value)||null;
   const pet=petId?petById(petId):null;
   const statusEl=document.getElementById("bk-extra-photo-status");
   if(!pet){statusEl.textContent="Pick a pet first.";return;}
   if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE"){statusEl.textContent="Drive sync isn't set up.";return;}
-  statusEl.textContent="Uploading…";
-  let compressed;
-  try{compressed=await compressPhoto(file,1000,1200,0.85);}
-  catch(err){console.error("Photo compress error:",err);statusEl.textContent="Couldn't process that photo.";return;}
-  try{
-    const base64=compressed.split(",")[1];
-    const date=document.getElementById("bk-date")?.value||todayStr();
-    const service=(document.getElementById("bk-service")?.value||"groom").replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
-    const filename=`${date}_${service}.jpg`;
-    const res=await fetch(SCRIPT_URL,{method:"POST",
-      body:JSON.stringify({action:"uploadPhoto",filename,mimeType:"image/jpeg",base64,petId,petName:pet.name}),
-      headers:{"Content-Type":"text/plain"}});
-    const json=await res.json().catch(()=>({}));
-    if(json.ok&&json.url){
-      if(json.folderUrl)savePetDriveFolder(petId,json.folderUrl);
-      statusEl.textContent="Uploaded!";
-      setTimeout(()=>{statusEl.textContent="";},2500);
-    }else{
-      console.error("Extra photo upload failed:",json);
-      statusEl.textContent="Upload failed — try again.";
+  const date=document.getElementById("bk-date")?.value||todayStr();
+  const service=(document.getElementById("bk-service")?.value||"groom").replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"");
+  let uploaded=0,failed=0;
+  for(let i=0;i<files.length;i++){
+    statusEl.textContent=files.length>1?`Uploading ${i+1}/${files.length}…`:"Uploading…";
+    let compressed;
+    try{compressed=await compressPhoto(files[i],1000,1200,0.85);}
+    catch(err){console.error("Photo compress error:",err);failed++;continue;}
+    try{
+      const base64=compressed.split(",")[1];
+      // Only add a -2, -3... suffix when uploading more than one at once, so a single
+      // photo still gets the plain {date}_{service}.jpg name as before.
+      const filename=files.length>1?`${date}_${service}-${i+1}.jpg`:`${date}_${service}.jpg`;
+      const res=await fetch(SCRIPT_URL,{method:"POST",
+        body:JSON.stringify({action:"uploadPhoto",filename,mimeType:"image/jpeg",base64,petId,petName:pet.name}),
+        headers:{"Content-Type":"text/plain"}});
+      const json=await res.json().catch(()=>({}));
+      if(json.ok&&json.url){
+        if(json.folderUrl)savePetDriveFolder(petId,json.folderUrl);
+        uploaded++;
+      }else{
+        console.error("Extra photo upload failed:",json);
+        failed++;
+      }
+    }catch(e){
+      console.error("Extra photo upload error:",e);
+      failed++;
     }
-  }catch(e){
-    console.error("Extra photo upload error:",e);
-    statusEl.textContent="Upload failed — try again.";
+  }
+  if(failed){
+    statusEl.textContent=`Uploaded ${uploaded}, ${failed} failed — try again.`;
+  }else{
+    statusEl.textContent=uploaded>1?`Uploaded ${uploaded} photos!`:"Uploaded!";
+    setTimeout(()=>{statusEl.textContent="";},2500);
   }
 }
 async function bkPhotoSelected(input,slot){
@@ -1806,6 +1827,13 @@ function updateBkMattingVisibility(){
   wrap.style.display=show?"":"none";
   if(!show)document.getElementById("bk-matting").value=0;
 }
+function updateBkBladesVisibility(){
+  const wrap=document.getElementById("bk-blades-wrap");if(!wrap)return;
+  const service=document.getElementById("bk-service")?.value||"";
+  const hide=service==="Bath & brush";
+  wrap.style.display=hide?"none":"";
+  if(hide&&bkActiveBlades.length){bkActiveBlades=[];renderBkBlades(bkActiveBlades);}
+}
 function toggleAddon(a){
   if(bkActiveAddons.includes(a))bkActiveAddons=bkActiveAddons.filter(x=>x!==a);else bkActiveAddons.push(a);
   // Auto-link: toggling the deshed addon syncs the David deshed rinse product
@@ -1833,6 +1861,7 @@ function toggleProduct(p){
 function bkOwnerChanged(sel){document.getElementById("bk-owner").value=sel.value;updateBkPrice();}
 function renderBkPets(ownerId,selPetId){/* legacy no-op */}
 function updateBkPrice(){
+  updateBkBladesVisibility();
   const svc=document.getElementById("bk-service").value;
   const petId=Number(document.getElementById("bk-pet").value);
   const pet=petById(petId);
