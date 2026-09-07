@@ -1020,6 +1020,46 @@ let nextExpId=lsg("pg_nextExpId2",9);
 let emptyProducts=lsg("pg_emptyProducts2",[]);
 
 function petById(id){return pets.find(p=>p.id===id);}
+function isDrivePhotoUrl(url){return typeof url==="string"&&url.includes("googleusercontent.com/d/");}
+async function movePhotoToPetFolder(url,petId,petName){
+  if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return false;
+  try{
+    const res=await fetch(SCRIPT_URL,{method:"POST",
+      body:JSON.stringify({action:"movePhoto",url,petId,petName}),
+      headers:{"Content-Type":"text/plain"}});
+    const json=await res.json().catch(()=>({}));
+    if(json.ok){
+      if(json.folderUrl)savePetDriveFolder(petId,json.folderUrl);
+      return true;
+    }
+    console.error("Move photo failed:",json.error||json);
+    return false;
+  }catch(e){console.error("Move photo error:",e.message);return false;}
+}
+// One-time, silent background cleanup: moves any before/after/profile photos still
+// sitting in the flat root Drive folder (from before per-pet subfolders existed) into
+// their pet's folder. Runs once per browser (tracked via localStorage), then never
+// again — every upload going forward already lands in the right folder on its own.
+async function autoOrganizePhotosOnce(){
+  if(localStorage.getItem("pg_photosOrganized"))return;
+  const jobs=[];
+  bookings.forEach(b=>{
+    if(!b.petId)return;
+    const pet=petById(b.petId);if(!pet)return;
+    if(isDrivePhotoUrl(b.beforePhoto))jobs.push({url:b.beforePhoto,petId:pet.id,petName:pet.name});
+    if(isDrivePhotoUrl(b.afterPhoto))jobs.push({url:b.afterPhoto,petId:pet.id,petName:pet.name});
+  });
+  pets.forEach(p=>{if(isDrivePhotoUrl(p.photo))jobs.push({url:p.photo,petId:p.id,petName:p.name});});
+  if(!jobs.length){localStorage.setItem("pg_photosOrganized","1");return;}
+  console.log(`Organizing ${jobs.length} existing photo(s) into pet folders in the background…`);
+  let moved=0,failed=0;
+  for(const job of jobs){
+    const ok=await movePhotoToPetFolder(job.url,job.petId,job.petName);
+    if(ok)moved++;else failed++;
+  }
+  console.log(`Photo organizing done: ${moved} moved, ${failed} failed.`);
+  localStorage.setItem("pg_photosOrganized","1");
+}
 async function syncBookingToCalendar(b){
   if(!SCRIPT_URL||SCRIPT_URL==="YOUR_APPS_SCRIPT_URL_HERE")return false;
   const pet=petById(b.petId);
@@ -2297,6 +2337,7 @@ loadFromSheets().then(loaded=>{
   render();
   document.body.style.opacity="1";
   checkIntake();
+  autoOrganizePhotosOnce();
 }).catch(()=>{
   // Same: don't wipe data on error, just render local
   setSyncStatus("⚠️ Loaded from local cache");
