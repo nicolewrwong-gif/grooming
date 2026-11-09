@@ -141,6 +141,76 @@ tr:hover td{background:#fafbfc}
 .rule-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
 .rule-card-title{font-size:14px;font-weight:600;margin-bottom:0.5rem;color:var(--navy)}
 .rule-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-right:5px;margin-bottom:5px}
+.mg-hdr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+.mg-hdr div{font-size:10px;text-transform:uppercase;letter-spacing:.05em;color:#888;font-weight:600;padding-left:2px}
+.mg-field{margin-bottom:12px}
+.mg-lbl{font-size:12px;font-weight:600;margin-bottom:4px}
+.mg-row2{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.mg-cell{border:1.5px solid var(--border);border-radius:10px;padding:9px 10px;font-size:13px;min-height:40px;display:flex;align-items:center;line-height:1.3;cursor:pointer;white-space:pre-wrap;word-break:break-word}
+.mg-cell.on{border-color:#00A99D;background:#E6F7F6;font-weight:500}
+.mg-bars{display:grid;gap:8px;margin-top:6px}
+.mg-bar{border:1.5px dashed #d0d0d0;border-radius:10px;padding:7px 10px;font-size:12px;color:#666;text-align:center;cursor:pointer}
+.mg-bar.on{border:1.5px solid #00A99D;background:#E6F7F6;color:#006B63;font-weight:500}
+.mg-input{width:100%;margin-top:6px;border:1.5px solid #00A99D;border-radius:10px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;background:#fff}
+.mg-cw{position:relative;display:flex;border:1.5px solid var(--border);border-radius:10px;cursor:pointer}
+.mg-cw.on{border-color:#00A99D;background:#E6F7F6}
+.mg-cw:focus-within{box-shadow:0 0 0 2px rgba(0,169,157,.35)}
+.mg-cw.on::after{content:"\270E";position:absolute;right:8px;top:6px;font-size:11px;color:#00A99D;pointer-events:none}
+.mg-edit{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:13px;line-height:1.3;padding:9px 22px 9px 10px;min-height:38px;resize:none;overflow:hidden;outline:none;cursor:pointer;color:inherit;width:100%}
+.mg-presets{display:flex;align-items:center;gap:6px;margin-bottom:14px}
+.mg-presets span{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-right:2px}
+.mg-pbtn{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:9px;padding:7px 4px;font-size:12px;font-weight:500;cursor:pointer;background:#fff}
+.mg-pbtn:active{background:#E6F7F6;border-color:#00A99D}
+#mg-sub{display:none}
+.f{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+.f:last-child{border-bottom:none}
+.fl{font-size:12px;color:var(--text-muted)}
+.vv{font-size:13px;word-break:break-word;white-space:pre-wrap;line-height:1.3}
+.vv em{font-style:normal;color:#aaa;display:inline-block;vertical-align:-2px;margin:0 2px}
+.vv .ev{outline:none;border-radius:4px}
+.vv .ev:focus{box-shadow:0 0 0 2px rgba(0,169,157,0.25)}
+.seg{display:grid;grid-template-columns:1fr 1fr 1fr;border:1px solid var(--border);border-radius:10px;overflow:hidden;margin-top:5px}
+.seg span{padding:5px 2px;font-size:11.5px;text-align:center;font-weight:600;color:var(--text-muted);cursor:pointer;transition:all .15s}
+.seg span+span{border-left:1px solid var(--border)}
+.seg span:hover{background:var(--bg)}
+.seg span.on{background:var(--teal);color:#fff}
+.seg span.off{opacity:.4;cursor:default;background:none}
+.mo{display:flex;gap:12px;align-items:center;padding:.6rem 1rem;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:6px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:all .15s}
+.mo:hover{border-color:var(--teal)}
+.mo.on{border-color:var(--teal);background:var(--teal-bg);box-shadow:0 0 0 3px rgba(0,169,157,0.12)}
+.mo.on small{color:var(--teal-dark);font-weight:600}
+.mo-ic{font-size:20px;width:24px;text-align:center;flex-shrink:0}
+.mo-t{flex:1;min-width:0}
+.mo-t small{display:block;font-size:11px;color:var(--text-muted);line-height:1.2;font-weight:500;letter-spacing:.02em}
+.mo-t b{display:block;font-size:13px;font-weight:500;white-space:pre-wrap;word-break:break-word;line-height:1.3;margin-top:1px;color:var(--text)}
+.mo .mg-edit{padding:0;min-height:0;font-size:13px;font-weight:500;margin-top:1px}
+.mo.on .mg-edit{cursor:text}
+.mo-fld{margin-bottom:14px}
+.mo-fld>.mg-lbl{font-size:11px;font-weight:600;margin:0 0 5px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted)}
+.mo-all{padding-bottom:10px;margin-bottom:14px;border-bottom:1px solid #e3e3e3}
+.mo-all .mo{padding:7px 12px}
+.mo-all .mg-lbl{font-size:12px;color:#888;margin-bottom:4px}
+.dup-sub{font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.4}
+.dup-blue{color:var(--blue);font-weight:600}
+.dup-q{font-size:14px;font-weight:600;line-height:1.3;margin-bottom:12px;color:var(--navy)}
+.dup-opt{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;transition:all .15s;color:var(--navy)}
+.dup-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
+.dup-trio .dup-opt{margin-bottom:0;text-align:center;padding:.9rem .4rem}
+.dup-trio .dup-opt:last-child{border-color:var(--teal)}
+.dup-trio .dup-opt:last-child b{color:var(--teal-dark)}
+.dup-opt:hover{border-color:var(--teal);background:var(--teal-bg)}
+.dup-opt:active{background:var(--teal-bg);border-color:var(--teal-dark)}
+.dup-ic{font-size:24px;width:28px;text-align:center;flex-shrink:0}
+.dup-opt b{display:block;font-size:13px;font-weight:600}
+.dup-opt small{display:block;font-size:12px;color:#666;margin-top:2px;line-height:1.3}
+.dup-more{margin-top:4px;padding:6px 2px;font-size:12px;color:var(--text-muted);cursor:pointer;font-weight:500}
+.dup-more span{display:inline-block;margin-right:8px;transition:transform .15s}
+.dup-more.open span{transform:rotate(180deg)}
+#dup-details{display:block;padding-bottom:8px}
+#dup-details.open{display:block}
+.dup-grid{display:grid;grid-template-columns:70px 1fr 1fr;gap:6px 10px;font-size:12.5px;word-break:break-word;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px}
+.dup-h{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600}
+.dup-l{color:var(--text-muted)}
 </style>
 <script>
 if("serviceWorker" in navigator){
@@ -349,6 +419,23 @@ if("serviceWorker" in navigator){
 <p style="font-size:12.5px;color:#888;margin:-6px 0 12px">New clients and pets from the intake form. Check consent, edit anything that needs it, then mark reviewed.</p>
 <div id="intake-review-list"></div>
 <div class="row-end"><button onclick="closeIntakeReviewModal()">Close</button></div>
+</div>
+</div>
+
+<div id="modal-merge" class="modal-bg" style="z-index:60">
+<div class="modal" style="width:460px">
+<h2 id="mg-title">Merge</h2>
+<p id="mg-sub" class="dup-sub"></p>
+<div id="mg-body"></div>
+<div class="row-end"><button onclick="closeMergeModal()">Cancel</button><button class="primary" onclick="applyMerge()">Merge</button></div>
+</div>
+</div>
+
+<div id="modal-dup" class="modal-bg" style="z-index:70">
+<div class="modal" style="width:420px">
+<h2>Duplicate found</h2>
+<div id="dup-body"></div>
+<div class="row-end"><button onclick="closeDupDialog()">Back</button></div>
 </div>
 </div>
 
@@ -954,13 +1041,254 @@ async function checkIntake(){
   }catch(e){console.error("checkIntake error:",e.message);}
   updateIntakeBanner();
 }
+
+// ── Duplicate suggestions for intake review (suggest only; you confirm each merge) ──
+function _normName(x){return String(x||"").toLowerCase().replace(/[^a-z0-9]/g,"");}
+function _digits(x){return String(x||"").replace(/\D/g,"");}
+function ownersMatch_(a,b){
+  if(!a||!b||a.id===b.id)return false;
+  const da=_digits(a.phone),db=_digits(b.phone);
+  if(da.length>=8&&db.length>=8&&da.slice(-8)===db.slice(-8))return true;
+  if(a.email&&b.email&&a.email.trim().toLowerCase()===b.email.trim().toLowerCase())return true;
+  const na=_normName(a.name);
+  return !!na&&na===_normName(b.name);
+}
+function findOwnerMatch(o){
+  const c=owners.filter(x=>ownersMatch_(o,x));
+  return c.find(x=>!x.needsReview)||c[0]||null;
+}
+function findPetMatch(p){
+  const nm=_normName(p.name);
+  if(!nm||nm==="unknown")return null;
+  const mine=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);
+  const c=pets.filter(q=>{
+    if(q.id===p.id||_normName(q.name)!==nm)return false;
+    return (q.ownerIds||[]).some(id=>{
+      if((p.ownerIds||[]).includes(id))return true;
+      const qo=owners.find(o=>o.id===id);
+      return qo&&mine.some(m=>ownersMatch_(m,qo));
+    });
+  });
+  return c.find(q=>!q.needsReview)||c[0]||null;
+}
+function dupBox_(msg,kind,fromId,intoId){
+  return `<div style="margin-top:8px;background:#FFF3CD;border-radius:8px;padding:8px;font-size:11px;color:#92620A"><div>${msg}</div><button class="sm" onclick="openDupDialog('${kind}',${fromId},${intoId})" style="margin-top:6px;width:100%;background:#92620A;color:#fff;border-color:#92620A;font-size:11px;padding:5px 2px">Resolve&hellip;</button></div>`;
+}
+function petDupHtml_(p,owner){
+  let h="";
+  const om=owner?findOwnerMatch(owner):null;
+  if(om)h+=dupBox_(`Owner may already exist: <strong>${om.name}</strong>${om.phone?" &middot; "+om.phone:""}`,"owner",owner.id,om.id);
+  const pm=findPetMatch(p);
+  if(pm){
+    const po=owners.filter(o=>(pm.ownerIds||[]).includes(o.id)).map(o=>o.name).join(", ");
+    h+=dupBox_(`Pet may already exist: <strong>${pm.name}</strong> &middot; ${displayBreed(pm.breed,pm.oodleName)}${po?" (owner "+po+")":""}`,"pet",p.id,pm.id);
+  }
+  return h;
+}
+function ownerDupHtml_(o){
+  const om=findOwnerMatch(o);
+  return om?dupBox_(`May already exist: <strong>${om.name}</strong>${om.phone?" &middot; "+om.phone:""}`,"owner",o.id,om.id):"";
+}
+function countIntakeDupes_(){
+  const rp=pets.filter(p=>p.needsReview);
+  const linked=new Set(rp.flatMap(p=>p.ownerIds||[]));
+  let n=0;
+  rp.forEach(p=>{const ow=owners.find(o=>(p.ownerIds||[]).includes(o.id));if((ow&&findOwnerMatch(ow))||findPetMatch(p))n++;});
+  owners.filter(o=>o.needsReview&&!linked.has(o.id)).forEach(o=>{if(findOwnerMatch(o))n++;});
+  return n;
+}
+// ── Merge screen: you pick what to keep, field by field ──
+const MG_PET_FIELDS=[
+  {k:"breed",l:"Breed",t:"text"},
+  {k:"age",l:"Age",t:"age"},
+  {k:"sex",l:"Sex",t:"text"},
+  {k:"desexed",l:"Desexed",t:"bool",show:r=>r.desexed?"Yes":"No"},
+  {k:"size",l:"Size",t:"text"},
+  {k:"treatsOk",l:"Treats",t:"bool",show:r=>r.treatsOk===false?"No treats":"Treats OK"},
+  {k:"behaviour",l:"Behaviour",t:"tags"},
+  {k:"medicalTags",l:"Medical",t:"tags"},
+  {k:"medicalNotes",l:"Medical notes",t:"note"},
+  {k:"customAllergies",l:"Other allergies",t:"note"},
+  {k:"customSpecialHandling",l:"Special handling",t:"note"},
+  {k:"lastNote",l:"Notes",t:"note"},
+  {k:"consent",l:"Consent",t:"consent"}
+];
+const MG_OWNER_FIELDS=[
+  {k:"name",l:"Name",t:"text",edit:true},
+  {k:"phone",l:"Phone",t:"text",edit:true},
+  {k:"email",l:"Email",t:"text",edit:true},
+  {k:"contact",l:"Preferred contact",t:"text"},
+  {k:"notes",l:"Notes",t:"note"}
+];
+let _mg=null;
+function _mgEsc(x){return String(x).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));}
+function _mgVal(f,r){
+  if(f.t==="age")return r.dob?fmtAge(r.dob,r.approxAge):"";
+  if(f.t==="bool")return f.show(r);
+  if(f.t==="tags")return (r[f.k]||[]).join(", ");
+  if(f.t==="consent")return r.consentSigned?`Signed by ${r.consentSignature||"?"}${r.consentDate?" on "+r.consentDate:""}`:"";
+  if(f.k==="breed")return displayBreed(r.breed,r.oodleName)||"";
+  return String(r[f.k]==null?"":r[f.k]).trim();
+}
+function mgBuild_(kind,fromId,intoId){
+  const list=kind==="pet"?pets:owners;
+  const f=list.find(x=>x.id===fromId),t=list.find(x=>x.id===intoId);if(!f||!t)return false;
+  const fields=kind==="pet"?MG_PET_FIELDS:MG_OWNER_FIELDS;
+  // Only ask about fields where the new entry has something different to offer
+  const rows=fields.map(fd=>({fd,ev:_mgVal(fd,t),nv:_mgVal(fd,f)}))
+    .filter(r=>{
+      if(!r.nv)return false;
+      if(r.fd.k==="phone"){const a=_digits(r.ev),b=_digits(r.nv);if(a.length>=8&&b.length>=8&&a.slice(-8)===b.slice(-8))return false;}
+      return r.nv.toLowerCase()!==r.ev.toLowerCase();
+    });
+  // If the existing profile is blank for a field, fill it from the new entry automatically; only ask when both have a value
+  const auto=rows.filter(r=>!r.ev);
+  rows.splice(0,rows.length,...rows.filter(r=>r.ev));
+  _mg={kind,fromId,intoId,rows,auto};
+  _mg.t=t;_mg.sel=rows.map(()=>"existing");_mg.ev=rows.map(r=>String(t[r.fd.k]==null?"":t[r.fd.k]));_mg.nv=rows.map(r=>String(f[r.fd.k]==null?"":f[r.fd.k]));
+  return true;
+}
+function openMerge_(kind,fromId,intoId){
+  if(!mgBuild_(kind,fromId,intoId))return;
+  const rows=_mg.rows,t=_mg.t;
+  const f=(kind==="pet"?pets:owners).find(x=>x.id===fromId);
+  document.getElementById("mg-title").textContent=kind==="pet"?"Merge pets":"Merge owners";
+  document.getElementById("mg-sub").innerHTML=
+    `Comparing <span class="dup-blue">${_mgEsc(t.name)}</span> (existing) with <span class="dup-blue">${_mgEsc(f.name)}</span> (new). Pick what to keep for each field. You can edit the text directly.`;
+  let h="";
+  if(!rows.length)h=`<p style="font-size:13px;color:#888;padding:10px 0">Nothing to decide, no details conflict. Merging will just remove the duplicate${kind==="pet"?" and move any bookings across":""}.</p>`;
+  else h=rows.map((r,i)=>mgField_(i)).join("");
+  document.getElementById("mg-body").innerHTML=h;
+  document.getElementById("modal-merge").classList.add("open");
+  document.querySelectorAll("#mg-body .mg-edit").forEach(mgAutosize_);
+}
+function mgAutosize_(el){el.style.height="auto";el.style.height=el.scrollHeight+"px";}
+function mgField_(i){
+  const r=_mg.rows[i],fd=r.fd,sel=_mg.sel[i];
+  const canBoth=fd.t==="note"||fd.t==="tags";
+  const canEdit=fd.t==="note"||fd.edit;
+  const val=(v,txt)=>canEdit?`<span class="ev" contenteditable="plaintext-only" oninput="mgTypeC(${i},'${v}',this)">${_mgEsc(v==="existing"?_mg.ev[i]:_mg.nv[i])}</span>`:`<span>${_mgEsc(txt)}</span>`;
+  const seg=(v,l,off)=>`<span data-s="${v}" class="${sel===v?"on":""}${off?" off":""}"${off?"":` onclick="mgPick(${i},'${v}')"`}>${l}</span>`;
+  return `<div class="f" id="mgf_${i}"><div class="fl">${fd.l}</div><div><div class="vv">${val("existing",r.ev)} <em><svg class="swp" viewBox="0 0 16 16" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M2 5h11M10 2l3 3-3 3M14 11H3M6 8l-3 3 3 3"/></svg></em> ${val("new",r.nv)}</div><div class="seg">${seg("existing","Keep old")}${seg("new","Replace")}${seg("both","Merge",!canBoth)}</div></div></div>`;
+}
+function mgTypeC(i,side,el){
+  const v=el.textContent;
+  if(side==="existing")_mg.ev[i]=v;else _mg.nv[i]=v;
+  if(_mg.sel[i]!==side)mgPick(i,side);
+}
+function mgPick(i,v){
+  if(!_mg)return;
+  _mg.sel[i]=v;
+  document.querySelectorAll("#mgf_"+i+" [data-s]").forEach(el=>el.classList.toggle("on",el.dataset.s===v));
+}
+function mgSetAll(mode){
+  if(!_mg)return;
+  _mg.rows.forEach((r,i)=>{
+    const canBoth=r.fd.t==="note"||r.fd.t==="tags";
+    mgPick(i,mode==="replace"?"new":mode==="merge"&&canBoth?"both":"existing");
+  });
+}
+function mgRun_(kind,fromId,intoId,mode){
+  if(!mgBuild_(kind,fromId,intoId))return;
+  _mg.mode=mode;
+  if(mode==="old"){_mg.sel=_mg.rows.map(()=>"existing");_mg.auto=[];}
+  else _mg.sel=_mg.rows.map(()=>"new");
+  applyMerge();
+}
+// ── "Replace or Skip"-style duplicate popup ──
+let _dup=null;
+function openDupDialog(kind,fromId,intoId){
+  const list=kind==="pet"?pets:owners;
+  const f=list.find(x=>x.id===fromId),t=list.find(x=>x.id===intoId);if(!f||!t)return;
+  _dup={kind,fromId,intoId};
+  const noun=kind==="pet"?"pet":"owner";
+  const on=r=>owners.filter(o=>(r.ownerIds||[]).includes(o.id)).map(o=>o.name).join(", ")||"—";
+  const rows=kind==="pet"
+    ?[["Name",t.name,f.name],["Breed",displayBreed(t.breed,t.oodleName)||"—",displayBreed(f.breed,f.oodleName)||"—"],["Owner",on(t),on(f)],["Size",t.size||"—",f.size||"—"],["Consent",t.consentSigned?"Signed":"Not signed",f.consentSigned?"Signed":"Not signed"]]
+    :[["Name",t.name,f.name],["Phone",t.phone||"—",f.phone||"—"],["Email",t.email||"—",f.email||"—"],["Contact",t.contact||"—",f.contact||"—"]];
+  const opt=(mode,ic,col,title,sub)=>`<div class="dup-opt" onclick="dupChoose('${mode}')"><span><b>${title}</b></span></div>`;
+  document.getElementById("dup-body").innerHTML=
+    `<div class="dup-q">This ${noun} looks like a duplicate of ${_mgEsc(t.name)}.</div>
+     <div class="dup-trio">${opt("replace","","","Replace","")}${opt("old","","","Keep old","")}${opt("merge","","","Merge","")}</div>
+     <div id="dup-details" class="open" style="margin-top:12px"><div class="dup-grid"><div></div><div class="dup-h">Existing</div><div class="dup-h">New</div>${rows.map(r=>`<div class="dup-l">${r[0]}</div><div>${_mgEsc(r[1])}</div><div>${_mgEsc(r[2])}</div>`).join("")}</div></div>`;
+  document.getElementById("modal-dup").classList.add("open");
+}
+function closeDupDialog(){document.getElementById("modal-dup").classList.remove("open");_dup=null;}
+function dupChoose(mode){
+  const d=_dup;if(!d)return;
+  closeDupDialog();
+  if(mode==="merge")openMerge_(d.kind,d.fromId,d.intoId);
+  else mgRun_(d.kind,d.fromId,d.intoId,mode);
+}
+function mgTap(i,side,el){
+  if(_mg.sel[i]!==side){mgPick(i,side);return;}   // first tap selects (no keyboard)
+  el.readOnly=false;el.focus();                    // tap again to edit
+  el.setSelectionRange(el.value.length,el.value.length);
+}
+function mgType(i,side,el){
+  if(side==="existing")_mg.ev[i]=el.value;else _mg.nv[i]=el.value;
+  mgAutosize_(el);
+  if(_mg.sel[i]!==side)mgPick(i,side);
+}
+function mgBack(){const m=_mg;closeMergeModal();if(m)openDupDialog(m.kind,m.fromId,m.intoId);}
+function closeMergeModal(){document.getElementById("modal-merge").classList.remove("open");_mg=null;}
+function mergeOwnersPrompt(fromId,intoId){openMerge_("owner",fromId,intoId);}
+function mergePetsPrompt(fromId,intoId){openMerge_("pet",fromId,intoId);}
+function applyMerge(){
+  if(!_mg)return;
+  const {kind,fromId,intoId,rows}=_mg;
+  const list=kind==="pet"?pets:owners;
+  const f=list.find(x=>x.id===fromId),t=list.find(x=>x.id===intoId);
+  if(!f||!t){closeMergeModal();return;}
+  const uni=(a,b)=>[...new Set([...(a||[]),...(b||[])])];
+  const both=(a,b)=>{a=a||"";b=b||"";return(b&&!a.includes(b))?[a,b].filter(Boolean).join("\n"):a;};
+  const m={...t};
+  const applyChoice=(r,c,idx)=>{
+    const k=r.fd.k,ty=r.fd.t;
+    if(idx!=null&&(ty==="note"||r.fd.edit)){   // typeable fields: use the (possibly edited) text of the chosen box
+      const E=_mg.ev[idx],N=_mg.nv[idx];
+      const v=String(c==="new"?N:c==="both"?both(E,N):E).trim();
+      if(v||ty==="note")m[k]=v;
+      return;
+    }
+    if(c==="existing")return;
+    if(ty==="age"){m.dob=f.dob;m.approxAge=f.approxAge;}
+    else if(ty==="consent"){m.consentSigned=f.consentSigned;m.consentSignature=f.consentSignature;m.consentDate=f.consentDate;}
+    else if(ty==="tags"){m[k]=c==="both"?uni(t[k],f[k]):[...(f[k]||[])];}
+    else if(ty==="note"){m[k]=c==="both"?both(t[k],f[k]):f[k];}
+    else m[k]=f[k];
+  };
+  (_mg.auto||[]).forEach(r=>applyChoice(r,"new"));
+  rows.forEach((r,i)=>applyChoice(r,_mg.sel[i]||"existing",i));
+  if(kind==="owner"){
+    owners=owners.filter(o=>o.id!==fromId).map(o=>o.id===intoId?m:o);
+    pets=pets.map(pt=>(pt.ownerIds||[]).includes(fromId)?{...pt,ownerIds:[...new Set(pt.ownerIds.map(id=>id===fromId?intoId:id))]}:pt);
+    bookings=bookings.map(b=>b.ownerId===fromId?{...b,ownerId:intoId}:b);
+  }else{
+    // Photos from both profiles are always kept
+    m.photos=uni(t.photos,f.photos);
+    if(!m.photo&&f.photo)m.photo=f.photo;
+    // Link owners from the new entry, skipping any who duplicate an owner already on the existing pet
+    const tOwners=(t.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);
+    const add=_mg.mode==="old"?[]:(f.ownerIds||[]).filter(id=>{
+      if((t.ownerIds||[]).includes(id))return false;
+      const o=owners.find(x=>x.id===id);
+      return o&&!tOwners.some(x=>ownersMatch_(o,x));
+    });
+    m.ownerIds=[...(t.ownerIds||[]),...add];
+    pets=pets.filter(pt=>pt.id!==fromId).map(pt=>pt.id===intoId?m:pt);
+    bookings=bookings.map(b=>b.petId===fromId?{...b,petId:intoId}:b);
+  }
+  closeMergeModal();
+  save();render();renderIntakeReviewModal();
+}
 function updateIntakeBanner(){
   const el=document.getElementById("intake-banner");if(!el)return;
   // Count exactly what the review list shows: one entry per pending pet, plus any pending owner with no pending pet.
   const _rp=pets.filter(p=>p.needsReview);
   const _linked=new Set(_rp.flatMap(p=>p.ownerIds||[]));
   const n=_rp.length+owners.filter(o=>o.needsReview&&!_linked.has(o.id)).length;
-  if(n){el.style.display="inline-flex";el.textContent=`🆕 ${n} new from intake — Review`;}
+  if(n){const d=countIntakeDupes_();el.style.display="inline-flex";el.textContent=`🆕 ${n} new from intake — Review`+(d?` · ⚠ ${d} possible duplicate${d>1?"s":""}`:"");}
   else{el.style.display="none";}
   if(document.getElementById("modal-intake-review").classList.contains("open"))renderIntakeReviewModal();
 }
@@ -1014,10 +1342,10 @@ function renderIntakeReviewModal(){
   reviewPets.forEach(p=>{
     const owner=owners.find(o=>(p.ownerIds||[]).includes(o.id));
     const consentBit=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:`<span class="badge" style="background:#FDECEB;color:#B4483A">&#9888; No consent on file</span>`;
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="editIntakeEntry(${p.id},${owner?owner.id:"null"})">&#9998; Edit</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div>${petDupHtml_(p,owner)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="editIntakeEntry(${p.id},${owner?owner.id:"null"})">&#9998; Edit</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
   });
   standaloneOwners.forEach(o=>{
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editOwner(${o.id})">&#9998; Edit owner</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div>${ownerDupHtml_(o)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editOwner(${o.id})">&#9998; Edit owner</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
   });
   listEl.innerHTML=html;
 }
