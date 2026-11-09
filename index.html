@@ -913,6 +913,8 @@ async function checkIntake(){
       const petNoteParts=[];
       if(item.behaviourNotes)petNoteParts.push(item.behaviourNotes);
       if(item.extraNotes)petNoteParts.push(item.extraNotes);
+      if(item.referencePhotoNote)petNoteParts.push("Photo note: "+item.referencePhotoNote);
+      if(Array.isArray(item.referencePhotos)&&item.referencePhotos.length)petNoteParts.push("Reference photos: "+item.referencePhotos.join(" "));
       if(item.limitTreats)petNoteParts.push("Please don't give too many treats.");
       if(approxAge)petNoteParts.push(`Approx age at intake: ${item.petApproxAge}`);
 
@@ -966,6 +968,31 @@ function markIntakeEntryReviewed(petId,ownerId){
   if(ownerId)owners=owners.map(o=>o.id===ownerId?{...o,needsReview:false}:o);
   save();render();
 }
+let _chainOwnerId=null; // after saving the pet from the review popup, continue straight on to the owner
+function editIntakeEntry(petId,ownerId){
+  closeIntakeReviewModal();
+  _chainOwnerId=ownerId||null;
+  editPet(petId);
+}
+function deleteIntakeEntry(petId,ownerId){
+  openConfirm("Delete this intake entry (pet and new owner)?","Delete",()=>{
+    pets=pets.filter(p=>p.id!==petId);
+    // Only remove the owner if they came from this intake and have no other pets
+    if(ownerId){
+      const stillLinked=pets.some(p=>(p.ownerIds||[]).includes(ownerId));
+      const o=owners.find(x=>x.id===ownerId);
+      if(o&&o.needsReview&&!stillLinked)owners=owners.filter(x=>x.id!==ownerId);
+    }
+    save();render();renderIntakeReviewModal();
+  });
+}
+function deleteIntakeOwner(ownerId){
+  openConfirm("Delete this owner?","Delete",()=>{
+    owners=owners.filter(o=>o.id!==ownerId);
+    pets=pets.map(p=>({...p,ownerIds:(p.ownerIds||[]).filter(id=>id!==ownerId)}));
+    save();render();renderIntakeReviewModal();
+  });
+}
 function openIntakeReviewModal(){
   renderIntakeReviewModal();
   document.getElementById("modal-intake-review").classList.add("open");
@@ -984,10 +1011,10 @@ function renderIntakeReviewModal(){
   reviewPets.forEach(p=>{
     const owner=owners.find(o=>(p.ownerIds||[]).includes(o.id));
     const consentBit=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:`<span class="badge" style="background:#FDECEB;color:#B4483A">&#9888; No consent on file</span>`;
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editPet(${p.id})">&#9998; Edit pet</button>${owner?`<button class="sm" onclick="closeIntakeReviewModal();editOwner(${owner.id})">&#9998; Edit owner</button>`:""}<button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="editIntakeEntry(${p.id},${owner?owner.id:"null"})">&#9998; Edit</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
   });
   standaloneOwners.forEach(o=>{
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editOwner(${o.id})">&#9998; Edit owner</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div></div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editOwner(${o.id})">&#9998; Edit owner</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
   });
   listEl.innerHTML=html;
 }
@@ -1065,6 +1092,11 @@ let nextOId=lsg("pg_nextOId2",7);
 let nextExpId=lsg("pg_nextExpId2",9);
 let emptyProducts=lsg("pg_emptyProducts2",[]);
 
+// Turns any URLs inside a pet note into tappable "Photo N" links
+function linkifyNote(t){
+  let n=0;
+  return String(t||"").replace(/https?:\/\/[^\s<>"']+/g,u=>`<a href="${u}" target="_blank" rel="noopener" style="color:#854F0B;font-weight:600">&#128247; Photo ${++n}</a>`);
+}
 function petById(id){return pets.find(p=>p.id===id);}
 function isDrivePhotoUrl(url){return typeof url==="string"&&url.includes("googleusercontent.com/d/");}
 async function movePhotoToPetFolder(url,petId,petName){
@@ -1362,7 +1394,7 @@ function renderPets(){
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${p.lastNote}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
@@ -2240,7 +2272,7 @@ function ptCoatToggle(i){const t=COAT_TYPES[i];ptActiveCoats=ptActiveCoats.inclu
 function ptMedToggle(i){const t=MEDICAL_TAGS[i];ptActiveMedical=ptActiveMedical.includes(t)?ptActiveMedical.filter(x=>x!==t):[...ptActiveMedical,t];renderPtToggles();}
 function ptAllergyToggle(i){const t=ALLERGENS[i];ptActiveAllergies=ptActiveAllergies.includes(t)?ptActiveAllergies.filter(x=>x!==t):[...ptActiveAllergies,t];renderPtToggles();}
 function ptOwnToggle(i){const oid=owners[i]?.id;if(!oid)return;ptActiveOwners=ptActiveOwners.includes(oid)?ptActiveOwners.filter(x=>x!==oid):[...ptActiveOwners,oid];renderPtToggles();}
-function closePtModal(){document.getElementById("modal-pet").classList.remove("open");ptEditing=null;}
+function closePtModal(){document.getElementById("modal-pet").classList.remove("open");ptEditing=null;_chainOwnerId=null;}
 async function savePtModal(){
   const name=document.getElementById("pt-name").value.trim();
   const breed=ptGetBreedString();
@@ -2257,7 +2289,9 @@ async function savePtModal(){
   }
   const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").checked,lastNote:document.getElementById("pt-behavnote").value,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
   if(ptEditing){pets=pets.map(p=>p.id===ptEditing.id?{...p,...obj}:p);}else{pets.push({id:nextPetId++,...obj});}
+  const _ch=_chainOwnerId;
   save();closePtModal();render();
+  if(_ch)editOwner(_ch);
 }
 function editPet(id){const p=pets.find(x=>x.id===id);if(p)openPtModal(p);}
 function deletePet(id){openConfirm("Delete this pet profile?","Delete",()=>{pets=pets.filter(p=>p.id!==id);save();render();});}
