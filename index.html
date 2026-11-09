@@ -3,6 +3,47 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<link rel="manifest" href="manifest.json"/>
+<meta name="theme-color" content="#1C2B3A"/>
+<link rel="icon" href="icons/icon-192.png"/>
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<script>
+// ── Passcode guard: adds your passcode to every Google Script request ──
+(function(){
+  const KEY="pg_passcode";
+  const realFetch=window.fetch.bind(window);
+  function getCode(force){
+    let c=null;
+    try{c=localStorage.getItem(KEY);}catch(e){}
+    if(!c||force){
+      c=window.prompt(force?"Passcode was rejected. Enter passcode:":"Enter your passcode:")||"";
+      c=c.trim();
+      try{if(c)localStorage.setItem(KEY,c);}catch(e){}
+    }
+    return c;
+  }
+  window.fetch=async function(input,init){
+    const url=typeof input==="string"?input:(input&&input.url)||"";
+    if(!url.startsWith("https://script.google.com/")||!init||typeof init.body!=="string")
+      return realFetch(input,init);
+    async function send(code){
+      let body;
+      try{const o=JSON.parse(init.body);o.token=code;body=JSON.stringify(o);}catch(e){body=init.body;}
+      return realFetch(input,Object.assign({},init,{body}));
+    }
+    let res=await send(getCode(false));
+    try{
+      const j=await res.clone().json();
+      if(j&&j.error==="unauthorized"){
+        try{localStorage.removeItem(KEY);}catch(e){}
+        res=await send(getCode(true));
+      }
+    }catch(e){}
+    return res;
+  };
+})();
+</script>
 <title>✂️ Grooming</title>
 <style>
 :root{
@@ -101,6 +142,11 @@ tr:hover td{background:#fafbfc}
 .rule-card-title{font-size:14px;font-weight:600;margin-bottom:0.5rem;color:var(--navy)}
 .rule-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-right:5px;margin-bottom:5px}
 </style>
+<script>
+if("serviceWorker" in navigator){
+  window.addEventListener("load",()=>navigator.serviceWorker.register("sw.js").catch(()=>{}));
+}
+</script>
 </head>
 <body>
 <div id="app-header">
