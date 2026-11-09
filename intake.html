@@ -297,6 +297,14 @@
   .terms-section h4{font-family:'Fraunces',serif;font-weight:600;font-size:14.5px;color:var(--pine-dark);margin:0 0 var(--space-1)}
   .terms-section p{font-size:13px;color:var(--ink-soft);line-height:1.6;margin:0}
   .terms-modal-actions{display:flex;justify-content:flex-end;gap:8px;margin-top:var(--space-3);padding-top:var(--space-3);border-top:1px dashed var(--line)}
+
+  .refpics-drop{display:flex;align-items:center;justify-content:center;gap:8px;border:1.5px dashed var(--line);border-radius:var(--radius);background:var(--paper);color:var(--pine);font-weight:600;font-size:14px;padding:16px;cursor:pointer;width:100%}
+  .refpics-drop:hover{border-color:var(--pine);background:var(--pine-tint)}
+  .refpics-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(84px,1fr));gap:8px;margin-top:10px}
+  .refpics-grid .thumb{position:relative;aspect-ratio:1;border-radius:10px;overflow:hidden;border:1px solid var(--line);background:#fff}
+  .refpics-grid .thumb img{width:100%;height:100%;object-fit:cover;display:block}
+  .refpics-grid .thumb button{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(30,42,36,.75);color:#fff;font-size:13px;line-height:1;padding:0}
+  .refpics-status{font-size:12px;color:var(--ink-soft);margin-top:6px}
 </style>
 </head>
 <body>
@@ -452,6 +460,16 @@
       <div class="field">
         <label for="extraNotes">Anything else I should know? <span class="opt">(optional)</span></label>
         <textarea id="extraNotes" placeholder=""></textarea>
+      </div>
+
+      <div class="field" id="f-refPics">
+        <label>Reference, inspo or past groom photos <span class="opt">(optional)</span></label>
+        <p class="step-hint" style="margin:0 0 var(--space-2)">Got a cut you love, or photos of a previous groom? Add up to 6 so I can see what you're after.</p>
+        <input type="file" id="refPicsInput" accept="image/*" multiple style="display:none"/>
+        <button type="button" class="refpics-drop" id="refPicsBtn">&#128247; Add photos</button>
+        <div class="refpics-grid" id="refPicsGrid"></div>
+        <div class="refpics-status" id="refPicsStatus"></div>
+        <textarea id="refPicsNote" placeholder="Anything I should know about these photos? e.g. 'love the length on the legs', 'this was too short'" style="margin-top:var(--space-2)"></textarea>
       </div>
     </div>
 
@@ -735,6 +753,10 @@ goStep(1);
 document.getElementById("consentDate").value=new Date().toISOString().slice(0,10);
 
 async function submitForm(){
+  const nb=document.getElementById("nextBtn");nb.disabled=true;
+  const _petNameForPics=document.getElementById("petName").value.trim();
+  const refUp=refPhotos.length?await uploadRefPhotos(_petNameForPics):{urls:[],failed:0};
+  nb.disabled=false;
   const submission={
     id:Date.now()+"-"+Math.random().toString(36).slice(2,8),
     submittedAt:new Date().toISOString(),
@@ -760,6 +782,9 @@ async function submitForm(){
     noAllergies:document.getElementById("noAllergies").checked,
     customAllergies:document.getElementById("noAllergies").checked?"No known allergies":document.getElementById("customAllergies").value.trim(),
     extraNotes:document.getElementById("extraNotes").value.trim(),
+    referencePhotos:refUp.urls,
+    referencePhotoNote:document.getElementById("refPicsNote").value.trim(),
+    referencePhotosFailed:refUp.failed,
     agreeTerms:document.getElementById("agreeTerms").checked,
     signature:document.getElementById("signature").value.trim(),
     consentDate:document.getElementById("consentDate").value,
@@ -808,6 +833,8 @@ async function submitForm(){
       "Medical Notes":submission.medicalNotes,
       "Allergies":submission.customAllergies,
       "Additional Notes":submission.extraNotes,
+      "Reference Photos":submission.referencePhotos.join("\n"),
+      "Reference Photo Notes":submission.referencePhotoNote,
       "Agreed to Terms":submission.agreeTerms?"Yes":"No",
       "Signature":submission.signature,
       "Consent Date":submission.consentDate,
@@ -826,13 +853,82 @@ async function submitForm(){
   document.getElementById("formCard").style.display="none";
   document.getElementById("tracker").style.display="none";
   document.getElementById("ticket").style.display="block";
+  if(refUp.failed){
+    const p0=document.querySelector("#ticket p");
+    p0.innerHTML+=" <br/><span style='color:var(--danger)'>"+refUp.failed+" reference photo(s) didn't upload, feel free to text them to me.</span>";
+  }
   if(!appOk&&!formspreeOk){
     const p=document.querySelector("#ticket p");
     p.innerHTML+=" <br/><span style='color:var(--danger)'>Note: I couldn't save this automatically, please also let me know by phone just in case.</span>";
   }
 }
 
+
+// ---- Reference / inspo / past-groom photos ----
+const REF_MAX=6;
+let refPhotos=[]; // {dataUrl}
+function compressRef(file,maxW,maxH,q){
+  return new Promise((resolve,reject)=>{
+    const r=new FileReader();
+    r.onerror=()=>reject(new Error("read failed"));
+    r.onload=e=>{
+      const img=new Image();
+      img.onerror=()=>reject(new Error("image load failed"));
+      img.onload=()=>{
+        const ratio=Math.min(maxW/img.width,maxH/img.height,1);
+        const c=document.createElement("canvas");
+        c.width=Math.round(img.width*ratio);c.height=Math.round(img.height*ratio);
+        c.getContext("2d").drawImage(img,0,0,c.width,c.height);
+        resolve(c.toDataURL("image/jpeg",q));
+      };
+      img.src=e.target.result;
+    };
+    r.readAsDataURL(file);
+  });
+}
+function renderRefPhotos(){
+  const g=document.getElementById("refPicsGrid");
+  g.innerHTML="";
+  refPhotos.forEach((p,i)=>{
+    const d=document.createElement("div");d.className="thumb";
+    const im=document.createElement("img");im.src=p.dataUrl;im.alt="Reference photo "+(i+1);
+    const b=document.createElement("button");b.type="button";b.textContent="\u00d7";b.setAttribute("aria-label","Remove photo");
+    b.onclick=()=>{refPhotos.splice(i,1);renderRefPhotos();};
+    d.appendChild(im);d.appendChild(b);g.appendChild(d);
+  });
+  document.getElementById("refPicsBtn").style.display=refPhotos.length>=REF_MAX?"none":"flex";
+}
+document.getElementById("refPicsBtn").addEventListener("click",()=>document.getElementById("refPicsInput").click());
+document.getElementById("refPicsInput").addEventListener("change",async function(){
+  const files=Array.from(this.files||[]);this.value="";
+  const st=document.getElementById("refPicsStatus");st.textContent="";
+  for(const f of files){
+    if(refPhotos.length>=REF_MAX){st.textContent="Max "+REF_MAX+" photos.";break;}
+    try{refPhotos.push({dataUrl:await compressRef(f,1000,1200,0.82)});}
+    catch(e){console.error("Ref photo error:",e);st.textContent="One photo couldn't be read, try a different one.";}
+  }
+  renderRefPhotos();
+});
+async function uploadRefPhotos(petName){
+  const urls=[];let failed=0;
+  const st=document.getElementById("refPicsStatus");
+  const safe=(petName||"pet").replace(/[^a-z0-9]+/gi,"-").replace(/^-+|-+$/g,"")||"pet";
+  for(let i=0;i<refPhotos.length;i++){
+    st.textContent="Uploading photo "+(i+1)+" of "+refPhotos.length+"\u2026";
+    try{
+      const res=await fetch(SCRIPT_URL,{method:"POST",
+        body:JSON.stringify({action:"uploadPhoto",filename:"intake-ref_"+safe+"_"+Date.now()+"-"+(i+1)+".jpg",mimeType:"image/jpeg",base64:refPhotos[i].dataUrl.split(",")[1],petId:null,petName:petName||""}),
+        headers:{"Content-Type":"text/plain"}});
+      const json=await res.json().catch(()=>({}));
+      if(json.ok&&json.url)urls.push(json.url);else{failed++;console.error("Ref upload failed:",json);}
+    }catch(e){failed++;console.error("Ref upload error:",e);}
+  }
+  st.textContent="";
+  return {urls,failed};
+}
+
 function resetForm(){
+  refPhotos=[];renderRefPhotos();
   document.querySelectorAll('.step input[type=text],.step input[type=tel],.step input[type=email],.step input[type=date],.step textarea').forEach(i=>i.value="");
   document.querySelectorAll('.step input[type=checkbox]').forEach(i=>i.checked=(i.id==="treatsOk"));
   document.querySelectorAll('.step input[type=radio]').forEach(i=>i.checked=false);
