@@ -956,7 +956,10 @@ async function checkIntake(){
 }
 function updateIntakeBanner(){
   const el=document.getElementById("intake-banner");if(!el)return;
-  const n=owners.filter(o=>o.needsReview).length+pets.filter(p=>p.needsReview).length;
+  // Count exactly what the review list shows: one entry per pending pet, plus any pending owner with no pending pet.
+  const _rp=pets.filter(p=>p.needsReview);
+  const _linked=new Set(_rp.flatMap(p=>p.ownerIds||[]));
+  const n=_rp.length+owners.filter(o=>o.needsReview&&!_linked.has(o.id)).length;
   if(n){el.style.display="inline-flex";el.textContent=`🆕 ${n} new from intake — Review`;}
   else{el.style.display="none";}
   if(document.getElementById("modal-intake-review").classList.contains("open"))renderIntakeReviewModal();
