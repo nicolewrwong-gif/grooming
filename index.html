@@ -4,7 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <link rel="manifest" href="manifest.json"/>
-<meta name="theme-color" content="#1C2B3A"/>
+<meta name="theme-color" content="#0f1720"/>
+<meta name="color-scheme" content="dark"/>
 <link rel="icon" href="icons/icon-192.png"/>
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png"/>
 <meta name="mobile-web-app-capable" content="yes"/>
@@ -47,19 +48,20 @@
 <title>✂️ Grooming</title>
 <style>
 :root{
-  --navy:#1C2B3A;
+  --navy:#E6EDF3;
   --navy-mid:#243447;
   --navy-light:#2E4156;
   --teal:#00A99D;
   --teal-dark:#008B80;
-  --teal-bg:#E6F7F6;
+  --teal-bg:rgba(0,169,157,0.16);
   --accent:#4DA6FF;
-  --accent-bg:#E8F3FF;
-  --text:#1a1a1a;
-  --text-muted:#6B7280;
-  --border:#E5E7EB;
-  --bg:#F3F4F6;
+  --accent-bg:rgba(77,166,255,0.16);
+  --text:#E6EDF3;
+  --text-muted:#8B9AAB;
+  --border:#2C3A49;
+  --bg:#0F1720;
   --white:#fff;
+  --surface:#18222D;--surface2:#1F2B38;
   --green-bg:#EAF7EE;--green:#5BAF7A;
   --amber-bg:#FFF3CD;--amber:#92620A;
   --red-bg:#FDECEB;--red:#E8534A;
@@ -70,10 +72,10 @@
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:13px}
 input,select,textarea,button{font-family:inherit;font-size:13px}
 select,input[type=text],input[type=date],input[type=time],input[type=number],textarea{
-  width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#fff;color:var(--text);
+  width:100%;padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);
   transition:border-color .15s;outline:none}
 select:focus,input:focus,textarea:focus{border-color:var(--teal);box-shadow:0 0 0 3px rgba(0,169,157,0.12)}
-button{cursor:pointer;border:1px solid var(--border);border-radius:14px;background:#fff;color:var(--text);padding:9px 18px;font-weight:600;transition:all .15s;font-size:13px}
+button{cursor:pointer;border:1px solid var(--border);border-radius:14px;background:var(--surface);color:var(--text);padding:9px 18px;font-weight:600;transition:all .15s;font-size:13px}
 button:hover{background:var(--bg);border-color:#ccc}
 button.primary{background:var(--teal);color:#fff;border-color:var(--teal);border-radius:14px;box-shadow:0 3px 8px rgba(0,169,157,0.28)}
 button.primary:hover{background:var(--teal-dark);border-color:var(--teal-dark)}
@@ -82,11 +84,11 @@ button.green:hover{background:#4a9a69;border-color:#4a9a69}
 button.accent{background:#b0d8f9;color:#1a4a6e;border-color:#b0d8f9;border-radius:14px;box-shadow:0 3px 8px rgba(176,216,249,0.5)}
 button.accent:hover{background:#98ccf5;border-color:#98ccf5}
 button.sm{padding:5px 12px;font-size:11px;border-radius:10px;font-weight:500}
-button.danger{border-color:var(--red);color:var(--red);background:#fff;border-radius:14px}
+button.danger{border-color:var(--red);color:var(--red);background:var(--surface);border-radius:14px}
 button.danger:hover{background:var(--red-bg)}
 label.lbl{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500;letter-spacing:0.02em}
 /* ── HEADER STRIP ── */
-#app-header{background:#fff;color:var(--text);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
+#app-header{background:var(--surface);color:var(--text);padding:1rem 1.5rem;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)}
 #app-header .app-title{font-size:18px;font-weight:600;letter-spacing:-0.3px;display:flex;align-items:center;gap:8px;color:var(--text)}
 #app-header .app-subtitle{font-size:12px;color:var(--text-muted);margin-top:2px}
 #app-header button.primary{background:var(--teal);border-color:var(--teal);color:#fff;font-size:13px;padding:9px 20px;border-radius:14px}
@@ -95,11 +97,11 @@ label.lbl{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px
 #sync-status{font-size:12px;color:var(--text-muted)}
 /* ── STAT CARDS ── */
 .stats-bar{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;padding:1.25rem 1.5rem 0}
-.stat{background:#fff;border-radius:10px;padding:0.95rem 1.1rem;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,0.05)}
+.stat{background:var(--surface);border-radius:10px;padding:0.95rem 1.1rem;border:1px solid var(--border);box-shadow:0 1px 3px rgba(0,0,0,0.05)}
 .stat .slabel{font-size:11px;color:var(--text-muted);margin-bottom:4px;font-weight:500;text-transform:uppercase;letter-spacing:0.04em}
 .stat .sval{font-size:22px;font-weight:600;color:var(--navy)}
 /* ── TABS ── */
-.tabs-wrap{padding:0 1.5rem;border-bottom:1px solid var(--border);background:#fff;box-shadow:0 1px 0 var(--border)}
+.tabs-wrap{padding:0 1.5rem;border-bottom:1px solid var(--border);background:var(--surface);box-shadow:0 1px 0 var(--border)}
 .tabs{display:flex;gap:0;flex-wrap:wrap}
 .tab-btn{padding:10px 16px;font-size:13px;border:none;background:none;border-bottom:3px solid transparent;margin-bottom:-1px;color:var(--text-muted);font-weight:500;border-radius:0;transition:color .15s}
 .tab-btn:hover{color:var(--navy);background:var(--bg)}
@@ -107,13 +109,13 @@ label.lbl{display:block;font-size:11px;color:var(--text-muted);margin-bottom:4px
 /* ── MAIN CONTENT ── */
 .page-content{padding:1.25rem 1.5rem}
 /* ── CARDS ── */
-.card{background:#fff;border:1px solid var(--border);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:0.9rem 1.1rem;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
 /* ── TABLE ── */
 table{width:100%;border-collapse:collapse}
 th{font-size:11px;color:var(--text-muted);font-weight:600;padding:8px 10px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;letter-spacing:0.04em;background:var(--bg)}
 td{padding:9px 10px;border-bottom:1px solid var(--border);vertical-align:middle}
 tr:last-child td{border-bottom:none}
-tr:hover td{background:#fafbfc}
+tr:hover td{background:var(--surface2)}
 /* ── BADGES / TAGS ── */
 .badge{display:inline-block;padding:2px 9px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap}
 .tag{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;white-space:nowrap;margin-right:3px;margin-bottom:3px}
@@ -122,23 +124,23 @@ tr:hover td{background:#fafbfc}
 .price-row{display:flex;justify-content:space-between;margin-bottom:4px}
 .price-row.total{font-weight:700;border-top:1px solid var(--border);padding-top:6px;margin-top:4px;color:var(--navy)}
 /* ── MODAL ── */
-.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:50;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:50;align-items:flex-start;justify-content:center;padding-top:40px;overflow-y:auto}
 .modal-bg.open{display:flex}
-.modal{background:#fff;border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:440px;max-width:95vw;margin-bottom:40px;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.modal{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:1.5rem;width:440px;max-width:95vw;margin-bottom:40px;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
 .modal h2{font-size:15px;font-weight:600;margin-bottom:1rem;color:var(--navy)}
 .grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
 .mb10{margin-bottom:10px}
 .row-end{display:flex;justify-content:flex-end;gap:8px;margin-top:1rem}
 /* ── CONFIRM ── */
-.confirm-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.45);z-index:200;align-items:center;justify-content:center}
+.confirm-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.65);z-index:200;align-items:center;justify-content:center}
 .confirm-bg.open{display:flex}
-.confirm-box{background:#fff;border-radius:14px;border:1px solid var(--border);padding:1.5rem;width:320px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
+.confirm-box{background:var(--surface);border-radius:14px;border:1px solid var(--border);padding:1.5rem;width:320px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,0.18)}
 .confirm-box p{font-size:13px;margin-bottom:1rem;color:var(--navy);font-weight:500}
 /* ── MISC ── */
 .search-row{display:flex;gap:8px;align-items:center;margin-bottom:12px;justify-content:space-between}
 .search-row .right{display:flex;gap:8px}
 .multi-toggle{display:flex;flex-wrap:wrap;gap:5px}
-.rule-card{background:#fff;border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
+.rule-card{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:1rem 1.25rem;margin-bottom:10px;box-shadow:0 1px 3px rgba(0,0,0,0.04)}
 .rule-card-title{font-size:14px;font-weight:600;margin-bottom:0.5rem;color:var(--navy)}
 .rule-pill{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:500;margin-right:5px;margin-bottom:5px}
 .mg-hdr{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
@@ -151,7 +153,7 @@ tr:hover td{background:#fafbfc}
 .mg-bars{display:grid;gap:8px;margin-top:6px}
 .mg-bar{border:1.5px dashed #d0d0d0;border-radius:10px;padding:7px 10px;font-size:12px;color:#666;text-align:center;cursor:pointer}
 .mg-bar.on{border:1.5px solid #00A99D;background:#E6F7F6;color:#006B63;font-weight:500}
-.mg-input{width:100%;margin-top:6px;border:1.5px solid #00A99D;border-radius:10px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;background:#fff}
+.mg-input{width:100%;margin-top:6px;border:1.5px solid #00A99D;border-radius:10px;padding:9px 10px;font-size:13px;font-family:inherit;resize:vertical;background:var(--surface)}
 .mg-cw{position:relative;display:flex;border:1.5px solid var(--border);border-radius:10px;cursor:pointer}
 .mg-cw.on{border-color:#00A99D;background:#E6F7F6}
 .mg-cw:focus-within{box-shadow:0 0 0 2px rgba(0,169,157,.35)}
@@ -159,7 +161,7 @@ tr:hover td{background:#fafbfc}
 .mg-edit{flex:1;min-width:0;border:0;background:transparent;font:inherit;font-size:13px;line-height:1.3;padding:9px 22px 9px 10px;min-height:38px;resize:none;overflow:hidden;outline:none;cursor:pointer;color:inherit;width:100%}
 .mg-presets{display:flex;align-items:center;gap:6px;margin-bottom:14px}
 .mg-presets span{font-size:11px;color:#888;text-transform:uppercase;letter-spacing:.05em;font-weight:600;margin-right:2px}
-.mg-pbtn{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:9px;padding:7px 4px;font-size:12px;font-weight:500;cursor:pointer;background:#fff}
+.mg-pbtn{flex:1;text-align:center;border:1.5px solid var(--border);border-radius:9px;padding:7px 4px;font-size:12px;font-weight:500;cursor:pointer;background:var(--surface)}
 .mg-pbtn:active{background:#E6F7F6;border-color:#00A99D}
 #mg-sub{display:none}
 .f{display:grid;grid-template-columns:70px 1fr;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
@@ -175,7 +177,7 @@ tr:hover td{background:#fafbfc}
 .seg span:hover{background:var(--bg)}
 .seg span.on{background:var(--teal);color:#fff}
 .seg span.off{opacity:.4;cursor:default;background:none}
-.mo{display:flex;gap:12px;align-items:center;padding:.6rem 1rem;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:6px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:all .15s}
+.mo{display:flex;gap:12px;align-items:center;padding:.6rem 1rem;border:1px solid var(--border);border-radius:10px;cursor:pointer;margin-bottom:6px;background:var(--surface);box-shadow:0 1px 3px rgba(0,0,0,0.04);transition:all .15s}
 .mo:hover{border-color:var(--teal)}
 .mo.on{border-color:var(--teal);background:var(--teal-bg);box-shadow:0 0 0 3px rgba(0,169,157,0.12)}
 .mo.on small{color:var(--teal-dark);font-weight:600}
@@ -193,7 +195,7 @@ tr:hover td{background:#fafbfc}
 .dup-sub{font-size:12px;color:var(--text-muted);margin-bottom:12px;line-height:1.4}
 .dup-blue{color:var(--blue);font-weight:600}
 .dup-q{font-size:14px;font-weight:600;line-height:1.3;margin-bottom:12px;color:var(--navy)}
-.dup-opt{background:#fff;border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;transition:all .15s;color:var(--navy)}
+.dup-opt{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:.9rem 1.1rem;margin-bottom:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);cursor:pointer;transition:all .15s;color:var(--navy)}
 .dup-trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px}
 .dup-trio .dup-opt{margin-bottom:0;text-align:center;padding:.9rem .4rem}
 .dup-trio .dup-opt:last-child{border-color:var(--teal)}
@@ -211,6 +213,66 @@ tr:hover td{background:#fafbfc}
 .dup-grid{display:grid;grid-template-columns:70px 1fr 1fr;gap:6px 10px;font-size:12.5px;word-break:break-word;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:11px 13px}
 .dup-h{font-size:11px;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);font-weight:600}
 .dup-l{color:var(--text-muted)}
+
+/* ── DARK MODE overrides for inline-styled elements ── */
+[style*="background:#fff" i]{background:var(--surface)!important}
+[style*="background:#f6f6f6" i]{background:var(--surface2)!important}
+[style*="background:#fafafa" i]{background:var(--surface2)!important}
+[style*="background:#fafbfc" i]{background:var(--surface2)!important}
+[style*="background:#f5f5f5" i]{background:var(--surface2)!important}
+[style*="background:#f0f0f0" i]{background:var(--surface2)!important}
+[style*="background:#FDECEA" i]{background:rgba(232,83,74,.16)!important}
+[style*="background:#FDECEB" i]{background:rgba(232,83,74,.16)!important}
+[style*="background:#EEEBFA" i]{background:rgba(124,111,230,.2)!important}
+[style*="background:#EEEDFE" i]{background:rgba(124,111,230,.2)!important}
+[style*="background:#E6F7F6" i]{background:rgba(0,169,157,.16)!important}
+[style*="background:#FAEEDA" i]{background:rgba(245,158,11,.15)!important}
+[style*="background:#FFF3CD" i]{background:rgba(245,158,11,.15)!important}
+[style*="background:#FFF8E7" i]{background:rgba(245,158,11,.15)!important}
+[style*="background:#EAF7EE" i]{background:rgba(91,175,122,.16)!important}
+[style*="background:#E3F5EA" i]{background:rgba(91,175,122,.16)!important}
+[style*="background:#E8F3FF" i]{background:rgba(77,166,255,.16)!important}
+[style*="background:#E6F1FB" i]{background:rgba(77,166,255,.16)!important}
+[style*="background:#EEF6FF" i]{background:rgba(77,166,255,.16)!important}
+[style*="background:#D4EBFF" i]{background:rgba(77,166,255,.22)!important}
+[style*="color:#888" i]{color:var(--text-muted)!important}
+[style*="color:#aaa" i]{color:var(--text-muted)!important}
+[style*="color:#666" i]{color:var(--text-muted)!important}
+[style*="color:#555" i]{color:var(--text-muted)!important}
+[style*="color:#444" i]{color:var(--text)!important}
+[style*="color:#1a1a1a" i]{color:var(--text)!important}
+[style*="color:#185FA5" i]{color:#86bff5!important}
+[style*="color:#854F0B" i]{color:#f0bd6e!important}
+[style*="color:#92620A" i]{color:#f0bd6e!important}
+[style*="color:#92400E" i]{color:#f0bd6e!important}
+[style*="color:#B4483A" i]{color:#f4968b!important}
+[style*="color:#1D7A46" i]{color:#74d6a0!important}
+[style*="color:#2f7a4a" i]{color:#7fd3a0!important}
+[style*="color:#534AB7" i]{color:#aaa4f7!important}
+[style*="color:#006B63" i]{color:#5fe0d6!important}
+[style*="color:#E8534A" i]{color:#ff7b72!important}
+[style*="color:#5BAF7A" i]{color:#6fcf92!important}
+[style*="background:#1C2B3A" i]{background:var(--teal)!important;border-color:var(--teal)!important}
+[style*="#d0d0d0" i],[style*="#ccc" i],[style*="#ddd" i],[style*="#eee" i],[style*="#e3e3e3" i]{border-color:var(--border)!important}
+/* keep solid accent buttons readable (color overrides above must not touch white-on-colour text) */
+[style*="background:#534AB7" i]{background:#6c63d9!important}
+button.danger{color:#ff7b72;border-color:#ff7b72}
+button.danger:hover{background:rgba(232,83,74,.16)}
+select,input[type=text],input[type=date],input[type=time],input[type=number],textarea,.mg-input{background:var(--surface2);color:var(--text)}
+select option{background:var(--surface2);color:var(--text)}
+input,select,textarea{color-scheme:dark}
+button:hover{background:var(--surface2);border-color:#3d5066}
+button.primary:hover{background:var(--teal-dark)}button.green:hover{background:#4a9a69}button.accent:hover{background:#98ccf5}
+.mg-cell.on,.mg-bar.on,.mg-cw.on,.mg-pbtn:active{background:var(--teal-bg)}
+.mg-bar.on{color:#5fe0d6}.mg-bar{color:var(--text-muted);border-color:var(--border)}
+.mg-hdr div,.mg-presets span,.mo-all .mg-lbl,.dup-opt small{color:var(--text-muted)}
+.mo-all{border-bottom-color:var(--border)}
+.mo.on small{color:#5fe0d6}
+.price-row.total{color:var(--text)}
+.ii .f{grid-template-columns:105px 1fr}
+.tmr{border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px;background:var(--surface2)}
+.tmr-clock{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
+.tmr button{padding:4px 10px;font-size:11px;border-radius:10px}
 </style>
 <script>
 if("serviceWorker" in navigator){
@@ -245,7 +307,7 @@ if("serviceWorker" in navigator){
 <div id="modal-booking" class="modal-bg">
 <div class="modal" style="width:440px">
 <h2 id="bk-title">New booking</h2>
-<div id="bk-completion-banner" style="display:none;background:#EAF7EE;color:#2f7a4a;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px">✅ Booking marked as done — add any final details below (blades/combs, photos, products, payment, time spent) before saving.</div>
+<div id="bk-completion-banner" style="display:none;background:#EAF7EE;color:#2f7a4a;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px">✅ Booking marked as done — add any final details below (blades/combs, photos, products, payment, timers) before saving.</div>
 <div class="mb10 bk-core-only"><label class="lbl">Pet</label><select id="bk-pet"></select><div id="bk-pet-hint" style="font-size:11px;color:#888;margin-top:3px"></div></div>
 <div class="mb10 bk-core-only"><label class="lbl">Owner</label><div id="bk-owner-display" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#f6f6f6;color:#888;font-size:13px;min-height:34px">—</div><input type="hidden" id="bk-owner"/></div>
 <div class="mb10 bk-core-only"><label class="lbl">Service</label><select id="bk-service"></select></div>
@@ -263,19 +325,16 @@ if("serviceWorker" in navigator){
   <div id="bk-products" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:2px"></div>
 </div>
 <div class="mb10 bk-postonly" id="bk-blades-wrap">
-  <label class="lbl">Blades used</label>
-  <div id="bk-blades" class="multi-toggle"></div>
-</div>
-<div class="mb10 bk-postonly">
-  <label class="lbl">Extension combs used</label>
-  <div id="bk-combs" class="multi-toggle"></div>
+  <label class="lbl">Blades &amp; extension combs used</label>
+  <div id="bk-cuts" class="multi-toggle"></div>
 </div>
 <div class="grid2 bk-postonly">
   <div id="bk-matting-wrap" style="display:none"><label class="lbl">De-matting (min)</label><input type="number" id="bk-matting" value="0" min="0"/></div>
   <div><label class="lbl">Custom price ($)</label><input type="number" id="bk-custom" placeholder="Auto"/></div>
 </div>
-<div class="mb10 bk-postonly"><label class="lbl">Time spent</label><select id="bk-timespent"></select></div>
+<div class="mb10 bk-postonly"><label class="lbl">Time spent <span style="font-weight:400">(logged in 15 min steps)</span></label><div id="bk-timers"></div></div>
 <div id="bk-price-box" class="price-box"></div>
+<div style="margin-bottom:8px"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-waive-extras" style="width:auto"> Waive extras <span style="color:#888;font-size:11px">(handling surcharge &amp; size adjustment)</span></label></div>
 <div style="margin-bottom:8px" class="bk-postonly"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-waived"> Waive payment</label></div>
 <div style="margin-bottom:10px" class="bk-postonly"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-paid"> Mark as paid</label></div>
 <div class="mb10 bk-postonly">
@@ -439,25 +498,11 @@ if("serviceWorker" in navigator){
 </div>
 </div>
 
-<div id="modal-bkdetails" class="modal-bg">
-<div class="modal" style="width:420px">
-<h2>📝 Add booking details</h2>
-<div class="mb10">
-  <label class="lbl">Products used</label>
-  <div id="bkd-products" style="display:flex;flex-wrap:wrap;gap:5px;margin-top:2px"></div>
-</div>
-<div class="mb10">
-  <label class="lbl">Blades used</label>
-  <div id="bkd-blades" class="multi-toggle"></div>
-</div>
-<div class="mb10">
-  <label class="lbl">Extension combs used</label>
-  <div id="bkd-combs" class="multi-toggle"></div>
-</div>
-<div class="mb10"><label class="lbl">Time spent</label><select id="bkd-timespent"></select></div>
-<div class="mb10"><label class="lbl">Completion notes</label><textarea id="bkd-notes" rows="2" placeholder="e.g. notes added after the groom was done"></textarea></div>
-<div class="mb10"><label class="lbl">For next time</label><textarea id="bkd-nextnote" rows="2" placeholder="e.g. trim nails shorter next visit"></textarea></div>
-<div class="row-end"><button onclick="closeBkDetailsModal()">Cancel</button><button class="primary" onclick="saveBkDetailsModal()">Save details</button></div>
+<div id="modal-intake-info" class="modal-bg" style="z-index:65">
+<div class="modal ii" style="width:460px">
+<h2 id="ii-title">Intake details</h2>
+<div id="ii-body"></div>
+<div class="row-end" id="ii-actions" style="flex-wrap:wrap"></div>
 </div>
 </div>
 
@@ -490,6 +535,95 @@ const COMBS=[
 ];
 const COMB_LABELS=COMBS.map(c=>`${c.size} (${c.mm})`);
 function combInfo(label){return COMBS.find(c=>`${c.size} (${c.mm})`===label);}
+// ── Unified blade / extension-comb picker ──
+// Blade lengths (Wahl): #10=1.5mm, #7F=3mm, #4F=10mm, #3F=13mm. Where a comb has the same mm as a
+// blade, the option is named by the blade number (keeping the comb's colour); every option shows mm.
+const BLADE_MM={"#10":1.5,"#7F":3,"#4F":10,"#3F":13};
+const CUTS=(()=>{
+  const list=COMBS.map(c=>{const mm=parseFloat(c.mm);const blade=Object.keys(BLADE_MM).find(k=>BLADE_MM[k]===mm)||null;
+    return{label:`${blade||c.size} (${c.mm})`,mm,bg:c.bg,text:c.text,colorName:c.colorName,legacyComb:`${c.size} (${c.mm})`,blade};});
+  Object.keys(BLADE_MM).forEach(k=>{if(!list.some(x=>x.blade===k))list.push({label:`${k} (${BLADE_MM[k]}mm)`,mm:BLADE_MM[k],bg:"#607D8B",text:"#fff",colorName:"Blade",legacyComb:null,blade:k});});
+  return list.sort((a,b)=>a.mm-b.mm);
+})();
+function cutInfo(label){return CUTS.find(c=>c.label===label);}
+function legacyBladeToCut(name){const c=CUTS.find(x=>x.blade===name);return c?c.label:name;}
+function legacyCombToCut(label){const c=CUTS.find(x=>x.legacyComb===label);return c?c.label:label;}
+function cutChipLabel(e){return e.area?`${e.label} [${e.area}]`:e.label;}
+// Reads a booking's cuts, upgrading older bookings that stored separate blades[] and combs[].
+function bookingCuts(b){
+  if(b&&Array.isArray(b.cuts))return b.cuts.map(x=>({label:x.label,area:x.area||""}));
+  const out=[];
+  const add=(label,area)=>{const ex=out.find(x=>x.label===label);if(ex){if(!ex.area)ex.area=area;}else out.push({label,area});};
+  normalizeBlades(b?.blades).forEach(e=>add(legacyBladeToCut(e.blade),e.area||""));
+  normalizeCombs(b?.combs).forEach(e=>add(legacyCombToCut(e.comb),e.area||""));
+  return out;
+}
+// ── Times groomed ──
+function timesGroomed(petId){return bookings.filter(b=>b.petId===petId&&b.status==="done").length;}
+function groomedBadge(petId){const n=timesGroomed(petId);return`<span class="badge" style="background:#E8F3FF;color:#185FA5;margin-left:6px" title="Completed bookings">✂️ Groomed ${n}×</span>`;}
+// ── Timers (bath & dry / groom), logged in 15-minute increments (rounded up) ──
+const TIMER_DEFS=[{k:"bath",label:"Bath & dry",icon:"🛁"},{k:"groom",label:"Groom",icon:"✂️"}];
+const TIMER_STEP=15*60000;
+let bkTimers={bath:{acc:0,since:null},groom:{acc:0,since:null}};
+let _timerTick=null;
+function tmMs(t){return(t.acc||0)+(t.since?Date.now()-t.since:0);}
+function timerMs(k){return tmMs(bkTimers[k]);}
+function timerLogged(k){const ms=timerMs(k);return ms>0?Math.ceil(ms/TIMER_STEP)*15:0;}
+function fmtClock(ms){const s=Math.floor(ms/1000);return`${Math.floor(s/3600)}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;}
+// Minutes logged for a saved booking (live if its timer is still running; legacy timeSpent counts as groom time)
+function bkTimeMins(b,k){
+  const t=b.timers&&b.timers[k];
+  if(t){const ms=tmMs(t);return ms>0?Math.ceil(ms/TIMER_STEP)*15:0;}
+  if(k==="bath")return b.timeBath||0;
+  return b.timeGroom!=null?b.timeGroom:(b.timeBath==null?(b.timeSpent||0):0);
+}
+function timeSpentHtml(b){
+  const bath=bkTimeMins(b,"bath"),groom=bkTimeMins(b,"groom"),total=bath+groom;
+  const running=b.timers&&(b.timers.bath?.since||b.timers.groom?.since);
+  if(!total&&!running)return"—";
+  const parts=[];if(bath)parts.push(`Bath ${fmtDuration(bath)}`);if(groom)parts.push(`Groom ${fmtDuration(groom)}`);
+  return`${fmtDuration(total)||"0 min"}${running?" ⏱":""}${parts.length>1||running?`<div style="font-size:10px;color:#888">${parts.join(" · ")}</div>`:""}`;
+}
+function initBkTimers(b){
+  clearInterval(_timerTick);_timerTick=null;
+  if(b&&b.timers){bkTimers={bath:{acc:b.timers.bath?.acc||0,since:b.timers.bath?.since||null},groom:{acc:b.timers.groom?.acc||0,since:b.timers.groom?.since||null}};}
+  else if(b){bkTimers={bath:{acc:bkTimeMins(b,"bath")*60000,since:null},groom:{acc:bkTimeMins(b,"groom")*60000,since:null}};}
+  else bkTimers={bath:{acc:0,since:null},groom:{acc:0,since:null}};
+  renderBkTimers();
+  if(b)_timerTick=setInterval(tickBkTimers,1000);
+}
+function tickBkTimers(){
+  TIMER_DEFS.forEach(d=>{
+    const c=document.getElementById("tm-clock-"+d.k),l=document.getElementById("tm-logged-"+d.k);
+    if(c)c.textContent=fmtClock(timerMs(d.k));
+    if(l)l.textContent=timerLogged(d.k)?`Logged: ${fmtDuration(timerLogged(d.k))}`:"Not logged";
+  });
+}
+function renderBkTimers(){
+  const el=document.getElementById("bk-timers");if(!el)return;
+  el.innerHTML=TIMER_DEFS.map(d=>{
+    const run=!!bkTimers[d.k].since;
+    return`<div class="tmr"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:12px;font-weight:600">${d.icon} ${d.label}</div><div style="text-align:right"><div class="tmr-clock" id="tm-clock-${d.k}">${fmtClock(timerMs(d.k))}</div><div id="tm-logged-${d.k}" style="font-size:10px;color:#888">${timerLogged(d.k)?`Logged: ${fmtDuration(timerLogged(d.k))}`:"Not logged"}</div></div></div><div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><button type="button" class="${run?"":"green"}" onclick="bkTimerToggle('${d.k}')">${run?"⏸ Pause":"▶ Start"}</button><button type="button" onclick="bkTimerAdj('${d.k}',-15)">−15</button><button type="button" onclick="bkTimerAdj('${d.k}',15)">+15</button><button type="button" onclick="bkTimerReset('${d.k}')">Reset</button></div></div>`;
+  }).join("");
+}
+function persistBkTimers(){
+  if(!bkEditing||!bkEditing.id)return;
+  const snap=JSON.parse(JSON.stringify(bkTimers));
+  bookings=bookings.map(b=>b.id===bkEditing.id?{...b,timers:snap}:b);
+  save();
+}
+function bkTimerToggle(k){
+  const t=bkTimers[k];
+  if(t.since){t.acc+=Date.now()-t.since;t.since=null;}else t.since=Date.now();
+  persistBkTimers();renderBkTimers();
+}
+function bkTimerAdj(k,delta){
+  const t=bkTimers[k];const running=!!t.since;
+  const mins=Math.max(0,timerLogged(k)+delta);
+  t.acc=mins*60000;t.since=running?Date.now():null;
+  persistBkTimers();renderBkTimers();
+}
+function bkTimerReset(k){bkTimers[k]={acc:0,since:null};persistBkTimers();renderBkTimers();}
 // Blades are stored as {blade, area} objects so a groomer can note "#4F on head" vs body;
 // normalizeBlades upgrades any older bookings that saved a plain string array.
 function normalizeBlades(arr){return(arr||[]).map(x=>typeof x==="string"?{blade:x,area:""}:{...x});}
@@ -1292,9 +1426,10 @@ function updateIntakeBanner(){
   else{el.style.display="none";}
   if(document.getElementById("modal-intake-review").classList.contains("open"))renderIntakeReviewModal();
 }
-function markOwnerReviewed(id){owners=owners.map(o=>o.id===id?{...o,needsReview:false}:o);save();render();}
+function markOwnerReviewed(id){closeIntakeInfo();owners=owners.map(o=>o.id===id?{...o,needsReview:false}:o);save();render();}
 function markPetReviewed(id){pets=pets.map(p=>p.id===id?{...p,needsReview:false}:p);save();render();}
 function markIntakeEntryReviewed(petId,ownerId){
+  closeIntakeInfo();
   pets=pets.map(p=>p.id===petId?{...p,needsReview:false}:p);
   if(ownerId)owners=owners.map(o=>o.id===ownerId?{...o,needsReview:false}:o);
   save();render();
@@ -1307,6 +1442,7 @@ function editIntakeEntry(petId,ownerId){
 }
 function deleteIntakeEntry(petId,ownerId){
   openConfirm("Delete this intake entry (pet and new owner)?","Delete",()=>{
+    closeIntakeInfo();
     pets=pets.filter(p=>p.id!==petId);
     // Only remove the owner if they came from this intake and have no other pets
     if(ownerId){
@@ -1319,14 +1455,55 @@ function deleteIntakeEntry(petId,ownerId){
 }
 function deleteIntakeOwner(ownerId){
   openConfirm("Delete this owner?","Delete",()=>{
+    closeIntakeInfo();
     owners=owners.filter(o=>o.id!==ownerId);
     pets=pets.map(p=>({...p,ownerIds:(p.ownerIds||[]).filter(id=>id!==ownerId)}));
     save();render();renderIntakeReviewModal();
   });
 }
 function openIntakeReviewModal(){
+  // A single pending submission opens straight to its info; several open the list.
+  const rp=pets.filter(p=>p.needsReview);
+  const linked=new Set(rp.flatMap(p=>p.ownerIds||[]));
+  const so=owners.filter(o=>o.needsReview&&!linked.has(o.id));
+  if(rp.length+so.length===1){
+    if(rp.length){const ow=owners.find(o=>(rp[0].ownerIds||[]).includes(o.id));openIntakeInfo(rp[0].id,ow?ow.id:null);}
+    else openIntakeOwnerInfo(so[0].id);
+    return;
+  }
   renderIntakeReviewModal();
   document.getElementById("modal-intake-review").classList.add("open");
+}
+function iiRow(label,val){
+  if(val===undefined||val===null||val===""||(Array.isArray(val)&&!val.length))return"";
+  return`<div class="f"><div class="fl">${label}</div><div class="vv">${Array.isArray(val)?val.join(", "):val}</div></div>`;
+}
+function closeIntakeInfo(){document.getElementById("modal-intake-info")?.classList.remove("open");}
+function openIntakeInfo(petId,ownerId){
+  const p=petById(petId);if(!p)return;
+  const o=ownerId?ownerById(ownerId):owners.find(x=>(p.ownerIds||[]).includes(x.id));
+  const consent=p.consentSigned?`✓ Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}`:"⚠ No consent on file";
+  let html=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin-bottom:2px">Pet</div>`;
+  html+=iiRow("Name",p.name)+iiRow("Breed",displayBreed(p.breed,p.oodleName))+iiRow("Sex",p.sex)+iiRow("Desexed",p.desexed?"Yes":"No")+iiRow("Size",p.size)+iiRow("Age",fmtAge(p.dob,p.approxAge))
+   +iiRow("Coat",p.coatTypes)+iiRow("Special handling",[...(p.medicalTags||[]),...(p.behaviour||[])].filter(t=>SPECIAL_HANDLING_TRAITS.includes(t)).concat(p.customSpecialHandling?[p.customSpecialHandling]:[]))
+   +iiRow("Behaviour",(p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical",(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical notes",p.medicalNotes)
+   +iiRow("Allergies",[...(p.allergies||[])].concat(p.customAllergies?[p.customAllergies]:[]))+iiRow("Treats",p.treatsOk===false?"No treats":"OK")+iiRow("Style",p.preferredStyle)
+   +iiRow("Notes",p.lastNote?linkifyNote(p.lastNote):"")+iiRow("Consent",consent);
+  html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin:12px 0 2px">Owner</div>`;
+  html+=o?iiRow("Name",o.name)+iiRow("Phone",o.phone)+iiRow("Email",o.email)+iiRow("Contact",o.contact)+iiRow("Notes",o.notes):`<div style="font-size:12px;color:var(--text-muted);padding:6px 0">No owner linked</div>`;
+  html+=petDupHtml_(p,o)||"";
+  document.getElementById("ii-title").textContent=`🆕 ${p.name} — intake details`;
+  document.getElementById("ii-body").innerHTML=html;
+  const oid=o?o.id:"null";
+  document.getElementById("ii-actions").innerHTML=`<button class="danger" onclick="deleteIntakeEntry(${p.id},${oid})">Delete</button><button onclick="closeIntakeInfo();editIntakeEntry(${p.id},${oid})">&#9998; Edit</button><button onclick="closeIntakeInfo()">Close</button><button class="primary" onclick="markIntakeEntryReviewed(${p.id},${oid})">&#10003; Reviewed</button>`;
+  document.getElementById("modal-intake-info").classList.add("open");
+}
+function openIntakeOwnerInfo(ownerId){
+  const o=ownerById(ownerId);if(!o)return;
+  document.getElementById("ii-title").textContent=`🆕 ${o.name} — intake details`;
+  document.getElementById("ii-body").innerHTML=iiRow("Name",o.name)+iiRow("Phone",o.phone)+iiRow("Email",o.email)+iiRow("Contact",o.contact)+iiRow("Notes",o.notes)+(ownerDupHtml_(o)||"");
+  document.getElementById("ii-actions").innerHTML=`<button class="danger" onclick="deleteIntakeOwner(${o.id})">Delete</button><button onclick="closeIntakeInfo();editOwner(${o.id})">&#9998; Edit</button><button onclick="closeIntakeInfo()">Close</button><button class="primary" onclick="markOwnerReviewed(${o.id})">&#10003; Reviewed</button>`;
+  document.getElementById("modal-intake-info").classList.add("open");
 }
 function closeIntakeReviewModal(){document.getElementById("modal-intake-review").classList.remove("open");}
 function renderIntakeReviewModal(){
@@ -1342,10 +1519,10 @@ function renderIntakeReviewModal(){
   reviewPets.forEach(p=>{
     const owner=owners.find(o=>(p.ownerIds||[]).includes(o.id));
     const consentBit=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:`<span class="badge" style="background:#FDECEB;color:#B4483A">&#9888; No consent on file</span>`;
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div>${petDupHtml_(p,owner)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="editIntakeEntry(${p.id},${owner?owner.id:"null"})">&#9998; Edit</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div>${petDupHtml_(p,owner)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="openIntakeInfo(${p.id},${owner?owner.id:"null"})" style="background:var(--teal);color:#fff;border-color:var(--teal)">&#128269; Review</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
   });
   standaloneOwners.forEach(o=>{
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div>${ownerDupHtml_(o)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="closeIntakeReviewModal();editOwner(${o.id})">&#9998; Edit owner</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div>${ownerDupHtml_(o)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="openIntakeOwnerInfo(${o.id})" style="background:var(--teal);color:#fff;border-color:var(--teal)">&#128269; Review</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
   });
   listEl.innerHTML=html;
 }
@@ -1513,20 +1690,21 @@ function savePetDriveFolder(petId,folderUrl){
 }
 function ownerById(id){return owners.find(o=>o.id===id);}
 
-function computeCost(service,addOns,pet){
+function computeCost(service,addOns,pet,waiveExtras){
   const base=prices[service]||0,baseDur=durations[service]||0;
   const addOnCost=(addOns||[]).reduce((s,a)=>s+(prices[a]||0),0);
   const addOnDur=(addOns||[]).reduce((s,a)=>s+(durations[a]||0),0);
   if(!pet)return{base,addOnCost,sizeAdj:0,behAdj:0,behDurAdj:0,total:base+addOnCost,duration:baseDur+addOnDur};
-  const sizeAdj=Math.round(base*(SIZE_MULT[pet.size]||1))-base;
-  const behAdj=(pet.behaviour||[]).some(t=>BEH_SURCHARGE_TRAITS.includes(t))?BEH_SURCHARGE:0;
+  const rawSize=Math.round(base*(SIZE_MULT[pet.size]||1))-base;
+  const rawBeh=(pet.behaviour||[]).some(t=>BEH_SURCHARGE_TRAITS.includes(t))?BEH_SURCHARGE:0;
+  const sizeAdj=waiveExtras?0:rawSize,behAdj=waiveExtras?0:rawBeh,waivedAmt=waiveExtras?rawSize+rawBeh:0;
   const behDurAdj=(pet.behaviour||[]).some(t=>BEH_DUR_TRAITS.includes(t))?BEH_DUR_ADD:0;
-  return{base,addOnCost,sizeAdj,behAdj,behDurAdj,total:base+sizeAdj+behAdj+addOnCost,duration:Math.max(baseDur+(SIZE_DUR[pet.size]||0)+behDurAdj+addOnDur,15)};
+  return{base,addOnCost,sizeAdj,behAdj,waivedAmt,behDurAdj,total:base+sizeAdj+behAdj+addOnCost,duration:Math.max(baseDur+(SIZE_DUR[pet.size]||0)+behDurAdj+addOnDur,15)};
 }
 function mattingCost(mins){return 0;}// De-matting is now billed as a flat add-on fee (see prices["De-matting"]), not per-minute.
 function bkPrice(b){
   const pet=petById(b.petId);
-  const cost=computeCost(b.service,b.addOns||[],pet);
+  const cost=computeCost(b.service,b.addOns||[],pet,b.waiveExtras);
   const matting=mattingCost(b.mattingMinutes);
   const duration=cost.duration+(Number(b.mattingMinutes)||0);
   const hasCustom=b.customPrice!==null&&b.customPrice!==undefined&&b.customPrice!=="";
@@ -1593,7 +1771,7 @@ function renderDashboard(){
     const brachy=pet&&isBrachy(pet.breed)&&!pet.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:8px">Brachy</span>`:"";
     const behTags=(pet?.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
     const petPhoto=pet?.photo?`<img src="${pet.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="font-size:24px">🐾</div>`;
-    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:#E8534A;box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button><button class="sm" onclick="openBkDetailsModal(${next.id})">📝 Details</button></div></div></div>`;
+    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}${groomedBadge(pet?.id)}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:#E8534A;box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button><button class="sm" onclick="editBk(${next.id})">📝 Edit</button></div></div></div>`;
   }
   let upcomingMore="";
   if(upcoming.length>1){
@@ -1615,10 +1793,10 @@ function renderBookings(){
         <div style="flex:1;min-width:0">
           <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
             <div>
-              <div style="font-weight:500;font-size:13px">${pet?.name||"—"} <span style="color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span></div>
+              <div style="font-weight:500;font-size:13px">${pet?.name||"—"} <span style="color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${groomedBadge(b.petId)}</div>
               <div style="font-size:12px;color:#888;margin-top:1px">${owner?.name||"—"} &middot; ${owner?.phone||""}</div>
             </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${badge(b.status)}<button class="sm" onclick="openBkDetailsModal(${b.id})">📝 Details</button><button class="sm" onclick="editBk(${b.id})">&#9998;</button><button class="sm" onclick="deleteBk(${b.id})">&#128465;</button></div>
+            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${badge(b.status)}<button class="sm" onclick="editBk(${b.id})">📝 Edit</button><button class="sm" onclick="deleteBk(${b.id})">&#128465;</button></div>
           </div>
           <div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
             <div style="min-width:120px">
@@ -1641,12 +1819,12 @@ function renderBookings(){
             </div>
             <div style="min-width:80px">
               <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Time spent</div>
-              <div style="font-size:13px">${b.timeSpent?fmtDuration(b.timeSpent):"—"}</div>
+              <div style="font-size:13px">${timeSpentHtml(b)}</div>
             </div>
           </div>
         </div>
       </div>
-      ${(b.blades||[]).length||(b.combs||[]).length?`<div style="margin-left:46px;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${normalizeBlades(b.blades).map(bl=>tag(bladeLabel(bl),"#E8F3FF","#185FA5")).join("")}${normalizeCombs(b.combs).map(c=>{const info=combInfo(c.comb);return info?tag(combChipLabel(c),info.bg,info.text):tag(combChipLabel(c),"#EAF7EE","#2f7a4a");}).join("")}</div>`:""}
+      ${bookingCuts(b).length?`<div style="margin-left:46px;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${bookingCuts(b).map(c=>{const info=cutInfo(c.label);return info?tag(cutChipLabel(c),info.bg,info.text):tag(cutChipLabel(c),"#EAF7EE","#2f7a4a");}).join("")}</div>`:""}
       ${b.notes||b.completionNotes||b.nextnote||b.beforePhoto||b.afterPhoto?`<div style="margin-left:46px">${b.notes?`<div style="background:#EEEDFE;border-left:3px solid #534AB7;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#534AB7;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Booking notes</strong><br>${b.notes}</div>`:""}${b.completionNotes?`<div style="background:#E6F1FB;border-left:3px solid #185FA5;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#185FA5;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Completion notes</strong><br>${b.completionNotes}</div>`:""}${b.nextnote?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#92400E;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">For next time</strong><br>${b.nextnote}</div>`:""}${(b.beforePhoto||b.afterPhoto)?`<div style="display:flex;gap:8px;margin-top:8px">${b.beforePhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">Before</div><img src="${b.beforePhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}${b.afterPhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">After</div><img src="${b.afterPhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}</div>`:""}</div>`:""}
     </div>`;
   }).join("");
@@ -1725,7 +1903,7 @@ function renderPets(){
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
@@ -1805,7 +1983,7 @@ function renderFinances(){
   return`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem"><div class="stat"><div class="slabel">Income</div><div class="sval" style="color:#5BAF7A">${fmtMoney(totalIncome)}</div></div><div class="stat"><div class="slabel">Expenses</div><div class="sval" style="color:#E8534A">${fmtMoney(totalExp)}</div></div><div class="stat"><div class="slabel">Net profit</div><div class="sval" style="color:${profit>=0?"#185FA5":"#E8534A"}">${fmtMoney(Math.abs(profit))}</div></div><div class="stat"><div class="slabel">Outstanding</div><div class="sval" style="color:#854F0B">${fmtMoney(outTotal)}</div></div></div><div style="font-size:14px;font-weight:600;margin-bottom:10px">${editingExp?"Edit expense":"Add expense"}</div><div class="card" style="margin-bottom:1.5rem"><div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap"><div style="flex:2;min-width:120px"><label class="lbl">Description</label><input type="text" id="exp-desc" placeholder="e.g. shampoo supplies" value="${editingExp?editingExp.desc:""}"/></div><div style="flex:1;min-width:90px"><label class="lbl">Amount ($)</label><input type="number" id="exp-amt" placeholder="0.00" value="${editingExp?editingExp.amount:""}"/></div><div style="flex:1;min-width:120px"><label class="lbl">Date</label><input type="date" id="exp-date" value="${editingExp?editingExp.date:todayStr()}"/></div><button class="primary" onclick="addExp()" style="flex-shrink:0;height:56px;width:64px;padding:0;font-size:13px;font-weight:700;border-radius:12px;line-height:1.3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;align-self:flex-end">${editingExp?'<span style="font-size:16px;line-height:1">&#10003;</span><span>Save</span>':'<span style="font-size:16px;line-height:1">+</span><span>Add</span>'}</button>${editingExp?'<button type="button" onclick="cancelEditExp()" style="flex-shrink:0;height:56px;align-self:flex-end">Cancel</button>':""}</div></div><div style="font-size:14px;font-weight:600;margin-bottom:8px">Income</div><div style="overflow-x:auto;margin-bottom:1.5rem"><table><thead><tr><th>Date</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment</th></tr></thead><tbody>${incRows}</tbody></table></div><div style="font-size:14px;font-weight:600;margin-bottom:8px">Expenses</div><div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Description</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>${expRows}</tbody></table></div>`;
 }
 
-let bkEditing=null,bkActiveAddons=[],bkActiveProducts=[],bkActiveBlades=[],bkActiveCombs=[],bkBeforePhoto=null,bkAfterPhoto=null;
+let bkEditing=null,bkActiveAddons=[],bkActiveProducts=[],bkActiveCuts=[],bkIsCreate=true,bkProdOpen=false,bkBeforePhoto=null,bkAfterPhoto=null;
 let _bkCompletionMode=false; // true when the modal is being opened right after marking a booking "done"
 let _pendingBeforeUpload=null,_pendingAfterUpload=null; // Promises that resolve to Drive URL or null
 let bkBeforePreCropUrl=null,bkAfterPreCropUrl=null; // Drive URLs superseded by a crop, pending deletion
@@ -2132,7 +2310,7 @@ function applyBkCrop(){
   }
 }
 function openBkModal(b){
-  bkEditing=b||null;bkActiveAddons=[...(b?.addOns||[])];bkActiveProducts=[...(b?.products||[])];bkActiveBlades=normalizeBlades(b?.blades);bkActiveCombs=normalizeCombs(b?.combs);bkBeforePhoto=b?.beforePhoto||null;bkAfterPhoto=b?.afterPhoto||null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
+  bkEditing=b||null;bkActiveAddons=[...(b?.addOns||[])];bkActiveProducts=[...(b?.products||[])];bkActiveCuts=bookingCuts(b);bkIsCreate=!b;bkProdOpen=false;bkBeforePhoto=b?.beforePhoto||null;bkAfterPhoto=b?.afterPhoto||null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
   document.getElementById("bk-title").textContent=b?"Edit booking":"New booking";
   // Populate all pets (sorted alphabetically)
   const petSel=document.getElementById("bk-pet");
@@ -2149,7 +2327,8 @@ function openBkModal(b){
   document.getElementById("bk-custom").value=b?.customPrice??"";
   document.getElementById("bk-waived").checked=b?.waived||false;
   document.getElementById("bk-paid").checked=b?.paid||false;
-  document.getElementById("bk-timespent").innerHTML=timeSpentOptionsHtml(b?.timeSpent);
+  document.getElementById("bk-waive-extras").checked=b?.waiveExtras||false;
+  initBkTimers(b);
   document.getElementById("bk-completion-banner").style.display=_bkCompletionMode?"block":"none";
   _bkCompletionMode=false;
   // New bookings only show the essentials (pet, owner, service, add-ons, date/time, status,
@@ -2158,13 +2337,11 @@ function openBkModal(b){
   // since the core details were already set when it was created.
   const isCreate=!b;
   document.querySelectorAll("#modal-booking .bk-postonly").forEach(el=>{el.style.display=isCreate?"none":"";});
-  document.querySelectorAll("#modal-booking .bk-core-only").forEach(el=>{el.style.display=isCreate?"":"none";});
   updateBkMattingVisibility();
   if(b?.petId){petSel.value=b.petId;updateBkOwnerFromPet(b.petId,b.ownerId);}else{updateBkOwnerFromPet("","");}
   renderBkAddons(bkActiveAddons);
   renderBkProducts(bkActiveProducts);
-  renderBkBlades(bkActiveBlades);
-  renderBkCombs(bkActiveCombs);
+  renderBkCuts();
   renderBkPhotos();
   updateBkPrice();
   document.getElementById("modal-booking").classList.add("open");
@@ -2179,6 +2356,7 @@ function openBkModal(b){
   document.getElementById("bk-matting").oninput=updateBkPrice;
   document.getElementById("bk-custom").oninput=updateBkPrice;
   document.getElementById("bk-waived").onchange=updateBkPrice;
+  document.getElementById("bk-waive-extras").onchange=updateBkPrice;
 }
 function updateBkOwnerFromPet(petId,preferOwnerId){
   const pet=petById(Number(petId));
@@ -2203,69 +2381,48 @@ function renderBkAddons(active){
   const visibleAddOns=ADD_ONS.filter(a=>a!=="Poodle point"||isPoodleBreed(pet?.breed));
   document.getElementById("bk-addons").innerHTML=visibleAddOns.map(a=>`<button type="button" onclick="toggleAddon('${a}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${active.includes(a)?"var(--teal)":"transparent"};color:${active.includes(a)?"#fff":"#666"};border:${active.includes(a)?"1px solid var(--teal)":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${active.includes(a)?"✓ ":""}${a} (+${fmtMoney(prices[a]||0)})</button>`).join("");
 }
+function toggleProdPanel(){bkProdOpen=!bkProdOpen;renderBkProducts(bkActiveProducts);}
 function renderBkProducts(active){
   const el=document.getElementById("bk-products");if(!el)return;
   const prods=getProductsFromExpenses();
-  const available=prods.filter(p=>!emptyProducts.includes(p));
-  const empty=prods.filter(p=>emptyProducts.includes(p));
-  let html="";
-  if(!prods.length){
-    html=`<span style="font-size:11px;color:#aaa">Add product expenses to populate this list.</span>`;
-  } else {
-    available.forEach(p=>{
-      const isActive=active.includes(p);
-      html+=`<div style="display:inline-flex;align-items:center;gap:0;margin-bottom:4px;border-radius:14px;border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};overflow:hidden">`;
-      html+=`<button type="button" onclick="toggleProduct('${p.replace(/'/g,"\\'")}')" style="padding:3px 8px;font-size:10px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#555"};border:none;font-family:inherit;font-weight:500;cursor:pointer;border-radius:0;white-space:nowrap">${isActive?"✓ ":""}${p}</button>`;
-      html+=`<button type="button" title="Mark as empty (hides from picker)" onclick="toggleEmptyProduct('${p.replace(/'/g,"\\'")}')" style="padding:3px 6px;font-size:9px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"rgba(255,255,255,0.7)":"#aaa"};border:none;border-left:1px solid ${isActive?"rgba(255,255,255,0.3)":"var(--border)"};font-family:inherit;cursor:pointer;border-radius:0" title="Mark empty">∅</button>`;
-      html+=`</div>`;
-    });
+  const esc=p=>p.replace(/'/g,"\\'");
+  if(!prods.length){el.innerHTML=`<span style="font-size:11px;color:#aaa">Add product expenses to populate this list.</span>`;return;}
+  const chips=active.map(p=>`<span style="display:inline-flex;align-items:center;background:#4DA6FF;color:#fff;border-radius:12px;padding:1px 2px 1px 8px;font-size:10px;font-weight:500">${p}<button type="button" onclick="toggleProduct('${esc(p)}')" style="padding:0 5px;border:none;background:transparent;color:rgba(255,255,255,.9);font-size:13px;line-height:1.2;border-radius:0">×</button></span>`).join("");
+  let html=chips+(active.length?"":`<span style="font-size:11px;color:#aaa">None selected</span>`);
+  html+=`<button type="button" onclick="toggleProdPanel()" style="padding:2px 9px;font-size:10px;border-radius:12px;background:transparent;font-weight:500">${bkProdOpen?"▲ Done":"＋ Add"}</button>`;
+  if(bkProdOpen){
+    const avail=prods.filter(p=>!emptyProducts.includes(p)&&!active.includes(p));
+    const empty=prods.filter(p=>emptyProducts.includes(p));
+    html+=`<div style="width:100%;border:1px solid var(--border);border-radius:8px;padding:6px;max-height:130px;overflow-y:auto;background:var(--surface2);display:flex;flex-wrap:wrap;gap:4px">`;
+    html+=avail.length?avail.map(p=>`<span style="display:inline-flex;align-items:center;border:1px solid var(--border);border-radius:12px;overflow:hidden"><button type="button" onclick="toggleProduct('${esc(p)}')" style="padding:2px 8px;font-size:10px;border:none;border-radius:0;background:transparent;font-weight:500;white-space:nowrap">+ ${p}</button><button type="button" title="Mark as empty (hides from picker)" onclick="toggleEmptyProduct('${esc(p)}')" style="padding:2px 6px;font-size:9px;border:none;border-left:1px solid var(--border);border-radius:0;background:transparent;color:#aaa">∅</button></span>`).join(""):`<span style="font-size:10px;color:#aaa">All available products selected</span>`;
     if(empty.length){
-      html+=`<div style="width:100%;margin-top:6px;margin-bottom:3px;font-size:10px;color:#aaa;font-weight:500;text-transform:uppercase;letter-spacing:0.04em">Empty — tap to restore</div>`;
-      empty.forEach(p=>{
-        html+=`<button type="button" onclick="toggleEmptyProduct('${p.replace(/'/g,"\\'")}')" style="padding:3px 8px;font-size:9px;border-radius:14px;background:#f5f5f5;color:#aaa;border:1px dashed #ddd;font-family:inherit;cursor:pointer;margin-bottom:4px;text-decoration:line-through;white-space:nowrap">${p}</button>`;
-      });
+      html+=`<div style="width:100%;font-size:9px;color:#aaa;font-weight:600;text-transform:uppercase;letter-spacing:.04em;margin-top:2px">Empty — tap to restore</div>`;
+      html+=empty.map(p=>`<button type="button" onclick="toggleEmptyProduct('${esc(p)}')" style="padding:2px 8px;font-size:9px;border-radius:12px;background:transparent;color:#aaa;border:1px dashed var(--border);text-decoration:line-through;white-space:nowrap">${p}</button>`).join("");
     }
+    html+=`</div>`;
   }
   el.innerHTML=html;
 }
-function renderBkBlades(active){
-  const el=document.getElementById("bk-blades");if(!el)return;
-  el.innerHTML=BLADES.map(b=>{
-    const entry=active.find(x=>x.blade===b);
+function renderBkCuts(){
+  const el=document.getElementById("bk-cuts");if(!el)return;
+  const known=CUTS.map(c=>c.label);
+  const extra=bkActiveCuts.filter(e=>!known.includes(e.label)).map(e=>({label:e.label,bg:"#607D8B",text:"#fff",colorName:"Other"}));
+  el.innerHTML=[...CUTS,...extra].map(info=>{
+    const entry=bkActiveCuts.find(x=>x.label===info.label);
     const isActive=!!entry;
-    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkBladeArea('${b}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
-    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="toggleBlade('${b}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#666"};border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${isActive?"✓ ":""}${b}</button>${areaBtns}</span>`;
+    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkCutArea('${info.label}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
+    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="toggleCut('${info.label}')" title="${info.colorName}" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;font-size:11px;border-radius:20px;background:${isActive?info.bg:"transparent"};color:${isActive?info.text:"#666"};border:${isActive?`1px solid ${info.bg}`:"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer"><span style="width:9px;height:9px;border-radius:50%;background:${info.bg};border:1px solid rgba(0,0,0,0.15);flex-shrink:0"></span>${isActive?"✓ ":""}${info.label}</button>${areaBtns}</span>`;
   }).join("");
 }
-function toggleBlade(b){
-  const idx=bkActiveBlades.findIndex(x=>x.blade===b);
-  if(idx>=0)bkActiveBlades.splice(idx,1);else bkActiveBlades.push({blade:b,area:""});
-  renderBkBlades(bkActiveBlades);
+function toggleCut(label){
+  const idx=bkActiveCuts.findIndex(x=>x.label===label);
+  if(idx>=0)bkActiveCuts.splice(idx,1);else bkActiveCuts.push({label,area:""});
+  renderBkCuts();
 }
-function setBkBladeArea(b,area){
-  const entry=bkActiveBlades.find(x=>x.blade===b);if(!entry)return;
+function setBkCutArea(label,area){
+  const entry=bkActiveCuts.find(x=>x.label===label);if(!entry)return;
   entry.area=entry.area===area?"":area;
-  renderBkBlades(bkActiveBlades);
-}
-function renderBkCombs(active){
-  const el=document.getElementById("bk-combs");if(!el)return;
-  el.innerHTML=COMBS.map(info=>{
-    const label=`${info.size} (${info.mm})`;
-    const entry=active.find(x=>x.comb===label);
-    const isActive=!!entry;
-    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkCombArea('${label}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
-    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="toggleComb('${label}')" title="${info.colorName}" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;font-size:11px;border-radius:20px;background:${isActive?info.bg:"transparent"};color:${isActive?info.text:"#666"};border:${isActive?`1px solid ${info.bg}`:"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer"><span style="width:9px;height:9px;border-radius:50%;background:${info.bg};border:1px solid rgba(0,0,0,0.15);flex-shrink:0"></span>${isActive?"✓ ":""}${label}</button>${areaBtns}</span>`;
-  }).join("");
-}
-function toggleComb(label){
-  const idx=bkActiveCombs.findIndex(x=>x.comb===label);
-  if(idx>=0)bkActiveCombs.splice(idx,1);else bkActiveCombs.push({comb:label,area:""});
-  renderBkCombs(bkActiveCombs);
-}
-function setBkCombArea(label,area){
-  const entry=bkActiveCombs.find(x=>x.comb===label);if(!entry)return;
-  entry.area=entry.area===area?"":area;
-  renderBkCombs(bkActiveCombs);
+  renderBkCuts();
 }
 function isDeshedProduct(p){return/deshed|de-shed/i.test(p)&&/david|rinse/i.test(p);}
 const DESHED_ADDON="De-shedding treatment";
@@ -2278,10 +2435,8 @@ function updateBkMattingVisibility(){
 }
 function updateBkBladesVisibility(){
   const wrap=document.getElementById("bk-blades-wrap");if(!wrap)return;
-  const service=document.getElementById("bk-service")?.value||"";
-  const hide=service==="Bath & brush";
-  wrap.style.display=hide?"none":"";
-  if(hide&&bkActiveBlades.length){bkActiveBlades=[];renderBkBlades(bkActiveBlades);}
+  if(bkIsCreate){wrap.style.display="none";return;} // no blades/combs on the booking creator
+  wrap.style.display=(document.getElementById("bk-service")?.value||"")==="Bath & brush"?"none":"";
 }
 function toggleAddon(a){
   if(bkActiveAddons.includes(a))bkActiveAddons=bkActiveAddons.filter(x=>x!==a);else bkActiveAddons.push(a);
@@ -2314,7 +2469,7 @@ function updateBkPrice(){
   const svc=document.getElementById("bk-service").value;
   const petId=Number(document.getElementById("bk-pet").value);
   const pet=petById(petId);
-  const cost=computeCost(svc,bkActiveAddons,pet);
+  const cost=computeCost(svc,bkActiveAddons,pet,document.getElementById("bk-waive-extras").checked);
   const mattingMins=Number(document.getElementById("bk-matting").value)||0;
   const matting=mattingCost(mattingMins);
   const customRaw=document.getElementById("bk-custom").value;
@@ -2329,6 +2484,7 @@ function updateBkPrice(){
   if(bkActiveAddons.length)html+=`<div class="price-row"><span style="color:#534AB7">Add-ons</span><span>+${fmtMoney(cost.addOnCost)}</span></div>`;
   if(cost.sizeAdj)html+=`<div class="price-row"><span style="color:${cost.sizeAdj>0?"#E8534A":"#5BAF7A"}">Size adj. (${pet?.size})</span><span>${cost.sizeAdj>0?"+":""}${fmtMoney(cost.sizeAdj)}</span></div>`;
   if(cost.behAdj)html+=`<div class="price-row" style="color:#E8534A"><span>Handling surcharge</span><span>+${fmtMoney(cost.behAdj)}</span></div>`;
+  if(cost.waivedAmt)html+=`<div class="price-row" style="color:#5BAF7A"><span>Extras waived</span><span>-${fmtMoney(cost.waivedAmt)}</span></div>`;
   if(matting)html+=`<div class="price-row" style="color:#E8534A"><span>Matting (${mattingMins} min)</span><span>+${fmtMoney(matting)}</span></div>`;
   if(disc)html+=`<div class="price-row" style="color:#5BAF7A"><span>Discount (${DISC_PCT}%)</span><span>-${fmtMoney(disc)}</span></div>`;
   html+=`<div class="price-row total"><span>Total</span><span>${waived?"Waived":fmtMoney(total)}</span></div><div class="price-row"><span style="color:#888;font-size:11px">Est. duration</span><span style="color:#888;font-size:11px">${duration} min</span></div>`;
@@ -2347,7 +2503,8 @@ function closeBkModal(){
   if(bkAfterPhoto&&bkAfterPhoto.startsWith("http")&&bkAfterPhoto!==savedAfter)deletePhotoFromDrive(bkAfterPhoto);
   deletePhotoFromDrive(bkBeforePreCropUrl);
   deletePhotoFromDrive(bkAfterPreCropUrl);
-  bkEditing=null;bkActiveAddons=[];bkActiveProducts=[];bkActiveBlades=[];bkActiveCombs=[];
+  clearInterval(_timerTick);_timerTick=null;
+  bkEditing=null;bkActiveAddons=[];bkActiveProducts=[];bkActiveCuts=[];
   bkBeforePhoto=null;bkAfterPhoto=null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
   _bkCompletionMode=false;
 }
@@ -2365,7 +2522,7 @@ async function saveBkModal(){
     _pendingBeforeUpload=null;_pendingAfterUpload=null;
   }
   const customRaw=document.getElementById("bk-custom").value;
-  const obj={ownerId,petId,service:document.getElementById("bk-service").value,addOns:[...bkActiveAddons],products:[...bkActiveProducts],blades:[...bkActiveBlades],combs:[...bkActiveCombs],date:document.getElementById("bk-date").value,time:document.getElementById("bk-time").value,status:document.getElementById("bk-status").value,notes:document.getElementById("bk-notes").value,completionNotes:document.getElementById("bk-completionnotes").value,nextnote:document.getElementById("bk-nextnote").value,mattingMinutes:Number(document.getElementById("bk-matting").value)||0,customPrice:customRaw!==""?Number(customRaw):null,discount:false,waived:document.getElementById("bk-waived").checked,paid:document.getElementById("bk-paid").checked,timeSpent:document.getElementById("bk-timespent").value?Number(document.getElementById("bk-timespent").value):null,beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
+  const obj={ownerId,petId,service:document.getElementById("bk-service").value,addOns:[...bkActiveAddons],products:[...bkActiveProducts],cuts:bkActiveCuts.map(c=>({...c})),blades:[],combs:[],date:document.getElementById("bk-date").value,time:document.getElementById("bk-time").value,status:document.getElementById("bk-status").value,notes:document.getElementById("bk-notes").value,completionNotes:document.getElementById("bk-completionnotes").value,nextnote:document.getElementById("bk-nextnote").value,mattingMinutes:Number(document.getElementById("bk-matting").value)||0,customPrice:customRaw!==""?Number(customRaw):null,discount:false,waived:document.getElementById("bk-waived").checked,paid:document.getElementById("bk-paid").checked,timers:JSON.parse(JSON.stringify(bkTimers)),timeBath:timerLogged("bath")||null,timeGroom:timerLogged("groom")||null,timeSpent:(timerLogged("bath")+timerLogged("groom"))||null,waiveExtras:document.getElementById("bk-waive-extras").checked,beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
   if(bkEditing){bookings=bookings.map(b=>b.id===bkEditing.id?{...b,...obj}:b);}else{bookings.push({id:nextId++,...obj});}
   const savedBk=bkEditing?bookings.find(b=>b.id===bkEditing.id):bookings[bookings.length-1];
   // Clean up any Drive URLs superseded by crops during this session
@@ -2376,89 +2533,6 @@ async function saveBkModal(){
   save();closeBkModal();render();
   if(savedBk.status==="cancelled")deleteBookingCalendarEvent(savedBk);
   else syncBookingToCalendar(savedBk);
-}
-let bkdEditing=null,bkdActiveProducts=[],bkdActiveBlades=[],bkdActiveCombs=[];
-function openBkDetailsModal(id){
-  const b=bookings.find(x=>x.id===id);if(!b)return;
-  bkdEditing=b;
-  bkdActiveProducts=[...(b.products||[])];
-  bkdActiveBlades=normalizeBlades(b.blades);
-  bkdActiveCombs=normalizeCombs(b.combs);
-  document.getElementById("bkd-notes").value=b.completionNotes||"";
-  document.getElementById("bkd-nextnote").value=b.nextnote||"";
-  document.getElementById("bkd-timespent").innerHTML=timeSpentOptionsHtml(b.timeSpent);
-  renderBkdProducts();
-  renderBkdBlades();
-  renderBkdCombs();
-  document.getElementById("modal-bkdetails").classList.add("open");
-}
-function closeBkDetailsModal(){
-  document.getElementById("modal-bkdetails").classList.remove("open");
-  bkdEditing=null;bkdActiveProducts=[];bkdActiveBlades=[];bkdActiveCombs=[];
-}
-function renderBkdProducts(){
-  const el=document.getElementById("bkd-products");if(!el)return;
-  const prods=getProductsFromExpenses();
-  const available=prods.filter(p=>!emptyProducts.includes(p));
-  let html="";
-  if(!prods.length){
-    html=`<span style="font-size:11px;color:#aaa">Add product expenses to populate this list.</span>`;
-  } else {
-    available.forEach(p=>{
-      const isActive=bkdActiveProducts.includes(p);
-      html+=`<button type="button" onclick="bkdToggleProduct('${p.replace(/'/g,"\\'")}')" style="padding:4px 10px;font-size:11px;border-radius:20px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#555"};border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer;margin-right:5px;margin-bottom:5px">${isActive?"✓ ":""}${p}</button>`;
-    });
-  }
-  el.innerHTML=html;
-}
-function bkdToggleProduct(p){
-  bkdActiveProducts=bkdActiveProducts.includes(p)?bkdActiveProducts.filter(x=>x!==p):[...bkdActiveProducts,p];
-  renderBkdProducts();
-}
-function renderBkdBlades(){
-  const el=document.getElementById("bkd-blades");if(!el)return;
-  el.innerHTML=BLADES.map(b=>{
-    const entry=bkdActiveBlades.find(x=>x.blade===b);
-    const isActive=!!entry;
-    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkdBladeArea('${b}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
-    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="bkdToggleBlade('${b}')" style="padding:4px 11px;font-size:11px;border-radius:20px;background:${isActive?"#4DA6FF":"transparent"};color:${isActive?"#fff":"#666"};border:${isActive?"1px solid #4DA6FF":"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer">${isActive?"✓ ":""}${b}</button>${areaBtns}</span>`;
-  }).join("");
-}
-function bkdToggleBlade(b){
-  const idx=bkdActiveBlades.findIndex(x=>x.blade===b);
-  if(idx>=0)bkdActiveBlades.splice(idx,1);else bkdActiveBlades.push({blade:b,area:""});
-  renderBkdBlades();
-}
-function setBkdBladeArea(b,area){
-  const entry=bkdActiveBlades.find(x=>x.blade===b);if(!entry)return;
-  entry.area=entry.area===area?"":area;
-  renderBkdBlades();
-}
-function renderBkdCombs(){
-  const el=document.getElementById("bkd-combs");if(!el)return;
-  el.innerHTML=COMBS.map(info=>{
-    const label=`${info.size} (${info.mm})`;
-    const entry=bkdActiveCombs.find(x=>x.comb===label);
-    const isActive=!!entry;
-    const areaBtns=isActive?`<span style="display:inline-flex;gap:2px;margin-left:4px">${BLADE_AREAS.map(a=>`<button type="button" onclick="setBkdCombArea('${label}','${a}')" style="padding:2px 7px;font-size:9px;border-radius:10px;background:${entry.area===a?"#1C2B3A":"transparent"};color:${entry.area===a?"#fff":"#888"};border:1px solid ${entry.area===a?"#1C2B3A":"#ccc"};font-family:inherit;cursor:pointer">${a}</button>`).join("")}</span>`:"";
-    return`<span style="display:inline-flex;align-items:center;margin-right:5px;margin-bottom:5px"><button type="button" onclick="bkdToggleComb('${label}')" title="${info.colorName}" style="display:inline-flex;align-items:center;gap:5px;padding:4px 11px 4px 8px;font-size:11px;border-radius:20px;background:${isActive?info.bg:"transparent"};color:${isActive?info.text:"#666"};border:${isActive?`1px solid ${info.bg}`:"1px solid var(--border)"};font-family:inherit;font-weight:500;cursor:pointer"><span style="width:9px;height:9px;border-radius:50%;background:${info.bg};border:1px solid rgba(0,0,0,0.15);flex-shrink:0"></span>${isActive?"✓ ":""}${label}</button>${areaBtns}</span>`;
-  }).join("");
-}
-function bkdToggleComb(label){
-  const idx=bkdActiveCombs.findIndex(x=>x.comb===label);
-  if(idx>=0)bkdActiveCombs.splice(idx,1);else bkdActiveCombs.push({comb:label,area:""});
-  renderBkdCombs();
-}
-function setBkdCombArea(label,area){
-  const entry=bkdActiveCombs.find(x=>x.comb===label);if(!entry)return;
-  entry.area=entry.area===area?"":area;
-  renderBkdCombs();
-}
-function saveBkDetailsModal(){
-  if(!bkdEditing)return;
-  const obj={products:[...bkdActiveProducts],blades:[...bkdActiveBlades],combs:[...bkdActiveCombs],completionNotes:document.getElementById("bkd-notes").value,nextnote:document.getElementById("bkd-nextnote").value,timeSpent:document.getElementById("bkd-timespent").value?Number(document.getElementById("bkd-timespent").value):null};
-  bookings=bookings.map(b=>b.id===bkdEditing.id?{...b,...obj}:b);
-  save();closeBkDetailsModal();render();
 }
 function markBkStatus(id,status){
   if(status==="done"){
