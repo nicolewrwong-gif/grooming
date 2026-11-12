@@ -79,7 +79,7 @@ button{cursor:pointer;border:1px solid var(--border);border-radius:14px;backgrou
 button:hover{background:var(--bg);border-color:#ccc}
 button.primary{background:var(--teal);color:#fff;border-color:var(--teal);border-radius:14px;box-shadow:0 3px 8px rgba(0,169,157,0.28)}
 button.primary:hover{background:var(--teal-dark);border-color:var(--teal-dark)}
-button.green{background:#5BAF7A;color:#fff;border-color:#5BAF7A;border-radius:14px;box-shadow:0 3px 8px rgba(91,175,122,0.28)}
+button.green{background:#5BAF7A;color:#fff;border-color:rgb(91,175,122);border-radius:14px;box-shadow:0 3px 8px rgba(91,175,122,0.28)}
 button.green:hover{background:#4a9a69;border-color:#4a9a69}
 button.accent{background:#b0d8f9;color:#1a4a6e;border-color:#b0d8f9;border-radius:14px;box-shadow:0 3px 8px rgba(176,216,249,0.5)}
 button.accent:hover{background:#98ccf5;border-color:#98ccf5}
@@ -273,6 +273,7 @@ button.primary:hover{background:var(--teal-dark)}button.green:hover{background:#
 .tmr{border:1px solid var(--border);border-radius:10px;padding:8px 10px;margin-bottom:6px;background:var(--surface2)}
 .tmr-clock{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
 .tmr button{padding:4px 10px;font-size:11px;border-radius:10px}
+.card.bk-card{display:flex;gap:12px;padding:12px}
 </style>
 <script>
 if("serviceWorker" in navigator){
@@ -445,8 +446,8 @@ if("serviceWorker" in navigator){
 <div class="mb10"><label class="lbl" style="color:#92620A;font-weight:600">Allergies</label><div id="pt-allergies" class="multi-toggle"></div><input type="text" id="pt-allergies-custom" placeholder="e.g. specific brand of shampoo" style="margin-top:6px"/></div>
 </div>
 <div class="mb10"><label class="lbl">Preferred style</label><input type="text" id="pt-prefstyle" placeholder="e.g. teddy bear trim, summer cut..."/></div>
-<div class="mb10"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="pt-treats" checked/> OK to give treats</label></div>
-<div class="mb10"><div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">Linked owners</label><button type="button" class="sm" onclick="openOwModalFromPet()">+ New owner</button></div><div id="pt-owners" class="multi-toggle" style="margin-top:4px"></div></div>
+<div class="mb10"><label class="lbl">Treats</label><select id="pt-treats"><option value="ok">Treats OK</option><option value="limit">Limit treats (not too many)</option><option value="no">No treats</option></select></div>
+<div class="mb10"><div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">Linked owners</label><button type="button" class="sm" id="pt-own-edit-btn" onclick="togglePtOwnEdit()">&#9998; Edit</button></div><div id="pt-owner-summary" style="margin-top:6px"></div><div id="pt-owner-editor" style="display:none;margin-top:8px"></div></div>
 <div class="row-end"><button onclick="closePtModal()">Cancel</button><button class="primary" onclick="savePtModal()">Save pet profile</button></div>
 </div>
 </div>
@@ -559,35 +560,42 @@ function bookingCuts(b){
   return out;
 }
 // ── Times groomed ──
+function treatsState(p){return p.treatsOk===false?"no":(p.treatsLimit?"limit":"ok");}
+function treatsLabel(p){return{ok:"Treats OK",limit:"Limit treats",no:"No treats"}[treatsState(p)];}
 function timesGroomed(petId){return bookings.filter(b=>b.petId===petId&&b.status==="done").length;}
-function groomedBadge(petId){const n=timesGroomed(petId);return`<span class="badge" style="background:#E8F3FF;color:#185FA5;margin-left:6px" title="Completed bookings">✂️ Groomed ${n}×</span>`;}
-// ── Timers (bath & dry / groom), logged in 15-minute increments (rounded up) ──
+function groomedBadge(petId){const n=timesGroomed(petId);return`<span class="badge" style="background:#E8F3FF;color:#185FA5;margin-left:6px" title="Times groomed (completed bookings)">✂️ ${n}×</span>`;}
+// ── Timers: Bath & dry and Groom, each logged in 15-minute increments (rounded up) ──
 const TIMER_DEFS=[{k:"bath",label:"Bath & dry",icon:"🛁"},{k:"groom",label:"Groom",icon:"✂️"}];
 const TIMER_STEP=15*60000;
 let bkTimers={bath:{acc:0,since:null},groom:{acc:0,since:null}};
 let _timerTick=null;
 function tmMs(t){return(t.acc||0)+(t.since?Date.now()-t.since:0);}
+function tmLog(ms){return ms>1500?Math.ceil((ms-1500)/TIMER_STEP)*15:0;}
 function timerMs(k){return tmMs(bkTimers[k]);}
-function timerLogged(k){const ms=timerMs(k);return ms>0?Math.ceil(ms/TIMER_STEP)*15:0;}
+function timerLogged(k){return tmLog(timerMs(k));}
 function fmtClock(ms){const s=Math.floor(ms/1000);return`${Math.floor(s/3600)}:${pad(Math.floor(s%3600/60))}:${pad(s%60)}`;}
-// Minutes logged for a saved booking (live if its timer is still running; legacy timeSpent counts as groom time)
+// Minutes logged for a saved booking (live if its timer is still running). Bookings from the one-timer
+// version count as groom time; older plain timeSpent values do too.
 function bkTimeMins(b,k){
-  const t=b.timers&&b.timers[k];
-  if(t){const ms=tmMs(t);return ms>0?Math.ceil(ms/TIMER_STEP)*15:0;}
+  if(b.timers&&b.timers[k])return tmLog(tmMs(b.timers[k]));
+  if(b.timers)return 0;
+  if(b.timer)return k==="groom"?tmLog(tmMs(b.timer)):0;
   if(k==="bath")return b.timeBath||0;
   return b.timeGroom!=null?b.timeGroom:(b.timeBath==null?(b.timeSpent||0):0);
 }
 function timeSpentHtml(b){
   const bath=bkTimeMins(b,"bath"),groom=bkTimeMins(b,"groom"),total=bath+groom;
-  const running=b.timers&&(b.timers.bath?.since||b.timers.groom?.since);
+  const running=!!((b.timers&&(b.timers.bath?.since||b.timers.groom?.since))||(b.timer&&b.timer.since));
   if(!total&&!running)return"—";
   const parts=[];if(bath)parts.push(`Bath ${fmtDuration(bath)}`);if(groom)parts.push(`Groom ${fmtDuration(groom)}`);
   return`${fmtDuration(total)||"0 min"}${running?" ⏱":""}${parts.length>1||running?`<div style="font-size:10px;color:#888">${parts.join(" · ")}</div>`:""}`;
 }
 function initBkTimers(b){
   clearInterval(_timerTick);_timerTick=null;
-  if(b&&b.timers){bkTimers={bath:{acc:b.timers.bath?.acc||0,since:b.timers.bath?.since||null},groom:{acc:b.timers.groom?.acc||0,since:b.timers.groom?.since||null}};}
-  else if(b){bkTimers={bath:{acc:bkTimeMins(b,"bath")*60000,since:null},groom:{acc:bkTimeMins(b,"groom")*60000,since:null}};}
+  const mk=t=>({acc:t?.acc||0,since:t?.since||null});
+  if(b&&b.timers)bkTimers={bath:mk(b.timers.bath),groom:mk(b.timers.groom)};
+  else if(b&&b.timer)bkTimers={bath:{acc:0,since:null},groom:mk(b.timer)};
+  else if(b)bkTimers={bath:{acc:bkTimeMins(b,"bath")*60000,since:null},groom:{acc:bkTimeMins(b,"groom")*60000,since:null}};
   else bkTimers={bath:{acc:0,since:null},groom:{acc:0,since:null}};
   renderBkTimers();
   if(b)_timerTick=setInterval(tickBkTimers,1000);
@@ -609,7 +617,7 @@ function renderBkTimers(){
 function persistBkTimers(){
   if(!bkEditing||!bkEditing.id)return;
   const snap=JSON.parse(JSON.stringify(bkTimers));
-  bookings=bookings.map(b=>b.id===bkEditing.id?{...b,timers:snap}:b);
+  bookings=bookings.map(b=>b.id===bkEditing.id?{...b,timers:snap,timer:null}:b);
   save();
 }
 function bkTimerToggle(k){
@@ -619,8 +627,7 @@ function bkTimerToggle(k){
 }
 function bkTimerAdj(k,delta){
   const t=bkTimers[k];const running=!!t.since;
-  const mins=Math.max(0,timerLogged(k)+delta);
-  t.acc=mins*60000;t.since=running?Date.now():null;
+  t.acc=Math.max(0,tmMs(t)+delta*60000);t.since=running?Date.now():null;
   persistBkTimers();renderBkTimers();
 }
 function bkTimerReset(k){bkTimers[k]={acc:0,since:null};persistBkTimers();renderBkTimers();}
@@ -1136,7 +1143,6 @@ async function checkIntake(){
       if(item.extraNotes)petNoteParts.push(item.extraNotes);
       if(item.referencePhotoNote)petNoteParts.push("Photo note: "+item.referencePhotoNote);
       if(Array.isArray(item.referencePhotos)&&item.referencePhotos.length)petNoteParts.push("Reference photos: "+item.referencePhotos.join(" "));
-      if(item.limitTreats)petNoteParts.push("Please don't give too many treats.");
       if(approxAge)petNoteParts.push(`Approx age at intake: ${item.petApproxAge}`);
 
       // Structured tags: every intake checkbox with a mapping above becomes
@@ -1161,7 +1167,7 @@ async function checkIntake(){
         sex:item.petSex||"Male",desexed:(item.petDesexed||"")==="Yes",size:item.petSize||"Medium",
         coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:item.medicalNotes||"",
         allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",
-        treatsOk:item.treatsOk!==false,
+        treatsOk:item.treatsOk!==false,treatsLimit:!!item.limitTreats,
         lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
         customSpecialHandling:item.noContactServices||"",hideBrachy:false,oodleName:null,needsReview:true,
         consentSigned:!!(item.agreeTerms&&item.signature),consentSignature:item.signature||"",consentDate:item.consentDate||""});
@@ -1187,15 +1193,16 @@ function ownersMatch_(a,b){
   const na=_normName(a.name);
   return !!na&&na===_normName(b.name);
 }
-function findOwnerMatch(o){
+function findOwnerMatches(o){
   const c=owners.filter(x=>ownersMatch_(o,x));
-  return c.find(x=>!x.needsReview)||c[0]||null;
+  return [...c.filter(x=>!x.needsReview),...c.filter(x=>x.needsReview)]; // existing clients first
 }
-function findPetMatch(p){
+function findOwnerMatch(o){return findOwnerMatches(o)[0]||null;}
+function findPetMatches(p){
   const nm=_normName(p.name);
-  if(!nm||nm==="unknown")return null;
+  if(!nm||nm==="unknown")return [];
   const mine=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);
-  const c=pets.filter(q=>{
+  const strict=pets.filter(q=>{
     if(q.id===p.id||_normName(q.name)!==nm)return false;
     return (q.ownerIds||[]).some(id=>{
       if((p.ownerIds||[]).includes(id))return true;
@@ -1203,25 +1210,38 @@ function findPetMatch(p){
       return qo&&mine.some(m=>ownersMatch_(m,qo));
     });
   });
-  return c.find(q=>!q.needsReview)||c[0]||null;
+  // Also same name + breed under a client we couldn't tie to this one (e.g. new phone number).
+  // This runs for EVERY record, so a submission that matches another intake entry still sees the saved pet.
+  const br=_normName(p.breed);
+  const loose=br?pets.filter(q=>q.id!==p.id&&!strict.includes(q)&&_normName(q.name)===nm&&_normName(q.breed)===br):[];
+  const all=[...strict,...loose];
+  return [...all.filter(q=>!q.needsReview),...all.filter(q=>q.needsReview)];
 }
+function findPetMatch(p){return findPetMatches(p)[0]||null;}
 function dupBox_(msg,kind,fromId,intoId){
-  return `<div style="margin-top:8px;background:#FFF3CD;border-radius:8px;padding:8px;font-size:11px;color:#92620A"><div>${msg}</div><button class="sm" onclick="openDupDialog('${kind}',${fromId},${intoId})" style="margin-top:6px;width:100%;background:#92620A;color:#fff;border-color:#92620A;font-size:11px;padding:5px 2px">Resolve&hellip;</button></div>`;
+  return `<div style="margin-top:8px;background:#FFF3CD;border-radius:8px;padding:8px;font-size:11px;color:#92620A"><div>${msg}</div><button class="sm" onclick="openDupDialog('${kind}',${fromId},${intoId})" style="margin-top:6px;width:100%;background:#92620A;color:#fff;border-color:rgb(146,98,10);font-size:11px;padding:5px 2px">Resolve&hellip;</button></div>`;
 }
+// Details of the matching client / pet so you can compare against the intake
+function currentOwnerInfo_(om,excludePetId){
+  const ps=pets.filter(x=>(x.ownerIds||[]).includes(om.id)&&(!x.needsReview||om.needsReview)&&x.id!==excludePetId);
+  const bits=[om.phone,om.email].filter(Boolean).join(" · ");
+  return `<strong>${om.name}</strong>${bits?`<br><span style="opacity:.85">${bits}</span>`:""}<br><span style="opacity:.85">Pets: ${ps.length?ps.map(x=>`${x.name} (${displayBreed(x.breed,x.oodleName)||"?"})`).join(", "):"none"}</span>`;
+}
+function currentPetInfo_(pm){
+  const po=owners.filter(o=>(pm.ownerIds||[]).includes(o.id));
+  const n=timesGroomed(pm.id);
+  return `<strong>${pm.name}</strong> &middot; ${displayBreed(pm.breed,pm.oodleName)||"?"}<br><span style="opacity:.85">${pm.sex||""} &middot; ${pm.size||""} &middot; Age ${fmtAge(pm.dob,pm.approxAge)}${pm.needsReview?"":` &middot; ✂️ ${n}×`}</span>${po.length?`<br><span style="opacity:.85">Owner: ${po.map(o=>o.name+(o.phone?" · "+o.phone:"")).join(", ")}</span>`:""}`;
+}
+// Shows saved records first, then other pending intake entries (both can apply at once)
 function petDupHtml_(p,owner){
   let h="";
-  const om=owner?findOwnerMatch(owner):null;
-  if(om)h+=dupBox_(`Owner may already exist: <strong>${om.name}</strong>${om.phone?" &middot; "+om.phone:""}`,"owner",owner.id,om.id);
-  const pm=findPetMatch(p);
-  if(pm){
-    const po=owners.filter(o=>(pm.ownerIds||[]).includes(o.id)).map(o=>o.name).join(", ");
-    h+=dupBox_(`Pet may already exist: <strong>${pm.name}</strong> &middot; ${displayBreed(pm.breed,pm.oodleName)}${po?" (owner "+po+")":""}`,"pet",p.id,pm.id);
-  }
+  const oms=owner?findOwnerMatches(owner):[];
+  oms.slice(0,2).forEach(om=>{h+=dupBox_(`${om.needsReview?"Also in this intake (client)":"Client already saved"}:<br>${currentOwnerInfo_(om,p.id)}`,"owner",owner.id,om.id);});
+  findPetMatches(p).slice(0,2).forEach(pm=>{h+=dupBox_(`${pm.needsReview?"Also in this intake (pet)":"Pet already saved"}:<br>${currentPetInfo_(pm)}`,"pet",p.id,pm.id);});
   return h;
 }
 function ownerDupHtml_(o){
-  const om=findOwnerMatch(o);
-  return om?dupBox_(`May already exist: <strong>${om.name}</strong>${om.phone?" &middot; "+om.phone:""}`,"owner",o.id,om.id):"";
+  return findOwnerMatches(o).slice(0,2).map(om=>dupBox_(`${om.needsReview?"Also in this intake (client)":"Client already saved"}:<br>${currentOwnerInfo_(om)}`,"owner",o.id,om.id)).join("");
 }
 function countIntakeDupes_(){
   const rp=pets.filter(p=>p.needsReview);
@@ -1239,6 +1259,7 @@ const MG_PET_FIELDS=[
   {k:"desexed",l:"Desexed",t:"bool",show:r=>r.desexed?"Yes":"No"},
   {k:"size",l:"Size",t:"text"},
   {k:"treatsOk",l:"Treats",t:"bool",show:r=>r.treatsOk===false?"No treats":"Treats OK"},
+  {k:"treatsLimit",l:"Limit treats",t:"bool",show:r=>r.treatsLimit?"Yes":"No"},
   {k:"behaviour",l:"Behaviour",t:"tags"},
   {k:"medicalTags",l:"Medical",t:"tags"},
   {k:"medicalNotes",l:"Medical notes",t:"note"},
@@ -1487,7 +1508,7 @@ function openIntakeInfo(petId,ownerId){
   html+=iiRow("Name",p.name)+iiRow("Breed",displayBreed(p.breed,p.oodleName))+iiRow("Sex",p.sex)+iiRow("Desexed",p.desexed?"Yes":"No")+iiRow("Size",p.size)+iiRow("Age",fmtAge(p.dob,p.approxAge))
    +iiRow("Coat",p.coatTypes)+iiRow("Special handling",[...(p.medicalTags||[]),...(p.behaviour||[])].filter(t=>SPECIAL_HANDLING_TRAITS.includes(t)).concat(p.customSpecialHandling?[p.customSpecialHandling]:[]))
    +iiRow("Behaviour",(p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical",(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical notes",p.medicalNotes)
-   +iiRow("Allergies",[...(p.allergies||[])].concat(p.customAllergies?[p.customAllergies]:[]))+iiRow("Treats",p.treatsOk===false?"No treats":"OK")+iiRow("Style",p.preferredStyle)
+   +iiRow("Allergies",[...(p.allergies||[])].concat(p.customAllergies?[p.customAllergies]:[]))+iiRow("Treats",treatsLabel(p))+iiRow("Style",p.preferredStyle)
    +iiRow("Notes",p.lastNote?linkifyNote(p.lastNote):"")+iiRow("Consent",consent);
   html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin:12px 0 2px">Owner</div>`;
   html+=o?iiRow("Name",o.name)+iiRow("Phone",o.phone)+iiRow("Email",o.email)+iiRow("Contact",o.contact)+iiRow("Notes",o.notes):`<div style="font-size:12px;color:var(--text-muted);padding:6px 0">No owner linked</div>`;
@@ -1519,10 +1540,10 @@ function renderIntakeReviewModal(){
   reviewPets.forEach(p=>{
     const owner=owners.find(o=>(p.ownerIds||[]).includes(o.id));
     const consentBit=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:`<span class="badge" style="background:#FDECEB;color:#B4483A">&#9888; No consent on file</span>`;
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div>${petDupHtml_(p,owner)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="openIntakeInfo(${p.id},${owner?owner.id:"null"})" style="background:var(--teal);color:#fff;border-color:var(--teal)">&#128269; Review</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span></div><div style="font-size:12px;color:#888;margin-top:2px">Owner: ${owner?owner.name:"—"}${owner?" &middot; "+owner.phone:""}</div><div style="margin-top:6px">${consentBit}</div>${petDupHtml_(p,owner)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="openIntakeInfo(${p.id},${owner?owner.id:"null"})" style="background:var(--teal);color:#fff;border-color:var(--teal)">&#128269; Review</button><button class="sm" onclick="markIntakeEntryReviewed(${p.id},${owner?owner.id:"null"})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeEntry(${p.id},${owner?owner.id:"null"})">&#128465; Delete</button></div></div></div>`;
   });
   standaloneOwners.forEach(o=>{
-    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div>${ownerDupHtml_(o)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="openIntakeOwnerInfo(${o.id})" style="background:var(--teal);color:#fff;border-color:var(--teal)">&#128269; Review</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
+    html+=`<div class="card" style="margin-bottom:8px"><div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px"><div><div style="font-size:14px;font-weight:500">${o.name}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${o.email?" &middot; "+o.email:""}</div>${ownerDupHtml_(o)}</div><div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0"><button class="sm" onclick="openIntakeOwnerInfo(${o.id})" style="background:var(--teal);color:#fff;border-color:var(--teal)">&#128269; Review</button><button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button><button class="sm danger" onclick="deleteIntakeOwner(${o.id})">&#128465; Delete</button></div></div></div>`;
   });
   listEl.innerHTML=html;
 }
@@ -1771,7 +1792,7 @@ function renderDashboard(){
     const brachy=pet&&isBrachy(pet.breed)&&!pet.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:8px">Brachy</span>`:"";
     const behTags=(pet?.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
     const petPhoto=pet?.photo?`<img src="${pet.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="font-size:24px">🐾</div>`;
-    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}${groomedBadge(pet?.id)}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:#E8534A;box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button><button class="sm" onclick="editBk(${next.id})">📝 Edit</button></div></div></div>`;
+    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:rgb(232,83,74);box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button></div></div></div>`;
   }
   let upcomingMore="";
   if(upcoming.length>1){
@@ -1787,45 +1808,19 @@ function renderBookings(){
     const priceHtml=b.waived?`<em style="color:#534AB7">Waived</em>`:b.discount&&p.disc>0?`<span style="text-decoration:line-through;color:#aaa;font-size:11px;margin-right:4px">${fmtMoney(p.subtotal)}</span><strong>${fmtMoney(p.finalTotal)}</strong>`:`<strong>${fmtMoney(p.finalTotal)}</strong>`;
     const payHtml=b.waived?tag("Waived","#EEEDFE","#534AB7"):b.paid?tag("Paid ✓","#EAF7EE","#5BAF7A"):b.status!=="done"?tag("Not due yet","#F0F0F0","#888"):`${tag("Outstanding","#FDECEA","#E8534A")}<div style="margin-top:4px;display:flex;gap:4px"><button class="sm" onclick="togglePaid(${b.id})">Mark paid</button><button class="sm" onclick="waiveBk(${b.id})">Waive</button></div>`;
     const petPhoto=pet?.photo?`<img src="${pet.photo}" style="width:36px;height:36px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:avatar(pet?.name||"?",36);
+    const dt=new Date(b.date+"T00:00");
+    const tileCol={done:"#5BAF7A",confirmed:"#4DA6FF",pending:"#F59E0B"}[b.status]||"#888888";
+    const miniPhoto=pet?.photo?`<img src="${pet.photo}" style="width:22px;height:22px;border-radius:50%;object-fit:cover;vertical-align:middle;margin-right:5px"/>`:"";
+    const cutChips=bookingCuts(b).map(c=>{const info=cutInfo(c.label);return info?tag(cutChipLabel(c),info.bg,info.text):tag(cutChipLabel(c),"#EAF7EE","#2f7a4a");}).join("");
     return`<div class="card bk-card" data-id="${b.id}">
-      <div style="display:flex;align-items:flex-start;gap:10px">
-        ${petPhoto}
-        <div style="flex:1;min-width:0">
-          <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap">
-            <div>
-              <div style="font-weight:500;font-size:13px">${pet?.name||"—"} <span style="color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${groomedBadge(b.petId)}</div>
-              <div style="font-size:12px;color:#888;margin-top:1px">${owner?.name||"—"} &middot; ${owner?.phone||""}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px;flex-shrink:0">${badge(b.status)}<button class="sm" onclick="editBk(${b.id})">📝 Edit</button><button class="sm" onclick="deleteBk(${b.id})">&#128465;</button></div>
-          </div>
-          <div style="margin-top:7px;display:flex;flex-wrap:wrap;gap:12px;align-items:flex-start">
-            <div style="min-width:120px">
-              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Service</div>
-              <div style="font-size:13px">${b.service}</div>
-              ${(b.addOns||[]).length?`<div style="font-size:10px;color:#534AB7">+${b.addOns.join(", ")}</div>`:""}
-            </div>
-            <div style="min-width:90px">
-              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Date & time</div>
-              <div style="font-size:13px">${fmtDate(b.date)}</div>
-              <div style="font-size:11px;color:#888">${fmtTime(b.time)}</div>
-            </div>
-            <div style="min-width:70px">
-              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Price</div>
-              <div style="font-size:13px">${priceHtml}</div>
-            </div>
-            <div style="min-width:110px">
-              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Payment</div>
-              <div style="font-size:13px">${payHtml}</div>
-            </div>
-            <div style="min-width:80px">
-              <div style="font-size:11px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.04em;margin-bottom:2px">Time spent</div>
-              <div style="font-size:13px">${timeSpentHtml(b)}</div>
-            </div>
-          </div>
-        </div>
+      <div style="width:50px;flex-shrink:0;align-self:flex-start;text-align:center;border-radius:10px;padding:6px 0;background:${tileCol}26;color:${tileCol}"><div style="font-size:10px;text-transform:uppercase;font-weight:600">${dt.toLocaleDateString("en-AU",{weekday:"short"})}</div><div style="font-size:22px;font-weight:700;line-height:1.1">${dt.getDate()}</div><div style="font-size:10px;text-transform:uppercase">${dt.toLocaleDateString("en-AU",{month:"short"})}</div><div style="font-size:10px;margin-top:3px;opacity:.85">${fmtTime(b.time)}</div></div>
+      <div style="flex:1;min-width:0">
+        <div style="display:flex;justify-content:space-between;gap:6px"><div><div style="font-size:14px;font-weight:600">${miniPhoto}${pet?.name||"—"} <span style="font-weight:400;color:var(--text-muted);font-size:12px">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span></div><div style="font-size:12px;color:var(--text-muted)">${owner?.name||"—"} &middot; ${owner?.phone||""}</div></div><div style="align-self:flex-start">${badge(b.status)}</div></div>
+        <div style="margin-top:6px;font-size:13px">${b.service} ${(b.addOns||[]).length?`<span style="font-size:11px;color:#534AB7">+${b.addOns.join(", ")}</span>`:""}</div>
+        ${cutChips?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${cutChips}</div>`:""}
+        ${b.notes||b.completionNotes||b.nextnote||b.beforePhoto||b.afterPhoto?`<div style="margin-top:2px">${b.notes?`<div style="background:#EEEDFE;border-left:3px solid #534AB7;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#534AB7;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Booking notes</strong><br>${b.notes}</div>`:""}${b.completionNotes?`<div style="background:#E6F1FB;border-left:3px solid #185FA5;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#185FA5;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Completion notes</strong><br>${b.completionNotes}</div>`:""}${b.nextnote?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#92400E;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">For next time</strong><br>${b.nextnote}</div>`:""}${(b.beforePhoto||b.afterPhoto)?`<div style="display:flex;gap:8px;margin-top:8px">${b.beforePhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">Before</div><img src="${b.beforePhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}${b.afterPhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">After</div><img src="${b.afterPhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}</div>`:""}</div>`:""}
+        <div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;flex-wrap:wrap"><span style="font-size:14px">${priceHtml}</span>${payHtml}${timeSpentHtml(b)!=="—"?`<span style="color:var(--text-muted)">⏱ ${timeSpentHtml(b)}</span>`:""}<span style="margin-left:auto;display:flex;gap:4px"><button class="sm" onclick="editBk(${b.id})">📝 Edit</button><button class="sm" onclick="deleteBk(${b.id})">&#128465;</button></span></div>
       </div>
-      ${bookingCuts(b).length?`<div style="margin-left:46px;margin-top:8px;display:flex;flex-wrap:wrap;gap:4px">${bookingCuts(b).map(c=>{const info=cutInfo(c.label);return info?tag(cutChipLabel(c),info.bg,info.text):tag(cutChipLabel(c),"#EAF7EE","#2f7a4a");}).join("")}</div>`:""}
-      ${b.notes||b.completionNotes||b.nextnote||b.beforePhoto||b.afterPhoto?`<div style="margin-left:46px">${b.notes?`<div style="background:#EEEDFE;border-left:3px solid #534AB7;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#534AB7;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Booking notes</strong><br>${b.notes}</div>`:""}${b.completionNotes?`<div style="background:#E6F1FB;border-left:3px solid #185FA5;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#185FA5;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Completion notes</strong><br>${b.completionNotes}</div>`:""}${b.nextnote?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#92400E;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">For next time</strong><br>${b.nextnote}</div>`:""}${(b.beforePhoto||b.afterPhoto)?`<div style="display:flex;gap:8px;margin-top:8px">${b.beforePhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">Before</div><img src="${b.beforePhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}${b.afterPhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">After</div><img src="${b.afterPhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}</div>`:""}</div>`:""}
     </div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">All bookings</span><div class="right"><input type="text" id="bk-search" placeholder="Search..." style="width:140px" oninput="filterBookings()"/><select id="bk-status-filter" onchange="filterBookings()" style="width:auto"><option value="">All statuses</option><option>confirmed</option><option>pending</option><option>done</option><option>cancelled</option></select></div></div><div id="bk-cards">${cards||`<p style="text-align:center;color:#888;padding:2rem">No bookings yet.</p>`}</div>`;
@@ -1897,13 +1892,13 @@ function renderPets(){
     const brachy=isBrachy(p.breed)&&!p.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">Brachy</span>`:"";
     const reviewBadge=p.needsReview?`<span class="badge" style="background:#EEEBFA;color:#534AB7;margin-left:6px">🆕 New</span>`:"";
     const consentBadge=p.consentSigned?`<span class="badge" style="background:#E3F5EA;color:#1D7A46;margin-left:6px" title="Signed by ${p.consentSignature||"?"}${p.consentDate?" on "+p.consentDate:""}">&#10003; Consent signed</span>`:(p.needsReview?`<span class="badge" style="background:#FDECEB;color:#B4483A;margin-left:6px">&#9888; No consent on file</span>`:"");
-    const treatsBadge=p.treatsOk===false?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">No treats</span>`:`<span class="badge" style="background:#EAF7EE;color:#5BAF7A;margin-left:6px">Treats OK</span>`;
+    const treatsBadge={ok:`<span class="badge" style="background:#EAF7EE;color:#5BAF7A;margin-left:6px">Treats OK</span>`,limit:`<span class="badge" style="background:#FAEEDA;color:#854F0B;margin-left:6px">Limit treats</span>`,no:`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">No treats</span>`}[treatsState(p)];
     const behTags=sortBehTraits((p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)&&BEHAVIOUR_TRAITS.includes(t))).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
     const medTags=(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)&&MEDICAL_TAGS.includes(t)).map(t=>{const c=medColor(t);return tag(t,c.bg,c.text);}).join("");
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">Owners: ${linkedOwners.map(o=>o.name).join(", ")||"—"}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">${(()=>{const ow=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);if(!ow.length)return"Owner: —";return ow.map((o,i)=>`${ow.length>1?`<b>${i===0?"Primary":i===1?"Secondary":"Other"}:</b> `:"Owner: "}${o.name}${o.phone?" &middot; "+o.phone:""}`).join(" &nbsp;|&nbsp; ");})()}</span></div></div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
@@ -1918,7 +1913,7 @@ function renderClients(){
     const reviewBadge=o.needsReview?`<span class="badge" style="background:#EEEBFA;color:#534AB7;margin-left:6px">🆕 New</span>`:"";
     const contactIcon=o.contact==="WhatsApp"?OW_CONTACT_ICONS.WhatsApp:o.contact==="SMS"?OW_CONTACT_ICONS.SMS:o.contact==="Facebook"?"📘":o.contact==="Email"?"✉️":o.contact==="Phone"?"📞":"";
     const contactBadge=o.contact?`<span style="display:inline-flex;align-items:center;gap:4px;font-size:11px;background:#EEEBFA;color:#534AB7;border-radius:20px;padding:3px 10px;margin-left:7px;vertical-align:middle;font-weight:500">${OW_CONTACT_ICONS[o.contact]||""} ${o.contact}</span>`:"";
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${avatar(o.name,36)}<div style="flex:1"><div style="font-size:14px;font-weight:500">${o.name}${reviewBadge}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${contactBadge}${o.email?" &middot; "+o.email:""}</div>${o.notes?`<div style="font-size:12px;color:#854F0B;background:#FAEEDA;border-radius:6px;padding:4px 8px;margin-top:5px">${o.notes}</div>`:""}<div style="margin-top:6px">${petTags||`<span style="font-size:12px;color:#888">No pets linked</span>`}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">${bks.length} visit${bks.length!==1?"s":""} &middot; ${fmtMoney(spent)}</div><div style="font-size:12px;color:#888">Last: ${last?fmtDate(last):"—"}</div><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px">${o.needsReview?`<button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:#534AB7">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editOwner(${o.id})">&#9998; Edit</button><button class="sm" onclick="deleteOwner(${o.id})">&#128465;</button></div></div></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${avatar(o.name,36)}<div style="flex:1"><div style="font-size:14px;font-weight:500">${o.name}${reviewBadge}</div><div style="font-size:12px;color:#888;margin-top:2px">${o.phone}${contactBadge}${o.email?" &middot; "+o.email:""}</div>${o.notes?`<div style="font-size:12px;color:#854F0B;background:#FAEEDA;border-radius:6px;padding:4px 8px;margin-top:5px">${o.notes}</div>`:""}<div style="margin-top:6px">${petTags||`<span style="font-size:12px;color:#888">No pets linked</span>`}</div></div><div style="text-align:right;flex-shrink:0"><div style="font-size:12px;color:#888">${bks.length} visit${bks.length!==1?"s":""} &middot; ${fmtMoney(spent)}</div><div style="font-size:12px;color:#888">Last: ${last?fmtDate(last):"—"}</div><div style="display:flex;gap:4px;justify-content:flex-end;margin-top:6px">${o.needsReview?`<button class="sm" onclick="markOwnerReviewed(${o.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editOwner(${o.id})">&#9998; Edit</button><button class="sm" onclick="deleteOwner(${o.id})">&#128465;</button></div></div></div></div>`;
   }).join("");
   return`<div class="search-row"><span style="font-size:14px;font-weight:500">Client directory</span><div class="right"><button class="accent" onclick="openOwModal(null)">+ New owner</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No clients yet.</p>`}`;
 }
@@ -1969,18 +1964,39 @@ function renderPricing(){
   </div>`;
 }
 
+let finMonth=null;
+function finKey(){return finMonth||todayStr().slice(0,7);}
+function finShift(d){const [y,m]=finKey().split("-").map(Number);const dt=new Date(y,m-1+d,1);finMonth=`${dt.getFullYear()}-${pad(dt.getMonth()+1)}`;renderPage();}
+function finToday(){finMonth=null;renderPage();}
 function renderFinances(){
-  const fi=bookings.filter(b=>b.status!=="cancelled"&&!b.waived);
-  const totalIncome=fi.filter(b=>b.paid).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
-  const totalExp=expenses.reduce((s,e)=>s+e.amount,0);
-  const profit=totalIncome-totalExp;
-  const outstanding=bookings.filter(b=>b.status!=="cancelled"&&!b.waived&&!b.paid);
-  const outTotal=outstanding.reduce((s,b)=>s+bkPrice(b).finalTotal,0);
-  const sortedExp=[...expenses].sort((a,b)=>b.date.localeCompare(a.date)||a.desc.localeCompare(b.desc));
-  const expRows=sortedExp.map(e=>`<tr${e.id===expEditing?' style="background:var(--teal-bg)"':""}><td>${fmtDate(e.date)}</td><td>${e.desc}</td><td style="text-align:right;color:#E8534A;font-weight:500">-${fmtMoney(e.amount)}</td><td style="white-space:nowrap"><button class="sm" onclick="editExp(${e.id})">&#9998;</button> <button class="sm" onclick="deleteExp(${e.id})">&#128465;</button></td></tr>`).join("");
-  const incRows=fi.map(b=>{const owner=ownerById(b.ownerId),pet=petById(b.petId),p=bkPrice(b);const payTag=b.paid?tag("Paid","#EAF7EE","#5BAF7A"):b.status!=="done"?tag("Not due yet","#F0F0F0","#888"):tag("Outstanding","#FDECEA","#E8534A");return`<tr><td>${fmtDate(b.date)}</td><td>${pet?.name||"?"} (${owner?.name||"?"})</td><td style="text-align:right;color:#5BAF7A;font-weight:500">+${fmtMoney(p.finalTotal)}</td><td>${payTag}</td></tr>`;}).join("");
+  const mk=finKey();
+  const [fy,fm]=mk.split("-").map(Number);
+  const monthLabel=new Date(fy,fm-1,1).toLocaleDateString("en-AU",{month:"long",year:"numeric"});
+  const fiAll=bookings.filter(b=>b.status!=="cancelled"&&!b.waived);
+  const fi=fiAll.filter(b=>b.date.slice(0,7)===mk).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time));
+  const incM=fi.filter(b=>b.paid).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
+  const expM=expenses.filter(e=>e.date.slice(0,7)===mk);
+  const expMTotal=expM.reduce((s,e)=>s+e.amount,0);
+  const netM=incM-expMTotal;
+  const incAll=fiAll.filter(b=>b.paid).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
+  const netAll=incAll-expenses.reduce((s,e)=>s+e.amount,0);
+  const owing=fiAll.filter(b=>!b.paid&&b.status==="done").reduce((s,b)=>s+bkPrice(b).finalTotal,0);
+  const money=(v)=>(v<0?"−":"")+fmtMoney(Math.abs(v));
+  const row=(l,sub,r,c,tail)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l}</div><div style="font-size:10px;color:var(--text-muted)">${sub}</div></div>${tail||""}<div style="font-size:12px;font-weight:600;color:${c};min-width:54px;text-align:right">${r}</div></div>`;
+  const incRows=fi.map(b=>{
+    const owner=ownerById(b.ownerId),pet=petById(b.petId),p=bkPrice(b);
+    const payTag=b.paid?tag("Paid","#EAF7EE","#5BAF7A"):b.status!=="done"?tag("Upcoming","#F0F0F0","#888"):tag("Owing","#FDECEA","#E8534A");
+    return row(`${pet?.name||"?"} &middot; ${b.service}`,`${fmtDate(b.date)} &middot; ${owner?.name||"?"}`,`+${fmtMoney(p.finalTotal)}`,"#5BAF7A",payTag);
+  }).join("")||`<div style="font-size:12px;color:var(--text-muted);padding:10px 0;text-align:center">No bookings this month</div>`;
   const editingExp=expenses.find(e=>e.id===expEditing);
-  return`<div style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:1.5rem"><div class="stat"><div class="slabel">Income</div><div class="sval" style="color:#5BAF7A">${fmtMoney(totalIncome)}</div></div><div class="stat"><div class="slabel">Expenses</div><div class="sval" style="color:#E8534A">${fmtMoney(totalExp)}</div></div><div class="stat"><div class="slabel">Net profit</div><div class="sval" style="color:${profit>=0?"#185FA5":"#E8534A"}">${fmtMoney(Math.abs(profit))}</div></div><div class="stat"><div class="slabel">Outstanding</div><div class="sval" style="color:#854F0B">${fmtMoney(outTotal)}</div></div></div><div style="font-size:14px;font-weight:600;margin-bottom:10px">${editingExp?"Edit expense":"Add expense"}</div><div class="card" style="margin-bottom:1.5rem"><div style="display:flex;gap:10px;align-items:flex-end;flex-wrap:wrap"><div style="flex:2;min-width:120px"><label class="lbl">Description</label><input type="text" id="exp-desc" placeholder="e.g. shampoo supplies" value="${editingExp?editingExp.desc:""}"/></div><div style="flex:1;min-width:90px"><label class="lbl">Amount ($)</label><input type="number" id="exp-amt" placeholder="0.00" value="${editingExp?editingExp.amount:""}"/></div><div style="flex:1;min-width:120px"><label class="lbl">Date</label><input type="date" id="exp-date" value="${editingExp?editingExp.date:todayStr()}"/></div><button class="primary" onclick="addExp()" style="flex-shrink:0;height:56px;width:64px;padding:0;font-size:13px;font-weight:700;border-radius:12px;line-height:1.3;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;align-self:flex-end">${editingExp?'<span style="font-size:16px;line-height:1">&#10003;</span><span>Save</span>':'<span style="font-size:16px;line-height:1">+</span><span>Add</span>'}</button>${editingExp?'<button type="button" onclick="cancelEditExp()" style="flex-shrink:0;height:56px;align-self:flex-end">Cancel</button>':""}</div></div><div style="font-size:14px;font-weight:600;margin-bottom:8px">Income</div><div style="overflow-x:auto;margin-bottom:1.5rem"><table><thead><tr><th>Date</th><th>Client</th><th style="text-align:right">Amount</th><th>Payment</th></tr></thead><tbody>${incRows}</tbody></table></div><div style="font-size:14px;font-weight:600;margin-bottom:8px">Expenses</div><div style="overflow-x:auto"><table><thead><tr><th>Date</th><th>Description</th><th style="text-align:right">Amount</th><th></th></tr></thead><tbody>${expRows}</tbody></table></div>`;
+  const expRows=[...expM].sort((a,b)=>b.date.localeCompare(a.date)||a.desc.localeCompare(b.desc)).map(e=>row(e.desc,fmtDate(e.date),`-${fmtMoney(e.amount)}`,"#E8534A",`<span style="white-space:nowrap"><button class="sm" onclick="editExp(${e.id})">&#9998;</button> <button class="sm" onclick="deleteExp(${e.id})">&#128465;</button></span>`).replace('<div style="display:flex;align-items:center;gap:8px;padding:7px 0;',e.id===expEditing?'<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;background:var(--teal-bg);border-radius:6px;':'<div style="display:flex;align-items:center;gap:8px;padding:7px 0;')).join("")||`<div style="font-size:12px;color:var(--text-muted);padding:10px 0;text-align:center">No expenses this month</div>`;
+  const head=(t,v,c)=>`<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px"><strong style="font-size:13px">${t}</strong><span style="font-weight:700;color:${c};font-size:15px">${v}</span></div>`;
+  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><button class="sm" onclick="finShift(-1)">&lsaquo;</button><div style="text-align:center"><strong style="font-size:14px">${monthLabel}</strong>${mk!==todayStr().slice(0,7)?`<div><a href="#" onclick="finToday();return false" style="font-size:11px;color:#4DA6FF">Back to this month</a></div>`:""}</div><button class="sm" onclick="finShift(1)">&rsaquo;</button></div>
+<div class="card" style="padding:10px 6px;margin-bottom:10px"><div style="display:flex"><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Net this month</div><div style="font-size:20px;font-weight:700;color:${netM>=0?"#185FA5":"#E8534A"}">${money(netM)}</div></div><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Owing (all time)</div><div style="font-size:20px;font-weight:700;color:#854F0B">${fmtMoney(owing)}</div></div></div><div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:6px">All time net <strong style="color:${netAll>=0?"#185FA5":"#E8534A"}">${money(netAll)}</strong></div></div>
+<div class="card" style="padding:10px 12px;margin-bottom:10px">${head("Income",fmtMoney(incM),"#5BAF7A")}${incRows}</div>
+<div class="card" style="padding:10px 12px">${head("Expenses","−"+fmtMoney(expMTotal),"#E8534A")}
+<div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--border)"><input type="text" id="exp-desc" placeholder="${editingExp?"Description":"Add expense…"}" value="${editingExp?editingExp.desc:""}" style="flex:2 1 140px;min-width:0;padding:6px 8px;font-size:12px"/><input type="number" id="exp-amt" placeholder="$" value="${editingExp?editingExp.amount:""}" style="flex:1 1 60px;min-width:0;padding:6px 8px;font-size:12px"/><input type="date" id="exp-date" value="${editingExp?editingExp.date:(mk===todayStr().slice(0,7)?todayStr():mk+"-01")}" style="flex:1 1 120px;min-width:0;padding:6px 8px;font-size:12px"/><button class="primary" onclick="addExp()" style="padding:6px 14px">${editingExp?"&#10003; Save":"+ Add"}</button>${editingExp?'<button type="button" onclick="cancelEditExp()" style="padding:6px 12px">Cancel</button>':""}</div>
+${expRows}</div>`;
 }
 
 let bkEditing=null,bkActiveAddons=[],bkActiveProducts=[],bkActiveCuts=[],bkIsCreate=true,bkProdOpen=false,bkBeforePhoto=null,bkAfterPhoto=null;
@@ -2310,6 +2326,8 @@ function applyBkCrop(){
   }
 }
 function openBkModal(b){
+  // Existing bookings are only edited from the Bookings page (new bookings can be started anywhere)
+  if(b&&currentTab!=="bookings")switchTab("bookings");
   bkEditing=b||null;bkActiveAddons=[...(b?.addOns||[])];bkActiveProducts=[...(b?.products||[])];bkActiveCuts=bookingCuts(b);bkIsCreate=!b;bkProdOpen=false;bkBeforePhoto=b?.beforePhoto||null;bkAfterPhoto=b?.afterPhoto||null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
   document.getElementById("bk-title").textContent=b?"Edit booking":"New booking";
   // Populate all pets (sorted alphabetically)
@@ -2370,7 +2388,7 @@ function updateBkOwnerFromPet(petId,preferOwnerId){
   if(ownerDisplay)ownerDisplay.textContent=owner?`${owner.name} · ${owner.phone}`:"—";
   // If multiple owners, show a small selector
   if(pet.ownerIds.length>1){
-    const opts=pet.ownerIds.map(id=>{const o=ownerById(id);return`<option value="${id}"${id===oid?" selected":""}>${o?.name||id}</option>`;}).join("");
+    const opts=pet.ownerIds.map((id,ix)=>{const o=ownerById(id);return`<option value="${id}"${id===oid?" selected":""}>${o?.name||id} (${ix===0?"primary":ix===1?"secondary":"other"})</option>`;}).join("");
     ownerDisplay.innerHTML=`<select onchange="bkOwnerChanged(this)" style="border:none;background:transparent;padding:0;font-size:13px;width:100%;outline:none">${opts}</select>`;
   }
 }
@@ -2522,7 +2540,7 @@ async function saveBkModal(){
     _pendingBeforeUpload=null;_pendingAfterUpload=null;
   }
   const customRaw=document.getElementById("bk-custom").value;
-  const obj={ownerId,petId,service:document.getElementById("bk-service").value,addOns:[...bkActiveAddons],products:[...bkActiveProducts],cuts:bkActiveCuts.map(c=>({...c})),blades:[],combs:[],date:document.getElementById("bk-date").value,time:document.getElementById("bk-time").value,status:document.getElementById("bk-status").value,notes:document.getElementById("bk-notes").value,completionNotes:document.getElementById("bk-completionnotes").value,nextnote:document.getElementById("bk-nextnote").value,mattingMinutes:Number(document.getElementById("bk-matting").value)||0,customPrice:customRaw!==""?Number(customRaw):null,discount:false,waived:document.getElementById("bk-waived").checked,paid:document.getElementById("bk-paid").checked,timers:JSON.parse(JSON.stringify(bkTimers)),timeBath:timerLogged("bath")||null,timeGroom:timerLogged("groom")||null,timeSpent:(timerLogged("bath")+timerLogged("groom"))||null,waiveExtras:document.getElementById("bk-waive-extras").checked,beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
+  const obj={ownerId,petId,service:document.getElementById("bk-service").value,addOns:[...bkActiveAddons],products:[...bkActiveProducts],cuts:bkActiveCuts.map(c=>({...c})),blades:[],combs:[],date:document.getElementById("bk-date").value,time:document.getElementById("bk-time").value,status:document.getElementById("bk-status").value,notes:document.getElementById("bk-notes").value,completionNotes:document.getElementById("bk-completionnotes").value,nextnote:document.getElementById("bk-nextnote").value,mattingMinutes:Number(document.getElementById("bk-matting").value)||0,customPrice:customRaw!==""?Number(customRaw):null,discount:false,waived:document.getElementById("bk-waived").checked,paid:document.getElementById("bk-paid").checked,timers:JSON.parse(JSON.stringify(bkTimers)),timer:null,timeBath:timerLogged("bath")||null,timeGroom:timerLogged("groom")||null,timeSpent:(timerLogged("bath")+timerLogged("groom"))||null,waiveExtras:document.getElementById("bk-waive-extras").checked,beforePhoto:bkBeforePhoto,afterPhoto:bkAfterPhoto};
   if(bkEditing){bookings=bookings.map(b=>b.id===bkEditing.id?{...b,...obj}:b);}else{bookings.push({id:nextId++,...obj});}
   const savedBk=bkEditing?bookings.find(b=>b.id===bkEditing.id):bookings[bookings.length-1];
   // Clean up any Drive URLs superseded by crops during this session
@@ -2602,13 +2620,13 @@ function openPtModal(pet){
   document.getElementById("pt-size").value=pet?.size||"Medium";
   document.getElementById("pt-mednotes").value=pet?.medicalNotes||"";
   document.getElementById("pt-prefstyle").value=pet?.preferredStyle||"";
-  document.getElementById("pt-treats").checked=pet?(pet.treatsOk!==false):true;
+  document.getElementById("pt-treats").value=pet?treatsState(pet):"ok";
   document.getElementById("pt-behavnote").value=pet?.lastNote||"";
   ptActiveBehaviour=[...(pet?.behaviour||[])];
   ptActiveCoats=[...(pet?.coatTypes||[])];
   ptActiveMedical=[...(pet?.medicalTags||[])];
   ptActiveAllergies=[...(pet?.allergies||[])];
-  ptActiveOwners=[...(pet?.ownerIds||[])];
+  ptActiveOwners=[...(pet?.ownerIds||[])];ptOwnEdit=!ptActiveOwners.length;ptOwnQuery="";
   ptPhotoData=pet?.photo||null;_pendingPetPhotoUpload=null;
   document.getElementById("pt-special-custom").value=pet?.customSpecialHandling||"";
   document.getElementById("pt-allergies-custom").value=pet?.customAllergies||"";
@@ -2658,7 +2676,7 @@ function renderPtToggles(){
   renderToggle("pt-special",SPECIAL_HANDLING_TRAITS,ptActiveBehaviour.filter(t=>SPECIAL_HANDLING_TRAITS.includes(t)),()=>({bg:"#FDECEA",text:"#E8534A"}),"ptSH");
   renderToggle("pt-medical",MEDICAL_TAGS,ptActiveMedical,t=>{const c=medColor(t);return{bg:c.bg,text:c.text};},"ptMed");
   renderToggle("pt-allergies",ALLERGENS,ptActiveAllergies,t=>{const c=allergyColor(t);return{bg:c.bg,text:c.text};},"ptAllergy");
-  renderToggle("pt-owners",owners.map(o=>o.name),owners.filter(o=>ptActiveOwners.includes(o.id)).map(o=>o.name),null,"ptOwn");
+  renderPtOwners();
 }
 function renderToggle(elId,opts,active,colorFn,prefix){
   const el=document.getElementById(elId);if(!el)return;
@@ -2676,7 +2694,44 @@ function ptSHToggle(i){const t=SPECIAL_HANDLING_TRAITS[i];if(!t)return;ptActiveB
 function ptCoatToggle(i){const t=COAT_TYPES[i];ptActiveCoats=ptActiveCoats.includes(t)?ptActiveCoats.filter(x=>x!==t):[...ptActiveCoats,t];renderPtToggles();}
 function ptMedToggle(i){const t=MEDICAL_TAGS[i];ptActiveMedical=ptActiveMedical.includes(t)?ptActiveMedical.filter(x=>x!==t):[...ptActiveMedical,t];renderPtToggles();}
 function ptAllergyToggle(i){const t=ALLERGENS[i];ptActiveAllergies=ptActiveAllergies.includes(t)?ptActiveAllergies.filter(x=>x!==t):[...ptActiveAllergies,t];renderPtToggles();}
-function ptOwnToggle(i){const oid=owners[i]?.id;if(!oid)return;ptActiveOwners=ptActiveOwners.includes(oid)?ptActiveOwners.filter(x=>x!==oid):[...ptActiveOwners,oid];renderPtToggles();}
+let ptOwnEdit=false,ptOwnQuery="";
+function ptRoleBadge(i){return`<span class="badge" style="background:${i===0?"var(--teal)":"#F0F0F0"};color:${i===0?"#fff":"#666"};min-width:62px;text-align:center">${i===0?"Primary":i===1?"Secondary":"Other"}</span>`;}
+function ptOwnerLine(o,i){return`<strong>${o.name}</strong>${o.phone?` <span style="color:#888">&middot; ${o.phone}</span>`:""}`;}
+function renderPtOwners(){
+  const sum=document.getElementById("pt-owner-summary"),ed=document.getElementById("pt-owner-editor"),btn=document.getElementById("pt-own-edit-btn");
+  if(!sum||!ed)return;
+  const list=ptActiveOwners.map(id=>owners.find(o=>o.id===id)).filter(Boolean);
+  btn.innerHTML=ptOwnEdit?"&#10003; Done":"&#9998; Edit";
+  // Summary (always shown when not editing)
+  sum.style.display=ptOwnEdit?"none":"";
+  sum.innerHTML=list.length?`<div style="display:flex;flex-direction:column;gap:6px">${list.map((o,i)=>`<div style="display:flex;align-items:center;gap:8px;font-size:13px">${ptRoleBadge(i)}<span style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ptOwnerLine(o,i)}</span></div>`).join("")}</div>`:`<div style="font-size:12px;color:#E8534A">No owner linked &mdash; tap Edit to add one.</div>`;
+  // Editor
+  ed.style.display=ptOwnEdit?"":"none";
+  if(!ptOwnEdit){ed.innerHTML="";return;}
+  ed.innerHTML=`${list.map((o,i)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 8px;border:1px solid var(--border);border-radius:8px;margin-bottom:5px;background:var(--surface2)">${ptRoleBadge(i)}<div style="flex:1;min-width:0;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${ptOwnerLine(o,i)}</div>${i>0?`<button type="button" class="sm" onclick="ptOwnerUp(${i})">${i===1?"Make primary":"&uarr;"}</button>`:""}<button type="button" class="sm" title="Unlink" onclick="ptOwnerRemove(${o.id})">&#10005;</button></div>`).join("")}
+  <div style="position:relative;margin-top:8px"><span style="position:absolute;left:10px;top:9px;font-size:13px">&#128269;</span><input type="text" id="pt-own-search" placeholder="Search clients by name, phone or email" value="${ptOwnQuery.replace(/"/g,"&quot;")}" oninput="ptOwnSearch(this.value)" autocomplete="off" style="width:100%;padding:8px 10px 8px 30px"/></div>
+  <div id="pt-own-results" style="margin-top:4px"></div>`;
+  ptOwnResults();
+}
+function ptOwnResults(){
+  const el=document.getElementById("pt-own-results");if(!el)return;
+  const q=ptOwnQuery.trim().toLowerCase(),qd=q.replace(/\D/g,"");
+  const free=owners.filter(o=>!ptActiveOwners.includes(o.id));
+  const hits=q?free.filter(o=>(o.name||"").toLowerCase().includes(q)||(o.email||"").toLowerCase().includes(q)||(qd.length>=3&&String(o.phone||"").replace(/\D/g,"").includes(qd))):[];
+  const rows=hits.slice(0,6).map(o=>`<div onclick="ptOwnerAdd(${o.id})" style="padding:8px 10px;font-size:12px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;gap:8px;cursor:pointer"><span style="min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${o.name}${o.phone?` <span style="color:#888">&middot; ${o.phone}</span>`:""}</span><span style="color:#5fe0d6;font-weight:600;flex-shrink:0">+ Add</span></div>`).join("");
+  const create=`<div onclick="ptOwnerCreate()" style="padding:8px 10px;font-size:12px;color:#4DA6FF;cursor:pointer">+ Create new owner${ptOwnQuery.trim()?` &ldquo;${ptOwnQuery.trim().replace(/</g,"&lt;")}&rdquo;`:""}</div>`;
+  el.innerHTML=(q||free.length===0?"":`<div style="font-size:11px;color:#888;padding:2px 2px 4px">Type to find an existing client.</div>`)+`<div style="border:1px solid var(--border);border-radius:8px;background:var(--surface)">${rows}${q&&!hits.length?`<div style="padding:8px 10px;font-size:12px;color:#888;border-bottom:1px solid var(--border)">No matching clients</div>`:""}${create}</div>`;
+}
+function ptOwnSearch(v){ptOwnQuery=v;ptOwnResults();}
+function ptOwnerAdd(id){if(!ptActiveOwners.includes(id))ptActiveOwners=[...ptActiveOwners,id];ptOwnQuery="";renderPtOwners();document.getElementById("pt-own-search")?.focus();}
+function ptOwnerRemove(id){ptActiveOwners=ptActiveOwners.filter(x=>x!==id);renderPtOwners();}
+function ptOwnerCreate(){
+  const q=ptOwnQuery.trim();
+  openOwModalFromPet();
+  if(q){const el=document.getElementById(/\d/.test(q)&&!/[a-z]/i.test(q)?"ow-phone":"ow-name");if(el)el.value=q;}
+}
+function togglePtOwnEdit(){ptOwnEdit=!ptOwnEdit;if(!ptOwnEdit)ptOwnQuery="";renderPtOwners();}
+function ptOwnerUp(i){if(i<1||i>=ptActiveOwners.length)return;const a=[...ptActiveOwners];[a[i-1],a[i]]=[a[i],a[i-1]];ptActiveOwners=a;renderPtOwners();}
 function closePtModal(){document.getElementById("modal-pet").classList.remove("open");ptEditing=null;_chainOwnerId=null;}
 async function savePtModal(){
   const name=document.getElementById("pt-name").value.trim();
@@ -2692,7 +2747,7 @@ async function savePtModal(){
     if(url)ptPhotoData=url;
     _pendingPetPhotoUpload=null;
   }
-  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").checked,lastNote:document.getElementById("pt-behavnote").value,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
+  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
   if(ptEditing){pets=pets.map(p=>p.id===ptEditing.id?{...p,...obj}:p);}else{pets.push({id:nextPetId++,...obj});}
   const _ch=_chainOwnerId;
   save();closePtModal();render();
