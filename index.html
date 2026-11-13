@@ -274,6 +274,8 @@ button.primary:hover{background:var(--teal-dark)}button.green:hover{background:#
 .tmr-clock{font-size:20px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text)}
 .tmr button{padding:4px 10px;font-size:11px;border-radius:10px}
 .card.bk-card{display:flex;gap:12px;padding:12px}
+body.has-timer{padding-bottom:96px}
+.bk-banner{background:rgba(91,175,122,.16)!important;color:#7fd3a0!important}
 </style>
 <script>
 if("serviceWorker" in navigator){
@@ -308,16 +310,18 @@ if("serviceWorker" in navigator){
 <div id="modal-booking" class="modal-bg">
 <div class="modal" style="width:440px">
 <h2 id="bk-title">New booking</h2>
-<div id="bk-completion-banner" style="display:none;background:#EAF7EE;color:#2f7a4a;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px">✅ Booking marked as done — add any final details below (blades/combs, photos, products, payment, timers) before saving.</div>
-<div class="mb10 bk-core-only"><label class="lbl">Pet</label><select id="bk-pet"></select><div id="bk-pet-hint" style="font-size:11px;color:#888;margin-top:3px"></div></div>
-<div class="mb10 bk-core-only"><label class="lbl">Owner</label><div id="bk-owner-display" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#f6f6f6;color:#888;font-size:13px;min-height:34px">—</div><input type="hidden" id="bk-owner"/></div>
-<div class="mb10 bk-core-only"><label class="lbl">Service</label><select id="bk-service"></select></div>
-<div class="mb10 bk-core-only"><label class="lbl">Add-ons</label><div id="bk-addons" class="multi-toggle"></div></div>
-<div class="grid2">
+<div id="bk-completion-banner" class="bk-banner" style="display:none;background:#EAF7EE;color:#2f7a4a;border-radius:8px;padding:8px 12px;font-size:12px;margin-bottom:10px">✅ Booking marked as done — add any final details below (blades/combs, photos, products, payment, timers) before saving.</div>
+<div id="bk-locked-summary" style="display:none"></div>
+<div id="bk-pet-note"></div>
+<div class="mb10 bk-core-only bk-lockable"><label class="lbl">Pet</label><select id="bk-pet"></select><div id="bk-pet-hint" style="font-size:11px;color:#888;margin-top:3px"></div></div>
+<div class="mb10 bk-core-only bk-lockable"><label class="lbl">Owner</label><div id="bk-owner-display" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;background:#f6f6f6;color:#888;font-size:13px;min-height:34px">—</div><input type="hidden" id="bk-owner"/></div>
+<div class="mb10 bk-core-only bk-lockable"><label class="lbl">Service</label><select id="bk-service"></select></div>
+<div class="mb10 bk-core-only bk-lockable"><label class="lbl">Add-ons</label><div id="bk-addons" class="multi-toggle"></div></div>
+<div class="grid2 bk-lockable">
   <div><label class="lbl">Date</label><input type="date" id="bk-date"/></div>
   <div><label class="lbl">Time</label><input type="time" id="bk-time"/></div>
 </div>
-<div class="mb10 bk-core-only"><label class="lbl">Status</label><select id="bk-status"><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="done">Done</option><option value="cancelled">Cancelled</option></select></div>
+<div class="mb10 bk-core-only bk-lockable"><label class="lbl">Status</label><select id="bk-status" onchange="applyBkModeVisibility()"><option value="confirmed">Confirmed</option><option value="pending">Pending</option><option value="done">Done</option><option value="cancelled">Cancelled</option></select></div>
 <div class="mb10 bk-core-only"><label class="lbl">Booking notes</label><textarea id="bk-notes" rows="2" placeholder="e.g. check ear infection"></textarea></div>
 <div class="mb10 bk-postonly"><label class="lbl">Completion notes</label><textarea id="bk-completionnotes" rows="2" placeholder="e.g. notes added after the groom was done"></textarea></div>
 <div class="mb10 bk-postonly"><label class="lbl">For next time</label><textarea id="bk-nextnote" rows="2" placeholder="e.g. trim nails shorter next visit"></textarea></div>
@@ -333,7 +337,7 @@ if("serviceWorker" in navigator){
   <div id="bk-matting-wrap" style="display:none"><label class="lbl">De-matting (min)</label><input type="number" id="bk-matting" value="0" min="0"/></div>
   <div><label class="lbl">Custom price ($)</label><input type="number" id="bk-custom" placeholder="Auto"/></div>
 </div>
-<div class="mb10 bk-postonly"><label class="lbl">Time spent <span style="font-weight:400">(logged in 15 min steps)</span></label><div id="bk-timers"></div></div>
+<div class="mb10 bk-existing-only"><label class="lbl">Time spent</label><div id="bk-timers"></div></div>
 <div id="bk-price-box" class="price-box"></div>
 <div style="margin-bottom:8px"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-waive-extras" style="width:auto"> Waive extras <span style="color:#888;font-size:11px">(handling surcharge &amp; size adjustment)</span></label></div>
 <div style="margin-bottom:8px" class="bk-postonly"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="bk-waived"> Waive payment</label></div>
@@ -367,7 +371,6 @@ if("serviceWorker" in navigator){
 </div>
 <div class="mb10 bk-postonly">
   <label class="lbl">Additional photo</label>
-  <p style="font-size:11px;color:#888;margin:0 0 6px">Not before/after — just extra shots from this visit, saved straight to the pet's Drive folder.</p>
   <input type="file" id="bk-extra-photo-input" accept="image/*" multiple style="display:none" onchange="bkExtraPhotoSelected(this)"/>
   <button type="button" class="sm" onclick="document.getElementById('bk-extra-photo-input').click()">&#128247; Add photo</button>
   <span id="bk-extra-photo-status" style="font-size:11px;color:#888;margin-left:8px"></span>
@@ -436,16 +439,16 @@ if("serviceWorker" in navigator){
 <div class="mb10"><label class="lbl">Coat type(s)</label><div id="pt-coats" class="multi-toggle"></div></div>
 <div class="mb10"><label class="lbl" style="color:#E8534A;font-weight:600">⚠️ Special handling</label><div id="pt-special" class="multi-toggle"></div><input type="text" id="pt-special-custom" placeholder="e.g. owner must stay in waiting area" style="margin-top:6px"/></div>
 <div class="mb10"><label class="lbl">Behaviour traits</label><div id="pt-behaviour" class="multi-toggle"></div></div>
-<div class="mb10"><label class="lbl">Behaviour notes</label><textarea id="pt-behavnote" rows="2" placeholder="e.g. settles after first 10 mins"></textarea></div>
+<div class="mb10"><label class="lbl">Notes</label><textarea id="pt-notes-all" rows="4" placeholder="Type anything, e.g. anxious around clippers. Allergic to chicken. Prefers a teddy bear trim. Please always use the quiet dryer." oninput="updateNotesSummary_()"></textarea><div id="pt-notes-sorted" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center"></div><textarea id="pt-behavnote" style="display:none"></textarea><textarea id="pt-petnote" style="display:none"></textarea></div>
 <div class="mb10"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="pt-no-allergies" onchange="ptToggleNoAllergies()"/> No known allergies or medical conditions</label></div>
 <div id="pt-medconditions-section">
 <div class="mb10"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><label class="lbl" style="margin:0;white-space:nowrap">Medical conditions</label><div id="pt-medical" class="multi-toggle" style="display:inline-flex;flex-wrap:wrap;gap:4px"></div></div></div>
-<div class="mb10"><label class="lbl">Medical notes</label><textarea id="pt-mednotes" rows="2" placeholder="e.g. sensitive skin"></textarea></div>
+<div class="mb10" style="display:none"><label class="lbl">Medical notes</label><textarea id="pt-mednotes" rows="2" placeholder="e.g. sensitive skin"></textarea></div>
 </div>
 <div id="pt-allergies-section">
 <div class="mb10"><label class="lbl" style="color:#92620A;font-weight:600">Allergies</label><div id="pt-allergies" class="multi-toggle"></div><input type="text" id="pt-allergies-custom" placeholder="e.g. specific brand of shampoo" style="margin-top:6px"/></div>
 </div>
-<div class="mb10"><label class="lbl">Preferred style</label><input type="text" id="pt-prefstyle" placeholder="e.g. teddy bear trim, summer cut..."/></div>
+<div class="mb10" style="display:none"><label class="lbl">Preferred style</label><input type="text" id="pt-prefstyle" placeholder="e.g. teddy bear trim, summer cut..."/></div>
 <div class="mb10"><label class="lbl">Treats</label><select id="pt-treats"><option value="ok">Treats OK</option><option value="limit">Limit treats (not too many)</option><option value="no">No treats</option></select></div>
 <div class="mb10"><div style="display:flex;align-items:center;justify-content:space-between"><label class="lbl" style="margin:0">Linked owners</label><button type="button" class="sm" id="pt-own-edit-btn" onclick="togglePtOwnEdit()">&#9998; Edit</button></div><div id="pt-owner-summary" style="margin-top:6px"></div><div id="pt-owner-editor" style="display:none;margin-top:8px"></div></div>
 <div class="row-end"><button onclick="closePtModal()">Cancel</button><button class="primary" onclick="savePtModal()">Save pet profile</button></div>
@@ -507,6 +510,16 @@ if("serviceWorker" in navigator){
 </div>
 </div>
 
+<div id="timer-bar" style="display:none;position:fixed;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px));z-index:30;flex-direction:column;gap:8px;padding:10px 12px;background:var(--surface);border:1px solid var(--teal);border-radius:14px;box-shadow:0 6px 22px rgba(0,0,0,.55);max-width:520px;margin:0 auto"></div>
+
+<div id="modal-compare" class="modal-bg" style="z-index:62">
+<div class="modal" style="width:470px">
+<h2 id="cmp-title">Compare grooms</h2>
+<div id="cmp-body"></div>
+<div class="row-end"><button onclick="closeCompare()">Close</button></div>
+</div>
+</div>
+
 <div id="confirm-modal" class="confirm-bg">
 <div class="confirm-box">
 <p id="confirm-msg"></p>
@@ -562,6 +575,196 @@ function bookingCuts(b){
 // ── Times groomed ──
 function treatsState(p){return p.treatsOk===false?"no":(p.treatsLimit?"limit":"ok");}
 function treatsLabel(p){return{ok:"Treats OK",limit:"Limit treats",no:"No treats"}[treatsState(p)];}
+// ── Auto-sort notes: files each sentence under Behaviour / Medical / Preferred style / Pet notes ──
+// Order matters: the first matching rule wins. A sentence with no match stays where it already is.
+const NOTE_FIELDS={
+  behaviour:{id:"pt-behavnote",label:"Behaviour notes",join:"\n"},
+  always:{id:"pt-petnote",label:"Pet notes (every booking)",join:"\n"},
+  medical:{id:"pt-mednotes",label:"Medical notes",join:"\n"},
+  style:{id:"pt-prefstyle",label:"Preferred style",join:"; "}
+};
+const NOTE_RULES=[
+  {cat:"medical",re:/\b(allerg\w*|vet|vets|medicat\w*|surgery|operat\w*|skin|rash|itch\w*|infect\w*|arthritis|seiz\w*|epilep\w*|heart|diabet\w*|lump\w*|hips?|joints?|injur\w*|pain\w*|sore|limp\w*|ear mites|tablets?|antibiotics?|pregnan\w*|in season|blind|deaf|cataracts?|medical|condition\w*|steroids?|fleas?|ticks?|hot ?spots?)\b/i},
+  {cat:"style",re:/\b(teddy|trim\w*|cut|cuts|length|shav\w*|scissor\w*|style|topknot|top knot|fluffy|round\w*|short\w*|longer|keep (the )?(ears?|tail|legs?|face|beard)|ears? long|puppy cut|lion|sanitary|shape|mm|blades?|combs?)\b/i},
+  {cat:"always",re:/\b(always|never|every (time|visit)|please|do not|don'?t|dont|must|prefer\w*|owner (stays|waits|will|wants|would|needs)|call|text|message|drop[- ]?off|pick[- ]?up|pickup|dryer|muzzle|treats?|cash|invoice|late|early)\b/i},
+  {cat:"behaviour",re:/\b(anxious|nervous|scared|afraid|fear\w*|bite\w*|bit|snap\w*|growl\w*|aggress\w*|reactive|bark\w*|howl\w*|shy|timid|settle\w*|calm|hyper|wriggl\w*|squirm\w*|wiggl\w*|hates|dislikes?|sensitive|jump\w*|escape|noise|thunder|clippers?|rescue|puppy|new to)\b/i}
+];
+const NOTE_SYS=/^(Photo note:|Reference photos:|Approx age at intake:)/i;
+function noteSentences_(text){
+  const out=[];
+  String(text||"").split(/\n+|\s—\s/).forEach(line=>{
+    const l=line.trim();if(!l)return;
+    if(NOTE_SYS.test(l)||/https?:\/\//i.test(l)){out.push(l);return;}
+    l.replace(/([.!?])\s+/g,"$1\n").split(/\n+|;\s+/).forEach(x=>{const t=x.trim();if(t)out.push(t);});
+  });
+  return out;
+}
+function classifyNote_(sent){
+  if(NOTE_SYS.test(sent)||/https?:\/\//i.test(sent))return null;
+  for(const r of NOTE_RULES){if(r.re.test(sent))return r.cat;}
+  return null;
+}
+// fields = {behaviour, always, medical, style} (strings). skip = Set of move indexes to leave where they are.
+function autoSortNotes(fields,skip){
+  const keep={behaviour:[],always:[],medical:[],style:[]},moves=[],moved=[];
+  Object.keys(keep).forEach(f=>{
+    noteSentences_(fields[f]).forEach(sent=>{
+      const cat=classifyNote_(sent),target=cat||f;
+      if(target!==f){
+        const m={idx:moves.length,text:sent,from:f,to:target};moves.push(m);
+        if(skip&&skip.has(m.idx))keep[f].push(sent);else moved.push(m);
+      }else keep[f].push(sent);
+    });
+  });
+  moved.forEach(m=>keep[m.to].push(m.text));
+  const result={};
+  Object.keys(keep).forEach(f=>{
+    const seen=new Set(),list=[];
+    keep[f].forEach(x=>{const k=x.toLowerCase().replace(/[.\s]+$/,"");if(!seen.has(k)){seen.add(k);list.push(f==="style"?x.replace(/\.+$/,""):x);}});
+    result[f]=list.join(NOTE_FIELDS[f].join);
+  });
+  return{moves,result};
+}
+function readNoteFields_(){const f={};Object.keys(NOTE_FIELDS).forEach(k=>{f[k]=document.getElementById(NOTE_FIELDS[k].id)?.value||"";});return f;}
+// One notes box: everything typed is filed automatically when the pet is saved.
+// A sentence with no keyword match stays where it was before (or goes to Behaviour notes if it is new).
+let _noteOrigin={};
+function sortNotesCore_(text,origin){
+  const keep={behaviour:[],always:[],medical:[],style:[]};
+  noteSentences_(text).forEach(sent=>{keep[classifyNote_(sent)||origin[sent.toLowerCase()]||"behaviour"].push(sent);});
+  const result={},counts={};
+  Object.keys(keep).forEach(f=>{
+    const seen=new Set(),list=[];
+    keep[f].forEach(x=>{const k=x.toLowerCase().replace(/[.\s]+$/,"");if(!seen.has(k)){seen.add(k);list.push(f==="style"?x.replace(/\.+$/,""):x);}});
+    result[f]=list.join(NOTE_FIELDS[f].join);counts[f]=list.length;
+  });
+  return{result,counts};
+}
+function combineNotes_(f){
+  const origin={},lines=[];
+  ["behaviour","always","medical","style"].forEach(k=>noteSentences_(f[k]).forEach(sent=>{const key=sent.toLowerCase();if(!origin[key]){origin[key]=k;lines.push(sent);}}));
+  return{text:lines.join("\n"),origin};
+}
+function loadNotesAll_(){
+  const c=combineNotes_(readNoteFields_());
+  _noteOrigin=c.origin;
+  document.getElementById("pt-notes-all").value=c.text;
+  updateNotesSummary_();
+}
+function updateNotesSummary_(){
+  const el=document.getElementById("pt-notes-sorted");if(!el)return;
+  const r=sortNotesCore_(document.getElementById("pt-notes-all").value,_noteOrigin);
+  const defs=[["medical","Medical","#FDECEA","#E8534A"],["style","Style","#E8F3FF","#185FA5"],["always","Pet notes (every booking)","#FAEEDA","#854F0B"],["behaviour","Behaviour","#F0F0F0","#666"]];
+  const chips=defs.filter(d=>r.counts[d[0]]).map(d=>`<span class="badge" style="background:${d[2]};color:${d[3]}">${d[1]} ${r.counts[d[0]]}</span>`).join("");
+  el.innerHTML=chips?`<span style="font-size:11px;color:#888">Sorted into:</span>${chips}`:"";
+}
+function syncNotesAll_(){
+  const r=sortNotesCore_(document.getElementById("pt-notes-all").value,_noteOrigin).result;
+  Object.keys(NOTE_FIELDS).forEach(k=>{const el=document.getElementById(NOTE_FIELDS[k].id);if(el)el.value=r[k];});
+  if(r.medical){const nk=document.getElementById("pt-no-allergies");if(nk&&nk.checked)nk.checked=false;}
+}
+function sortAllPetNotes(){
+  openConfirm("Sort the notes on every pet profile into Behaviour, Medical, Style and Pet notes?","Sort all",()=>{
+    let n=0;
+    pets=pets.map(p=>{
+      const f={behaviour:p.lastNote||"",always:p.petNote||"",medical:p.medicalNotes||"",style:p.preferredStyle||""};
+      const c=combineNotes_(f),r=sortNotesCore_(c.text,c.origin).result;
+      if(r.behaviour===f.behaviour.split(" — ").join("\n")&&r.always===f.always&&r.medical===f.medical&&r.style===f.style)return p;
+      n++;return{...p,lastNote:r.behaviour.split("\n").join(" — "),petNote:r.always,medicalNotes:r.medical,preferredStyle:r.style};
+    });
+    save();render();
+    alert(n?`Sorted notes on ${n} pet${n===1?"":"s"}.`:"All notes were already sorted.");
+  });
+}
+// ── Compare two grooms of the same pet ──
+let cmpPetId=null,cmpIds=[null,null];
+function petDoneBookings_(petId){return bookings.filter(b=>b.petId===petId&&b.status==="done").sort((a,b)=>b.date.localeCompare(a.date)||String(b.time||"").localeCompare(String(a.time||"")));}
+function openCompare(petId,idA,idB){
+  const done=petDoneBookings_(petId);if(done.length<2)return;
+  cmpPetId=petId;cmpIds=idA&&idB?[idA,idB]:[done[1].id,done[0].id]; // older on the left, newest on the right
+  renderCompare();
+  document.getElementById("modal-compare").classList.add("open");
+}
+function closeCompare(){document.getElementById("modal-compare").classList.remove("open");}
+function cmpPick(i,id){cmpIds[i]=Number(id);renderCompare();}
+function renderCompare(){
+  const pet=petById(cmpPetId);const done=petDoneBookings_(cmpPetId);
+  document.getElementById("cmp-title").textContent=`Compare grooms — ${pet?.name||""}`;
+  const pair=cmpIds.map(id=>done.find(b=>b.id===id)||done[0]).sort((a,b)=>a.date.localeCompare(b.date)||String(a.time||"").localeCompare(String(b.time||"")));
+  const [A,B]=pair;
+  const opts=sel=>done.map(b=>`<option value="${b.id}"${b.id===sel?" selected":""}>${fmtDate(b.date)} &middot; ${b.service}</option>`).join("");
+  const days=Math.round((new Date(B.date+"T00:00")-new Date(A.date+"T00:00"))/86400000);
+  const addons=b=>(b.addOns||[]).length?` + ${b.addOns.join(", ")}`:"";
+  const cutsOf=b=>bookingCuts(b);
+  const cutsHtml=b=>cutsOf(b).length?`<div style="display:flex;flex-wrap:wrap;gap:3px">${cutsOf(b).map(c=>{const i=cutInfo(c.label);return i?tag(cutChipLabel(c),i.bg,i.text):tag(cutChipLabel(c),"#EAF7EE","#2f7a4a");}).join("")}</div>`:"—";
+  const mins=(b,k)=>bkTimeMins(b,k);
+  const esc=t=>String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+  const photoHtml=b=>{const ph=[b.beforePhoto,b.afterPhoto].filter(Boolean);return ph.length?`<div style="display:flex;gap:4px">${[["Before",b.beforePhoto],["After",b.afterPhoto]].filter(x=>x[1]).map(x=>`<div style="text-align:center"><img src="${x[1]}" style="width:88px;height:88px;object-fit:cover;border-radius:8px;display:block"/><span style="font-size:10px;color:var(--text-muted)">${x[0]}</span></div>`).join("")}</div>`:"—";};
+  const rows=[
+    {l:"Photos",v:photoHtml,k:null},
+    {l:"Blades & combs",v:cutsHtml,k:b=>cutsOf(b).map(c=>c.label+"@"+c.area).sort().join("|")},
+    {l:"Bath & dry",v:b=>mins(b,"bath")?fmtDuration(mins(b,"bath")):"—",k:b=>mins(b,"bath")},
+    {l:"Groom time",v:b=>mins(b,"groom")?fmtDuration(mins(b,"groom")):"—",k:b=>mins(b,"groom")},
+    {l:"Total time",v:b=>(mins(b,"bath")+mins(b,"groom"))?fmtDuration(mins(b,"bath")+mins(b,"groom")):"—",k:b=>mins(b,"bath")+mins(b,"groom")},
+    {l:"Completion notes",v:b=>b.completionNotes?esc(b.completionNotes):"—",k:b=>b.completionNotes||""}
+  ];
+  const cell=(h,tone)=>`<div style="font-size:12px;min-width:0;overflow-wrap:anywhere;${tone}">${h}</div>`;
+  document.getElementById("cmp-body").innerHTML=`
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px"><select onchange="cmpPick(0,this.value)">${opts(A.id)}</select><select onchange="cmpPick(1,this.value)">${opts(B.id)}</select></div>
+   <div style="font-size:11px;color:var(--text-muted);margin-bottom:8px;text-align:center">${days} day${days===1?"":"s"} apart &middot; <span style="color:#f0bd6e">&#9679;</span> = changed</div>
+   <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 10px">
+   ${rows.map(r=>{
+     const diff=r.k&&String(r.k(A))!==String(r.k(B));
+     return`<div style="grid-column:1/-1;margin-top:10px;font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:${diff?"#f0bd6e":"var(--text-muted)"}">${diff?"&#9679; ":""}${r.l}</div>${cell(r.v(A),diff?"border-left:3px solid #F59E0B;padding-left:8px;":"padding-left:11px;")}${cell(r.v(B),diff?"border-left:3px solid #F59E0B;padding-left:8px;":"padding-left:11px;")}`;
+   }).join("")}
+   </div>`;
+}
+// ── Progress tab: how a pet has changed over its grooms ──
+let progPetId=null;
+function progSetPet(v){progPetId=Number(v);renderPage();}
+function renderProgress(){
+  const withGrooms=pets.filter(p=>petDoneBookings_(p.id).length);
+  const sortedPets=[...pets].sort((a,b)=>a.name.localeCompare(b.name));
+  if(!progPetId||!petById(progPetId))progPetId=(withGrooms.sort((a,b)=>petDoneBookings_(b.id).length-petDoneBookings_(a.id).length)[0]||sortedPets[0]||{}).id||null;
+  const pet=petById(progPetId);
+  const picker=`<div class="search-row"><span style="font-size:14px;font-weight:500">Progress</span><div class="right"><select onchange="progSetPet(this.value)">${sortedPets.map(p=>`<option value="${p.id}"${p.id===progPetId?" selected":""}>${p.name}</option>`).join("")}</select></div></div>`;
+  if(!pet)return picker+`<div class="card" style="color:var(--text-muted);font-size:13px">Add a pet to see its progress.</div>`;
+  const done=petDoneBookings_(pet.id);            // newest first
+  const asc=[...done].reverse();
+  if(!done.length)return picker+`<div class="card" style="color:var(--text-muted);font-size:13px"><strong>${pet.name}</strong> has no completed grooms yet. Mark a booking done and its photos, times and blades will build up here.</div>`;
+  const tot=b=>bkTimeMins(b,"bath")+bkTimeMins(b,"groom");
+  const timed=asc.filter(b=>tot(b)>0);
+  const avg=timed.length?Math.round(timed.reduce((s,b)=>s+tot(b),0)/timed.length/15)*15:0;
+  const gaps=asc.slice(1).map((b,i)=>Math.round((new Date(b.date+"T00:00")-new Date(asc[i].date+"T00:00"))/86400000));
+  const avgGap=gaps.length?Math.round(gaps.reduce((a,b)=>a+b,0)/gaps.length):0;
+  const esc=t=>String(t||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+  const stat=(l,v)=>`<div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">${l}</div><div style="font-size:17px;font-weight:700">${v}</div></div>`;
+  const stats=`<div class="card" style="display:flex;padding:10px 6px;margin-bottom:10px">${stat("Grooms",done.length)}${stat("Avg time",avg?fmtDuration(avg):"—")}${stat("Every",avgGap?avgGap+" days":"—")}${stat("Since",fmtDate(asc[0].date).slice(3))}</div>`;
+  // trend: total time per groom (last 8)
+  const trendItems=timed.slice(-8),mx=Math.max(...trendItems.map(tot),1);
+  const trend=trendItems.length>=2?`<div class="card" style="padding:10px 12px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:baseline;margin-bottom:8px"><strong style="font-size:13px">Time per groom</strong><span style="font-size:11px;color:var(--text-muted)">newest on the right</span></div><div style="display:flex;align-items:flex-end;gap:6px;height:84px">${trendItems.map(b=>`<div style="flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%;min-width:0"><div style="font-size:9px;color:var(--text-muted);margin-bottom:2px">${fmtDuration(tot(b))}</div><div style="width:100%;border-radius:4px 4px 0 0;background:var(--teal);height:${Math.max(6,Math.round(tot(b)/mx*58))}px"></div></div>`).join("")}</div><div style="display:flex;gap:6px;margin-top:4px">${trendItems.map(b=>`<div style="flex:1;text-align:center;font-size:9px;color:var(--text-muted)">${fmtDate(b.date).slice(0,5)}</div>`).join("")}</div></div>`:"";
+  const cards=done.map((b,i)=>{
+    const prev=done[i+1];
+    const cuts=bookingCuts(b).map(c=>{const info=cutInfo(c.label);return info?tag(cutChipLabel(c),info.bg,info.text):tag(cutChipLabel(c),"#EAF7EE","#2f7a4a");}).join("");
+    const ph=[["Before",b.beforePhoto],["After",b.afterPhoto]].filter(x=>x[1]);
+    const bt=bkTimeMins(b,"bath"),gt=bkTimeMins(b,"groom");
+    return`<div class="card" style="padding:12px">
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px"><div><strong style="font-size:14px">${fmtDate(b.date)}</strong> <span style="font-size:12px;color:var(--text-muted)">&middot; ${b.service}${(b.addOns||[]).length?" + "+b.addOns.join(", "):""}</span></div>${i===0?tag("Latest","#E8F3FF","#185FA5"):""}</div>
+      ${ph.length?`<div style="display:flex;gap:8px;margin-top:8px">${ph.map(x=>`<div style="text-align:center"><img src="${x[1]}" style="width:92px;height:92px;object-fit:cover;border-radius:10px;display:block"/><span style="font-size:10px;color:var(--text-muted)">${x[0]}</span></div>`).join("")}</div>`:""}
+      ${cuts?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:8px">${cuts}</div>`:""}
+      ${(bt||gt)?`<div style="font-size:12px;color:var(--text-muted);margin-top:8px">${bt?`&#128705; ${fmtDuration(bt)}`:""}${bt&&gt?" &nbsp;&middot;&nbsp; ":""}${gt?`&#9986;&#65039; ${fmtDuration(gt)}`:""}${bt&&gt?` &nbsp;&middot;&nbsp; <strong style="color:var(--text)">${fmtDuration(bt+gt)} total</strong>`:""}</div>`:""}
+      ${b.completionNotes?`<div style="border-left:3px solid #185FA5;background:var(--surface2);border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;margin-top:8px">${esc(b.completionNotes)}</div>`:""}
+      ${b.nextnote?`<div style="border-left:3px solid #F59E0B;background:var(--surface2);border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;margin-top:6px"><strong style="font-size:10px;text-transform:uppercase;color:#f0bd6e">For next time</strong><br>${esc(b.nextnote)}</div>`:""}
+      ${prev?`<div style="margin-top:8px;text-align:right"><a href="#" onclick="openCompare(${pet.id},${prev.id},${b.id});return false" style="font-size:12px;color:#4DA6FF">&#9878; Compare with ${fmtDate(prev.date).slice(0,5)}</a></div>`:""}
+    </div>`;
+  }).join("");
+  return picker+stats+trend+cards;
+}
+function petNoteHtml(pet){
+  const t=(pet?.petNote||"").trim();if(!t)return"";
+  const esc=t.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/\n/g,"<br>");
+  return`<div style="background:#FAEEDA;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;margin-top:8px;color:#854F0B"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:.04em">&#128204; Pet notes</strong><br>${esc}</div>`;
+}
 function timesGroomed(petId){return bookings.filter(b=>b.petId===petId&&b.status==="done").length;}
 function groomedBadge(petId){const n=timesGroomed(petId);return`<span class="badge" style="background:#E8F3FF;color:#185FA5;margin-left:6px" title="Times groomed (completed bookings)">✂️ ${n}×</span>`;}
 // ── Timers: Bath & dry and Groom, each logged in 15-minute increments (rounded up) ──
@@ -609,16 +812,66 @@ function tickBkTimers(){
 }
 function renderBkTimers(){
   const el=document.getElementById("bk-timers");if(!el)return;
+  if(bkLocked){ // done bookings: time is final, shown read-only
+    el.innerHTML=`<div class="tmr" style="display:flex;gap:8px">${TIMER_DEFS.map(d=>{const m=timerLogged(d.k);return`<div style="flex:1"><div style="font-size:11px;color:var(--text-muted)">${d.icon} ${d.label}</div><div style="font-size:15px;font-weight:600">${m?fmtDuration(m):"—"}</div></div>`;}).join("")}</div>`;
+    return;
+  }
   el.innerHTML=TIMER_DEFS.map(d=>{
     const run=!!bkTimers[d.k].since;
     return`<div class="tmr"><div style="display:flex;align-items:center;justify-content:space-between;gap:8px"><div style="font-size:12px;font-weight:600">${d.icon} ${d.label}</div><div style="text-align:right"><div class="tmr-clock" id="tm-clock-${d.k}">${fmtClock(timerMs(d.k))}</div><div id="tm-logged-${d.k}" style="font-size:10px;color:#888">${timerLogged(d.k)?`Logged: ${fmtDuration(timerLogged(d.k))}`:"Not logged"}</div></div></div><div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap"><button type="button" class="${run?"":"green"}" onclick="bkTimerToggle('${d.k}')">${run?"⏸ Pause":"▶ Start"}</button><button type="button" onclick="bkTimerAdj('${d.k}',-15)">−15</button><button type="button" onclick="bkTimerAdj('${d.k}',15)">+15</button><button type="button" onclick="bkTimerReset('${d.k}')">Reset</button></div></div>`;
   }).join("");
 }
+// ── Timers without opening the booking: on booking cards, the dashboard, and a floating bar ──
+function bkTimersOf(b){
+  const mk=t=>({acc:t?.acc||0,since:t?.since||null});
+  if(b.timers)return{bath:mk(b.timers.bath),groom:mk(b.timers.groom)};
+  if(b.timer)return{bath:mk(null),groom:mk(b.timer)};
+  return{bath:{acc:bkTimeMins(b,"bath")*60000,since:null},groom:{acc:bkTimeMins(b,"groom")*60000,since:null}};
+}
+function saveBkTimersFor(id,t){
+  bookings=bookings.map(b=>{
+    if(b.id!==id)return b;
+    const bath=tmLog(tmMs(t.bath)),groom=tmLog(tmMs(t.groom));
+    return{...b,timers:t,timer:null,timeBath:bath||null,timeGroom:groom||null,timeSpent:(bath+groom)||null};
+  });
+  save();
+}
+function cardTimerToggle(id,k){
+  const b=bookings.find(x=>x.id===id);if(!b)return;
+  const t=bkTimersOf(b),now=Date.now();
+  if(t[k].since){t[k].acc+=now-t[k].since;t[k].since=null;}
+  else{["bath","groom"].forEach(o=>{if(o!==k&&t[o].since){t[o].acc+=now-t[o].since;t[o].since=null;}});t[k].since=now;}
+  saveBkTimersFor(id,t);
+  renderPage();renderTimerBar();
+}
+function cardTimersHtml(b){
+  const running=!!(bkTimersOf(b).bath.since||bkTimersOf(b).groom.since);
+  if(b.status==="cancelled"||b.status==="done"||(b.date!==todayStr()&&!running))return"";
+  const t=bkTimersOf(b);
+  return`<div style="display:flex;gap:6px;margin-top:8px">${TIMER_DEFS.map(d=>{const run=!!t[d.k].since;return`<div style="flex:1;min-width:0;display:flex;align-items:center;gap:6px;padding:6px 8px;border:1px solid ${run?"var(--teal)":"var(--border)"};border-radius:10px;background:var(--surface2)"><div style="flex:1;min-width:0"><div style="font-size:10px;color:var(--text-muted);white-space:nowrap">${d.icon} ${d.label}</div><div class="tmr-clock" style="font-size:15px" data-tm="${b.id}:${d.k}">${fmtClock(tmMs(t[d.k]))}</div></div><button type="button" class="sm ${run?"":"green"}" onclick="cardTimerToggle(${b.id},'${d.k}')">${run?"Pause":"Start"}</button></div>`;}).join("")}</div>`;
+}
+function renderTimerBar(){
+  const el=document.getElementById("timer-bar");if(!el)return;
+  const r=[];
+  bookings.forEach(b=>{const t=bkTimersOf(b);TIMER_DEFS.forEach(d=>{if(t[d.k].since)r.push({b,d,ms:tmMs(t[d.k])});});});
+  document.body.classList.toggle("has-timer",r.length>0);
+  if(!r.length){el.style.display="none";el.innerHTML="";return;}
+  el.style.display="flex";
+  el.innerHTML=r.map(x=>{const pet=petById(x.b.petId);return`<div style="display:flex;align-items:center;gap:8px"><div style="flex:1;min-width:0;cursor:pointer" onclick="switchTab('bookings')"><div style="font-size:11px;color:var(--text-muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${pet?.name||"?"} &middot; ${x.d.icon} ${x.d.label}</div><div class="tmr-clock" data-bar="${x.b.id}:${x.d.k}">${fmtClock(x.ms)}</div></div>${x.d.k==="bath"?`<button type="button" class="sm green" onclick="cardTimerToggle(${x.b.id},'groom')">Groom &#9654;</button>`:""}<button type="button" class="sm" onclick="cardTimerToggle(${x.b.id},'${x.d.k}')">Pause</button></div>`;}).join("");
+}
+setInterval(()=>{
+  document.querySelectorAll("[data-tm],[data-bar]").forEach(el=>{
+    const [id,k]=(el.dataset.tm||el.dataset.bar).split(":");
+    const b=bookings.find(x=>x.id===Number(id));
+    if(b)el.textContent=fmtClock(tmMs(bkTimersOf(b)[k]));
+  });
+},1000);
 function persistBkTimers(){
   if(!bkEditing||!bkEditing.id)return;
   const snap=JSON.parse(JSON.stringify(bkTimers));
   bookings=bookings.map(b=>b.id===bkEditing.id?{...b,timers:snap,timer:null}:b);
   save();
+  renderTimerBar();
 }
 function bkTimerToggle(k){
   const t=bkTimers[k];
@@ -1162,13 +1415,14 @@ async function checkIntake(){
         else petNoteParts.push(t);
       });
 
+      const sortedN=autoSortNotes({behaviour:petNoteParts.join("\n"),always:"",medical:item.medicalNotes||"",style:""}).result;
       pets.push({id:nextPetId++,name:item.petName||"Unknown",breed:item.petBreed||"",
         dob:approxAge?"":(item.petDob||""),approxAge:approxAge,
         sex:item.petSex||"Male",desexed:(item.petDesexed||"")==="Yes",size:item.petSize||"Medium",
-        coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:item.medicalNotes||"",
-        allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",
+        coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:sortedN.medical,
+        allergies:[],customAllergies:item.customAllergies||"",preferredStyle:sortedN.style,petNote:sortedN.always,
         treatsOk:item.treatsOk!==false,treatsLimit:!!item.limitTreats,
-        lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
+        lastNote:sortedN.behaviour.split("\n").join(" — "),ownerIds:[owner.id],photo:null,photos:[],
         customSpecialHandling:item.noContactServices||"",hideBrachy:false,oodleName:null,needsReview:true,
         consentSigned:!!(item.agreeTerms&&item.signature),consentSignature:item.signature||"",consentDate:item.consentDate||""});
       processedIds.push(item.id);
@@ -1266,6 +1520,7 @@ const MG_PET_FIELDS=[
   {k:"customAllergies",l:"Other allergies",t:"note"},
   {k:"customSpecialHandling",l:"Special handling",t:"note"},
   {k:"lastNote",l:"Notes",t:"note"},
+  {k:"petNote",l:"Pet notes (every booking)",t:"note"},
   {k:"consent",l:"Consent",t:"consent"}
 ];
 const MG_OWNER_FIELDS=[
@@ -1509,7 +1764,7 @@ function openIntakeInfo(petId,ownerId){
    +iiRow("Coat",p.coatTypes)+iiRow("Special handling",[...(p.medicalTags||[]),...(p.behaviour||[])].filter(t=>SPECIAL_HANDLING_TRAITS.includes(t)).concat(p.customSpecialHandling?[p.customSpecialHandling]:[]))
    +iiRow("Behaviour",(p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical",(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical notes",p.medicalNotes)
    +iiRow("Allergies",[...(p.allergies||[])].concat(p.customAllergies?[p.customAllergies]:[]))+iiRow("Treats",treatsLabel(p))+iiRow("Style",p.preferredStyle)
-   +iiRow("Notes",p.lastNote?linkifyNote(p.lastNote):"")+iiRow("Consent",consent);
+   +iiRow("Notes",p.lastNote?linkifyNote(p.lastNote):"")+iiRow("Pet notes",p.petNote)+iiRow("Consent",consent);
   html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin:12px 0 2px">Owner</div>`;
   html+=o?iiRow("Name",o.name)+iiRow("Phone",o.phone)+iiRow("Email",o.email)+iiRow("Contact",o.contact)+iiRow("Notes",o.notes):`<div style="font-size:12px;color:var(--text-muted);padding:6px 0">No owner linked</div>`;
   html+=petDupHtml_(p,o)||"";
@@ -1760,7 +2015,7 @@ document.addEventListener("click",function(e){
   }
 });
 
-function render(){renderMetrics();renderPage();updateIntakeBanner();}
+function render(){renderMetrics();renderPage();updateIntakeBanner();renderTimerBar();}
 
 function renderMetrics(){
   const td=todayStr();const now=new Date();const sw=new Date();sw.setDate(now.getDate()-((now.getDay()+6)%7));const ew2=new Date(sw);ew2.setDate(sw.getDate()+6);
@@ -1775,6 +2030,7 @@ function renderPage(){
   else if(currentTab==="bookings")page.innerHTML=renderBookings();
   else if(currentTab==="calendar")page.innerHTML=renderCalendar();
   else if(currentTab==="pets")page.innerHTML=renderPets();
+  else if(currentTab==="progress")page.innerHTML=renderProgress();
   else if(currentTab==="clients")page.innerHTML=renderClients();
   else if(currentTab==="pricing")page.innerHTML=renderPricing();
   else if(currentTab==="finances")page.innerHTML=renderFinances();
@@ -1792,7 +2048,7 @@ function renderDashboard(){
     const brachy=pet&&isBrachy(pet.breed)&&!pet.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:8px">Brachy</span>`:"";
     const behTags=(pet?.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)).map(t=>{const c=behColor(t);return tag(t,c.bg,c.text);}).join("");
     const petPhoto=pet?.photo?`<img src="${pet.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="font-size:24px">🐾</div>`;
-    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:rgb(232,83,74);box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button></div></div></div>`;
+    nextHtml=`<div class="card"><div style="display:flex;gap:10px"><div style="flex:1;min-width:0"><div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">${petPhoto}<div style="flex:1"><div style="font-size:14px;font-weight:500">${pet?.name||"?"} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span>${brachy}</div><div style="font-size:12px;color:#888">${owner?.name||"?"} &middot; ${owner?.phone||""}</div></div>${badge(next.status)}</div><div style="font-size:13px;margin-bottom:8px"><strong>${next.service}</strong>${(next.addOns||[]).length?" + "+next.addOns.join(", "):""} — ${fmtDate(next.date)} at ${fmtTime(next.time)}</div>${specialHandlingBox(pet,8)}${(()=>{const prevDone=[...bookings].filter(b=>b.petId===next.petId&&b.status==="done"&&b.nextnote).sort((a,b2)=>b2.date.localeCompare(a.date)||b2.time.localeCompare(a.time))[0];return prevDone?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:12px;color:#92400E;margin-bottom:8px;white-space:pre-wrap"><strong>For next time:</strong> ${prevDone.nextnote}</div>`:"";})()} <br>${behTags?`<div style="margin-bottom:10px">${behTags}</div>`:""}${(()=>{const lastBk=bookings.filter(b=>b.petId===next.petId&&b.id!==next.id&&b.status==="done"&&(b.products||[]).length).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time))[0];return lastBk?`<div style="background:#EEF6FF;border-radius:6px;padding:6px 10px;font-size:11px;margin-bottom:8px"><span style="color:#185FA5;font-weight:600">Products last visit</span><br>${(lastBk.products||[]).map(p=>`<span style="display:inline-block;background:#D4EBFF;color:#185FA5;border-radius:10px;padding:1px 7px;font-size:10px;font-weight:500;margin-right:3px">${p}</span>`).join("")}</div>`:"";})()}${petNoteHtml(pet)}${cardTimersHtml(next)}</div><div style="display:flex;flex-direction:column;gap:8px;flex-shrink:0;justify-content:flex-start"><button class="primary" onclick="markBkStatus(${next.id},'done')" style="padding:9px 18px;font-size:13px;background:#95ddbc;border-color:#95ddbc;color:#1a4a2e;box-shadow:0 3px 8px rgba(149,221,188,0.4)">Done</button><button class="primary" onclick="markBkStatus(${next.id},'cancelled')" style="padding:9px 18px;font-size:13px;background:#E8534A;border-color:rgb(232,83,74);box-shadow:0 3px 8px rgba(232,83,74,0.28)">Cancelled</button></div></div></div>`;
   }
   let upcomingMore="";
   if(upcoming.length>1){
@@ -1817,7 +2073,9 @@ function renderBookings(){
       <div style="flex:1;min-width:0">
         <div style="display:flex;justify-content:space-between;gap:6px"><div><div style="font-size:14px;font-weight:600">${miniPhoto}${pet?.name||"—"} <span style="font-weight:400;color:var(--text-muted);font-size:12px">&middot; ${displayBreed(pet?.breed,pet?.oodleName)||""}</span></div><div style="font-size:12px;color:var(--text-muted)">${owner?.name||"—"} &middot; ${owner?.phone||""}</div></div><div style="align-self:flex-start">${badge(b.status)}</div></div>
         <div style="margin-top:6px;font-size:13px">${b.service} ${(b.addOns||[]).length?`<span style="font-size:11px;color:#534AB7">+${b.addOns.join(", ")}</span>`:""}</div>
+        ${petNoteHtml(pet)}
         ${cutChips?`<div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${cutChips}</div>`:""}
+        ${cardTimersHtml(b)}
         ${b.notes||b.completionNotes||b.nextnote||b.beforePhoto||b.afterPhoto?`<div style="margin-top:2px">${b.notes?`<div style="background:#EEEDFE;border-left:3px solid #534AB7;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#534AB7;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Booking notes</strong><br>${b.notes}</div>`:""}${b.completionNotes?`<div style="background:#E6F1FB;border-left:3px solid #185FA5;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#185FA5;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">Completion notes</strong><br>${b.completionNotes}</div>`:""}${b.nextnote?`<div style="background:#FFF8E7;border-left:3px solid #F59E0B;border-radius:0 6px 6px 0;padding:6px 10px;font-size:11px;color:#92400E;margin-top:8px;white-space:pre-wrap"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:0.04em;opacity:0.7">For next time</strong><br>${b.nextnote}</div>`:""}${(b.beforePhoto||b.afterPhoto)?`<div style="display:flex;gap:8px;margin-top:8px">${b.beforePhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">Before</div><img src="${b.beforePhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}${b.afterPhoto?`<div style="width:80px;flex-shrink:0"><div style="font-size:10px;color:var(--text-muted);font-weight:500;margin-bottom:3px;text-transform:uppercase;letter-spacing:0.04em">After</div><img src="${b.afterPhoto}" style="width:80px;height:100px;object-fit:cover;border-radius:7px;border:1px solid var(--border)"/></div>`:""}</div>`:""}</div>`:""}
         <div style="display:flex;align-items:center;gap:8px;margin-top:9px;padding-top:8px;border-top:1px solid var(--border);font-size:12px;flex-wrap:wrap"><span style="font-size:14px">${priceHtml}</span>${payHtml}${timeSpentHtml(b)!=="—"?`<span style="color:var(--text-muted)">⏱ ${timeSpentHtml(b)}</span>`:""}<span style="margin-left:auto;display:flex;gap:4px"><button class="sm" onclick="editBk(${b.id})">📝 Edit</button><button class="sm" onclick="deleteBk(${b.id})">&#128465;</button></span></div>
       </div>
@@ -1898,9 +2156,9 @@ function renderPets(){
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}</span><span style="font-size:11px;color:#888">${(()=>{const ow=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);if(!ow.length)return"Owner: —";return ow.map((o,i)=>`${ow.length>1?`<b>${i===0?"Primary":i===1?"Secondary":"Other"}:</b> `:"Owner: "}${o.name}${o.phone?" &middot; "+o.phone:""}`).join(" &nbsp;|&nbsp; ");})()}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}${petDoneBookings_(p.id).length>=2?` &nbsp;<a href="#" onclick="openCompare(${p.id});return false" style="color:#4DA6FF">&#9878; Compare grooms</a>`:""}</span><span style="font-size:11px;color:#888">${(()=>{const ow=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);if(!ow.length)return"Owner: —";return ow.map((o,i)=>`${ow.length>1?`<b>${i===0?"Primary":i===1?"Secondary":"Other"}:</b> `:"Owner: "}${o.name}${o.phone?" &middot; "+o.phone:""}`).join(" &nbsp;|&nbsp; ");})()}</span></div></div>`;
   }).join("");
-  return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
+  return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="sm" onclick="sortAllPetNotes()">&#10024; Sort all notes</button> <button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
 
 function renderClients(){
@@ -1964,38 +2222,60 @@ function renderPricing(){
   </div>`;
 }
 
-let finMonth=null;
+let finMonth=null,finView="month";
 function finKey(){return finMonth||todayStr().slice(0,7);}
 function finShift(d){const [y,m]=finKey().split("-").map(Number);const dt=new Date(y,m-1+d,1);finMonth=`${dt.getFullYear()}-${pad(dt.getMonth()+1)}`;renderPage();}
 function finToday(){finMonth=null;renderPage();}
+function finSetView(v){finView=v;renderPage();}
+function monthLabel_(mk){const [y,m]=mk.split("-").map(Number);return new Date(y,m-1,1).toLocaleDateString("en-AU",{month:"long",year:"numeric"});}
 function renderFinances(){
+  const all=finView==="all";
   const mk=finKey();
-  const [fy,fm]=mk.split("-").map(Number);
-  const monthLabel=new Date(fy,fm-1,1).toLocaleDateString("en-AU",{month:"long",year:"numeric"});
   const fiAll=bookings.filter(b=>b.status!=="cancelled"&&!b.waived);
-  const fi=fiAll.filter(b=>b.date.slice(0,7)===mk).sort((a,b)=>b.date.localeCompare(a.date)||b.time.localeCompare(a.time));
+  const byDate=(a,b)=>b.date.localeCompare(a.date)||String(b.time||"").localeCompare(String(a.time||""));
+  const fi=(all?fiAll:fiAll.filter(b=>b.date.slice(0,7)===mk)).slice().sort(byDate);
+  const expM=all?expenses:expenses.filter(e=>e.date.slice(0,7)===mk);
   const incM=fi.filter(b=>b.paid).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
-  const expM=expenses.filter(e=>e.date.slice(0,7)===mk);
   const expMTotal=expM.reduce((s,e)=>s+e.amount,0);
   const netM=incM-expMTotal;
   const incAll=fiAll.filter(b=>b.paid).reduce((s,b)=>s+bkPrice(b).finalTotal,0);
   const netAll=incAll-expenses.reduce((s,e)=>s+e.amount,0);
   const owing=fiAll.filter(b=>!b.paid&&b.status==="done").reduce((s,b)=>s+bkPrice(b).finalTotal,0);
   const money=(v)=>(v<0?"−":"")+fmtMoney(Math.abs(v));
-  const row=(l,sub,r,c,tail)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border)"><div style="flex:1;min-width:0"><div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l}</div><div style="font-size:10px;color:var(--text-muted)">${sub}</div></div>${tail||""}<div style="font-size:12px;font-weight:600;color:${c};min-width:54px;text-align:right">${r}</div></div>`;
+  const row=(l,sub,r,c,tail,hi)=>`<div style="display:flex;align-items:center;gap:8px;padding:7px ${hi?"4px":"0"};border-bottom:1px solid var(--border);${hi?"background:var(--teal-bg);border-radius:6px;":""}"><div style="flex:1;min-width:0"><div style="font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${l}</div><div style="font-size:10px;color:var(--text-muted)">${sub}</div></div>${tail||""}<div style="font-size:12px;font-weight:600;color:${c};min-width:54px;text-align:right">${r}</div></div>`;
+  const grp=(mkey)=>`<div style="font-size:10px;font-weight:600;letter-spacing:.05em;text-transform:uppercase;color:var(--text-muted);padding:8px 0 2px">${monthLabel_(mkey)}</div>`;
+  let lastG="";
   const incRows=fi.map(b=>{
     const owner=ownerById(b.ownerId),pet=petById(b.petId),p=bkPrice(b);
     const payTag=b.paid?tag("Paid","#EAF7EE","#5BAF7A"):b.status!=="done"?tag("Upcoming","#F0F0F0","#888"):tag("Owing","#FDECEA","#E8534A");
-    return row(`${pet?.name||"?"} &middot; ${b.service}`,`${fmtDate(b.date)} &middot; ${owner?.name||"?"}`,`+${fmtMoney(p.finalTotal)}`,"#5BAF7A",payTag);
-  }).join("")||`<div style="font-size:12px;color:var(--text-muted);padding:10px 0;text-align:center">No bookings this month</div>`;
+    const g=all&&b.date.slice(0,7)!==lastG?(lastG=b.date.slice(0,7),grp(lastG)):"";
+    return g+row(`${pet?.name||"?"} &middot; ${b.service}`,`${fmtDate(b.date)} &middot; ${owner?.name||"?"}`,`+${fmtMoney(p.finalTotal)}`,"#5BAF7A",payTag);
+  }).join("")||`<div style="font-size:12px;color:var(--text-muted);padding:10px 0;text-align:center">No bookings${all?"":" this month"}</div>`;
   const editingExp=expenses.find(e=>e.id===expEditing);
-  const expRows=[...expM].sort((a,b)=>b.date.localeCompare(a.date)||a.desc.localeCompare(b.desc)).map(e=>row(e.desc,fmtDate(e.date),`-${fmtMoney(e.amount)}`,"#E8534A",`<span style="white-space:nowrap"><button class="sm" onclick="editExp(${e.id})">&#9998;</button> <button class="sm" onclick="deleteExp(${e.id})">&#128465;</button></span>`).replace('<div style="display:flex;align-items:center;gap:8px;padding:7px 0;',e.id===expEditing?'<div style="display:flex;align-items:center;gap:8px;padding:7px 4px;background:var(--teal-bg);border-radius:6px;':'<div style="display:flex;align-items:center;gap:8px;padding:7px 0;')).join("")||`<div style="font-size:12px;color:var(--text-muted);padding:10px 0;text-align:center">No expenses this month</div>`;
+  lastG="";
+  const expRows=[...expM].sort((a,b)=>b.date.localeCompare(a.date)||a.desc.localeCompare(b.desc)).map(e=>{
+    const g=all&&e.date.slice(0,7)!==lastG?(lastG=e.date.slice(0,7),grp(lastG)):"";
+    return g+row(e.desc,fmtDate(e.date),`-${fmtMoney(e.amount)}`,"#E8534A",`<span style="white-space:nowrap"><button class="sm" onclick="editExp(${e.id})">&#9998;</button> <button class="sm" onclick="deleteExp(${e.id})">&#128465;</button></span>`,e.id===expEditing);
+  }).join("")||`<div style="font-size:12px;color:var(--text-muted);padding:10px 0;text-align:center">No expenses${all?"":" this month"}</div>`;
   const head=(t,v,c)=>`<div style="display:flex;align-items:baseline;justify-content:space-between;margin-bottom:2px"><strong style="font-size:13px">${t}</strong><span style="font-weight:700;color:${c};font-size:15px">${v}</span></div>`;
-  return`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><button class="sm" onclick="finShift(-1)">&lsaquo;</button><div style="text-align:center"><strong style="font-size:14px">${monthLabel}</strong>${mk!==todayStr().slice(0,7)?`<div><a href="#" onclick="finToday();return false" style="font-size:11px;color:#4DA6FF">Back to this month</a></div>`:""}</div><button class="sm" onclick="finShift(1)">&rsaquo;</button></div>
-<div class="card" style="padding:10px 6px;margin-bottom:10px"><div style="display:flex"><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Net this month</div><div style="font-size:20px;font-weight:700;color:${netM>=0?"#185FA5":"#E8534A"}">${money(netM)}</div></div><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Owing (all time)</div><div style="font-size:20px;font-weight:700;color:#854F0B">${fmtMoney(owing)}</div></div></div><div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:6px">All time net <strong style="color:${netAll>=0?"#185FA5":"#E8534A"}">${money(netAll)}</strong></div></div>
+  const seg=`<div style="display:flex;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:3px;margin-bottom:10px">${[["month","Month"],["all","All time"]].map(x=>`<div onclick="finSetView('${x[0]}')" style="flex:1;text-align:center;padding:6px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;${finView===x[0]?"background:var(--teal);color:#fff":"color:var(--text-muted)"}">${x[1]}</div>`).join("")}</div>`;
+  const stepper=all?"":`<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px"><button class="sm" onclick="finShift(-1)">&lsaquo;</button><div style="text-align:center"><strong style="font-size:14px">${monthLabel_(mk)}</strong>${mk!==todayStr().slice(0,7)?`<div><a href="#" onclick="finToday();return false" style="font-size:11px;color:#4DA6FF">Back to this month</a></div>`:""}</div><button class="sm" onclick="finShift(1)">&rsaquo;</button></div>`;
+  const summary=all
+   ?`<div class="card" style="padding:10px 6px;margin-bottom:10px"><div style="display:flex"><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Net profit (all time)</div><div style="font-size:20px;font-weight:700;color:${netAll>=0?"#185FA5":"#E8534A"}">${money(netAll)}</div></div><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Owing</div><div style="font-size:20px;font-weight:700;color:#854F0B">${fmtMoney(owing)}</div></div></div><div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:6px"><span style="color:#5BAF7A">${fmtMoney(incAll)} in</span> &middot; <span style="color:#E8534A">${fmtMoney(expenses.reduce((s,e)=>s+e.amount,0))} out</span></div></div>`
+   :`<div class="card" style="padding:10px 6px;margin-bottom:10px"><div style="display:flex"><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Net this month</div><div style="font-size:20px;font-weight:700;color:${netM>=0?"#185FA5":"#E8534A"}">${money(netM)}</div></div><div style="flex:1;text-align:center"><div style="font-size:9px;text-transform:uppercase;letter-spacing:.05em;color:var(--text-muted);font-weight:600">Owing (all time)</div><div style="font-size:20px;font-weight:700;color:#854F0B">${fmtMoney(owing)}</div></div></div><div style="text-align:center;font-size:11px;color:var(--text-muted);margin-top:6px">All time net <strong style="color:${netAll>=0?"#185FA5":"#E8534A"}">${money(netAll)}</strong></div></div>`;
+  // All time: per-month table
+  let byMonth="";
+  if(all){
+    const m={};
+    fiAll.filter(b=>b.paid).forEach(b=>{(m[b.date.slice(0,7)]=m[b.date.slice(0,7)]||{i:0,e:0}).i+=bkPrice(b).finalTotal;});
+    expenses.forEach(e=>{(m[e.date.slice(0,7)]=m[e.date.slice(0,7)]||{i:0,e:0}).e+=e.amount;});
+    const keys=Object.keys(m).sort().reverse();
+    byMonth=`<div class="card" style="padding:10px 12px;margin-bottom:10px"><strong style="font-size:13px">By month</strong><div style="display:grid;grid-template-columns:1.3fr 1fr 1fr 1fr;gap:4px 6px;margin-top:6px;font-size:11px"><div style="color:var(--text-muted);font-weight:600"></div><div style="color:var(--text-muted);font-weight:600;text-align:right">In</div><div style="color:var(--text-muted);font-weight:600;text-align:right">Out</div><div style="color:var(--text-muted);font-weight:600;text-align:right">Net</div>${keys.map(k=>{const n=m[k].i-m[k].e;return`<div style="padding:5px 0;border-top:1px solid var(--border)">${new Date(Number(k.slice(0,4)),Number(k.slice(5))-1,1).toLocaleDateString("en-AU",{month:"short",year:"numeric"})}</div><div style="padding:5px 0;border-top:1px solid var(--border);text-align:right;color:#5BAF7A">${fmtMoney(m[k].i)}</div><div style="padding:5px 0;border-top:1px solid var(--border);text-align:right;color:#E8534A">${fmtMoney(m[k].e)}</div><div style="padding:5px 0;border-top:1px solid var(--border);text-align:right;font-weight:600;color:${n>=0?"#86bff5":"#ff7b72"}">${money(n)}</div>`;}).join("")||`<div style="grid-column:1/-1;color:var(--text-muted);padding:8px 0">No data yet</div>`}</div></div>`;
+  }
+  return`${seg}${stepper}${summary}${byMonth}
 <div class="card" style="padding:10px 12px;margin-bottom:10px">${head("Income",fmtMoney(incM),"#5BAF7A")}${incRows}</div>
 <div class="card" style="padding:10px 12px">${head("Expenses","−"+fmtMoney(expMTotal),"#E8534A")}
-<div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--border)"><input type="text" id="exp-desc" placeholder="${editingExp?"Description":"Add expense…"}" value="${editingExp?editingExp.desc:""}" style="flex:2 1 140px;min-width:0;padding:6px 8px;font-size:12px"/><input type="number" id="exp-amt" placeholder="$" value="${editingExp?editingExp.amount:""}" style="flex:1 1 60px;min-width:0;padding:6px 8px;font-size:12px"/><input type="date" id="exp-date" value="${editingExp?editingExp.date:(mk===todayStr().slice(0,7)?todayStr():mk+"-01")}" style="flex:1 1 120px;min-width:0;padding:6px 8px;font-size:12px"/><button class="primary" onclick="addExp()" style="padding:6px 14px">${editingExp?"&#10003; Save":"+ Add"}</button>${editingExp?'<button type="button" onclick="cancelEditExp()" style="padding:6px 12px">Cancel</button>':""}</div>
+<div style="display:flex;gap:6px;align-items:flex-end;flex-wrap:wrap;padding:8px 0;border-bottom:1px solid var(--border)"><input type="text" id="exp-desc" placeholder="${editingExp?"Description":"Add expense…"}" value="${editingExp?editingExp.desc:""}" style="flex:2 1 140px;min-width:0;padding:6px 8px;font-size:12px"/><input type="number" id="exp-amt" placeholder="$" value="${editingExp?editingExp.amount:""}" style="flex:1 1 60px;min-width:0;padding:6px 8px;font-size:12px"/><input type="date" id="exp-date" value="${editingExp?editingExp.date:(all||mk===todayStr().slice(0,7)?todayStr():mk+"-01")}" style="flex:1 1 120px;min-width:0;padding:6px 8px;font-size:12px"/><button class="primary" onclick="addExp()" style="padding:6px 14px">${editingExp?"&#10003; Save":"+ Add"}</button>${editingExp?'<button type="button" onclick="cancelEditExp()" style="padding:6px 12px">Cancel</button>':""}</div>
 ${expRows}</div>`;
 }
 
@@ -2329,7 +2609,8 @@ function openBkModal(b){
   // Existing bookings are only edited from the Bookings page (new bookings can be started anywhere)
   if(b&&currentTab!=="bookings")switchTab("bookings");
   bkEditing=b||null;bkActiveAddons=[...(b?.addOns||[])];bkActiveProducts=[...(b?.products||[])];bkActiveCuts=bookingCuts(b);bkIsCreate=!b;bkProdOpen=false;bkBeforePhoto=b?.beforePhoto||null;bkAfterPhoto=b?.afterPhoto||null;_pendingBeforeUpload=null;_pendingAfterUpload=null;bkBeforePreCropUrl=null;bkAfterPreCropUrl=null;
-  document.getElementById("bk-title").textContent=b?"Edit booking":"New booking";
+  bkLocked=!!b&&b.status==="done";
+  document.getElementById("bk-title").textContent=bkLocked?"Groom record":b?"Edit booking":"New booking";
   // Populate all pets (sorted alphabetically)
   const petSel=document.getElementById("bk-pet");
   petSel.innerHTML=`<option value="">Select pet...</option>`+[...pets].sort((a,z)=>a.name.localeCompare(z.name)).map(p=>{const ow=owners.find(o=>p.ownerIds.includes(o.id));return`<option value="${p.id}">${p.name} — ${displayBreed(p.breed,p.oodleName)}${ow?" ("+ow.name+")":""}`;}).join("");
@@ -2349,22 +2630,17 @@ function openBkModal(b){
   initBkTimers(b);
   document.getElementById("bk-completion-banner").style.display=_bkCompletionMode?"block":"none";
   _bkCompletionMode=false;
-  // New bookings only show the essentials (pet, owner, service, add-ons, date/time, status,
-  // booking notes, price estimate); once a booking exists, editing it instead shows only the
-  // remaining sections (products/blades/combs/matting/time spent/payment/photos/completion notes),
-  // since the core details were already set when it was created.
-  const isCreate=!b;
-  document.querySelectorAll("#modal-booking .bk-postonly").forEach(el=>{el.style.display=isCreate?"none":"";});
-  updateBkMattingVisibility();
   if(b?.petId){petSel.value=b.petId;updateBkOwnerFromPet(b.petId,b.ownerId);}else{updateBkOwnerFromPet("","");}
   renderBkAddons(bkActiveAddons);
   renderBkProducts(bkActiveProducts);
   renderBkCuts();
   renderBkPhotos();
+  applyBkModeVisibility();
   updateBkPrice();
   document.getElementById("modal-booking").classList.add("open");
   petSel.onchange=()=>{
     updateBkOwnerFromPet(petSel.value,"");
+    updateBkPetNote();
     const pet=petById(Number(petSel.value));
     if(!isPoodleBreed(pet?.breed))bkActiveAddons=bkActiveAddons.filter(a=>a!=="Poodle point");
     renderBkAddons(bkActiveAddons);
@@ -2451,10 +2727,35 @@ function updateBkMattingVisibility(){
   wrap.style.display=show?"":"none";
   if(!show)document.getElementById("bk-matting").value=0;
 }
+let bkLocked=false;
+// New bookings show only the essentials. Existing bookings: details stay editable until the booking is done;
+// once done the modal becomes the "groom record" (cuts, products, notes, photos, payment) with the
+// booking details locked. Timers are available on any existing booking.
+function applyBkModeVisibility(){
+  const statusNow=document.getElementById("bk-status").value;
+  const showRecord=!bkIsCreate&&statusNow==="done";
+  document.querySelectorAll("#modal-booking .bk-postonly").forEach(el=>{el.style.display=showRecord?"":"none";});
+  document.querySelectorAll("#modal-booking .bk-existing-only").forEach(el=>{el.style.display=bkIsCreate?"none":"";});
+  document.querySelectorAll("#modal-booking .bk-lockable").forEach(el=>{el.style.display=bkLocked?"none":"";});
+  const sum=document.getElementById("bk-locked-summary");
+  if(bkLocked&&bkEditing){
+    const pet=petById(bkEditing.petId),owner=ownerById(bkEditing.ownerId);
+    sum.style.display="";
+    sum.innerHTML=`<div style="padding:9px 12px;border:1px solid var(--border);border-radius:10px;background:var(--surface2);margin-bottom:10px;display:flex;justify-content:space-between;align-items:center;gap:8px"><div style="min-width:0"><div style="font-size:13px"><strong>${pet?.name||"?"}</strong> &middot; ${owner?.name||"—"}</div><div style="font-size:12px;color:var(--text-muted)">${bkEditing.service}${(bkEditing.addOns||[]).length?" + "+bkEditing.addOns.join(", "):""} &middot; ${fmtDate(bkEditing.date)} ${fmtTime(bkEditing.time)}</div></div></div>`;
+  }else sum.style.display="none";
+  updateBkMattingVisibility();
+  updateBkBladesVisibility();
+  updateBkPetNote();
+}
+function updateBkPetNote(){
+  const el=document.getElementById("bk-pet-note");if(!el)return;
+  const v=document.getElementById("bk-pet")?.value;
+  el.innerHTML=v?petNoteHtml(petById(Number(v))).replace("margin-top:8px","margin-bottom:10px"):"";
+}
 function updateBkBladesVisibility(){
   const wrap=document.getElementById("bk-blades-wrap");if(!wrap)return;
-  if(bkIsCreate){wrap.style.display="none";return;} // no blades/combs on the booking creator
-  wrap.style.display=(document.getElementById("bk-service")?.value||"")==="Bath & brush"?"none":"";
+  const rec=!bkIsCreate&&document.getElementById("bk-status").value==="done";
+  wrap.style.display=(!rec||(document.getElementById("bk-service")?.value||"")==="Bath & brush")?"none":"";
 }
 function toggleAddon(a){
   if(bkActiveAddons.includes(a))bkActiveAddons=bkActiveAddons.filter(x=>x!==a);else bkActiveAddons.push(a);
@@ -2556,6 +2857,11 @@ function markBkStatus(id,status){
   if(status==="done"){
     // Save the status change immediately so it's reflected everywhere, then reopen the
     // full booking editor pre-filled so the groomer can log final details right away.
+    // Stop any timer still running for this booking, since the groom is finished
+    const cur=bookings.find(b=>b.id===id);
+    if(cur){const t=bkTimersOf(cur),now=Date.now();let changed=false;
+      ["bath","groom"].forEach(k=>{if(t[k].since){t[k].acc+=now-t[k].since;t[k].since=null;changed=true;}});
+      if(changed)saveBkTimersFor(id,t);}
     bookings=bookings.map(b=>b.id===id?{...b,status:"done"}:b);
     save();render();
     syncBookingToCalendar(bookings.find(b=>b.id===id));
@@ -2622,6 +2928,7 @@ function openPtModal(pet){
   document.getElementById("pt-prefstyle").value=pet?.preferredStyle||"";
   document.getElementById("pt-treats").value=pet?treatsState(pet):"ok";
   document.getElementById("pt-behavnote").value=pet?.lastNote||"";
+  document.getElementById("pt-petnote").value=pet?.petNote||"";
   ptActiveBehaviour=[...(pet?.behaviour||[])];
   ptActiveCoats=[...(pet?.coatTypes||[])];
   ptActiveMedical=[...(pet?.medicalTags||[])];
@@ -2657,6 +2964,7 @@ function openPtModal(pet){
   document.getElementById("pt-no-allergies").checked=hasNone;
   document.getElementById("pt-medconditions-section").style.display=hasNone?"none":"";
   document.getElementById("pt-allergies-section").style.display=hasNone?"none":"";
+  loadNotesAll_();
   document.getElementById("modal-pet").classList.add("open");
 }
 function ptToggleNoAllergies(){
@@ -2734,6 +3042,7 @@ function togglePtOwnEdit(){ptOwnEdit=!ptOwnEdit;if(!ptOwnEdit)ptOwnQuery="";rend
 function ptOwnerUp(i){if(i<1||i>=ptActiveOwners.length)return;const a=[...ptActiveOwners];[a[i-1],a[i]]=[a[i],a[i-1]];ptActiveOwners=a;renderPtOwners();}
 function closePtModal(){document.getElementById("modal-pet").classList.remove("open");ptEditing=null;_chainOwnerId=null;}
 async function savePtModal(){
+  syncNotesAll_();
   const name=document.getElementById("pt-name").value.trim();
   const breed=ptGetBreedString();
   if(!name||!breed){alert("Please enter name and at least one breed.");return;}
@@ -2747,7 +3056,7 @@ async function savePtModal(){
     if(url)ptPhotoData=url;
     _pendingPetPhotoUpload=null;
   }
-  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
+  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,petNote:document.getElementById("pt-petnote").value.trim(),ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
   if(ptEditing){pets=pets.map(p=>p.id===ptEditing.id?{...p,...obj}:p);}else{pets.push({id:nextPetId++,...obj});}
   const _ch=_chainOwnerId;
   save();closePtModal();render();
@@ -2854,7 +3163,7 @@ function cancelEditExp(){expEditing=null;render();}
 function deleteExp(id){openConfirm("Remove this expense?","Remove",()=>{expenses=expenses.filter(e=>e.id!==id);if(expEditing===id)expEditing=null;save();render();});}
 
 // Build tabs row
-document.getElementById("tabs-row").innerHTML=["dashboard","bookings","calendar","pets","clients","pricing","finances"].map(t=>`<button class="tab-btn" onclick="switchTab('${t}')" id="tab-${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join("");
+document.getElementById("tabs-row").innerHTML=["dashboard","bookings","calendar","pets","progress","clients","pricing","finances"].map(t=>`<button class="tab-btn" onclick="switchTab('${t}')" id="tab-${t}">${t.charAt(0).toUpperCase()+t.slice(1)}</button>`).join("");
 
 document.getElementById("tab-dashboard").classList.add("active");
 
