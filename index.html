@@ -276,6 +276,19 @@ button.primary:hover{background:var(--teal-dark)}button.green:hover{background:#
 .card.bk-card{display:flex;gap:12px;padding:12px}
 body.has-timer{padding-bottom:96px}
 .bk-banner{background:rgba(91,175,122,.16)!important;color:#7fd3a0!important}
+.rv-sel{font-size:11px;font-weight:600;padding:3px 6px;border-radius:12px;width:auto;max-width:128px;border:1px solid transparent;color:var(--text-muted)}
+.rv-sel[data-c="behaviour"]{background-color:rgba(207,214,222,.12)!important;color:#cfd6de}
+.rv-sel[data-c="always"]{background-color:rgba(245,158,11,.15)!important;color:#f0bd6e;border-color:rgba(240,189,110,.4)}
+.rv-sel[data-c="medical"]{background-color:rgba(232,83,74,.16)!important;color:#ff7b72;border-color:rgba(255,123,114,.4)}
+.rv-sel[data-c="history"]{background-color:rgba(170,164,247,.16)!important;color:#aaa4f7;border-color:rgba(170,164,247,.4)}
+.rv-sel[data-c="style"]{background-color:rgba(77,166,255,.16)!important;color:#86bff5;border-color:rgba(134,191,245,.4)}
+.rv-tick{color:#74d6a0;border-color:rgba(116,214,160,.5);padding:3px 9px}
+.rv-tick:disabled{opacity:.3;cursor:not-allowed}
+.rv-tag{appearance:none;-webkit-appearance:none;border-radius:12px;padding:3px 20px 3px 10px;font-size:11px;font-weight:600;width:auto!important;min-width:0;max-width:140px;flex-shrink:0;background-image:none!important;cursor:pointer;text-align:right}
+.rv-tag+.rv-tick{flex-shrink:0}
+select.rv-tag{background:var(--surface2) url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='8' height='5'><path d='M0 0h8L4 5z' fill='%23999'/></svg>") no-repeat right 8px center!important}
+.rv-tick{background:transparent!important;border:none!important;padding:2px 4px!important;font-size:15px;color:#74d6a0;cursor:pointer}
+.rv-tick:disabled{color:var(--text-muted);opacity:.35;cursor:not-allowed}
 </style>
 <script>
 if("serviceWorker" in navigator){
@@ -439,7 +452,7 @@ if("serviceWorker" in navigator){
 <div class="mb10"><label class="lbl">Coat type(s)</label><div id="pt-coats" class="multi-toggle"></div></div>
 <div class="mb10"><label class="lbl" style="color:#E8534A;font-weight:600">⚠️ Special handling</label><div id="pt-special" class="multi-toggle"></div><input type="text" id="pt-special-custom" placeholder="e.g. owner must stay in waiting area" style="margin-top:6px"/></div>
 <div class="mb10"><label class="lbl">Behaviour traits</label><div id="pt-behaviour" class="multi-toggle"></div></div>
-<div class="mb10"><label class="lbl">Notes</label><textarea id="pt-notes-all" rows="4" placeholder="Type anything, e.g. anxious around clippers. Allergic to chicken. Prefers a teddy bear trim. Please always use the quiet dryer." oninput="updateNotesSummary_()"></textarea><div id="pt-notes-sorted" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center"></div><textarea id="pt-behavnote" style="display:none"></textarea><textarea id="pt-petnote" style="display:none"></textarea></div>
+<div class="mb10"><label class="lbl">Notes</label><textarea id="pt-notes-all" rows="4" placeholder="Type anything, e.g. anxious around clippers. Allergic to chicken. Prefers a teddy bear trim. Please always use the quiet dryer." oninput="updateNotesSummary_()"></textarea><div id="pt-notes-sorted" style="margin-top:6px;display:flex;flex-wrap:wrap;gap:4px;align-items:center"></div><textarea id="pt-behavnote" style="display:none"></textarea><textarea id="pt-petnote" style="display:none"></textarea><textarea id="pt-unsorted" style="display:none"></textarea><textarea id="pt-history" style="display:none"></textarea></div>
 <div class="mb10"><label style="display:flex;align-items:center;gap:7px;font-size:13px;cursor:pointer"><input type="checkbox" id="pt-no-allergies" onchange="ptToggleNoAllergies()"/> No known allergies or medical conditions</label></div>
 <div id="pt-medconditions-section">
 <div class="mb10"><div style="display:flex;align-items:baseline;gap:8px;flex-wrap:wrap"><label class="lbl" style="margin:0;white-space:nowrap">Medical conditions</label><div id="pt-medical" class="multi-toggle" style="display:inline-flex;flex-wrap:wrap;gap:4px"></div></div></div>
@@ -524,7 +537,7 @@ if("serviceWorker" in navigator){
 <div class="modal" style="width:440px">
 <h2 id="ns-title">Approve note sorting</h2>
 <div id="ns-body" style="max-height:60vh;overflow-y:auto"></div>
-<div class="row-end"><button onclick="closeNoteApproval()">Back</button><button class="primary" id="ns-apply" onclick="approveNoteSort_()">Approve</button></div>
+<div class="row-end" style="flex-wrap:wrap"><button onclick="closeNoteApproval()">Not now</button><button id="ns-apply" onclick="approveNoteSort_('sel')">Approve selected</button><button class="primary" onclick="approveNoteSort_('all')">Approve all</button></div>
 </div>
 </div>
 
@@ -589,15 +602,36 @@ const NOTE_FIELDS={
   behaviour:{id:"pt-behavnote",label:"Behaviour notes",join:"\n"},
   always:{id:"pt-petnote",label:"Pet notes (every booking)",join:"\n"},
   medical:{id:"pt-mednotes",label:"Medical notes",join:"\n"},
-  style:{id:"pt-prefstyle",label:"Preferred style",join:"; "}
+  style:{id:"pt-prefstyle",label:"Preferred style",join:"; "},
+  history:{id:"pt-history",label:"History",join:"\n"},
+  unsorted:{id:"pt-unsorted",label:"Plain note (unsorted)",join:"\n"}
 };
 const NOTE_RULES=[
   {cat:"medical",re:/\b(allerg\w*|vet|vets|medicat\w*|surgery|operat\w*|skin|rash|itch\w*|infect\w*|arthritis|seiz\w*|epilep\w*|heart|diabet\w*|lump\w*|hips?|joints?|injur\w*|pain\w*|sore|limp\w*|ear mites|tablets?|antibiotics?|pregnan\w*|in season|blind|deaf|cataracts?|medical|condition\w*|steroids?|fleas?|ticks?|hot ?spots?)\b/i},
+  {cat:"history",re:/\b(last (time|visit|groom|month|week|year)|previous(ly)?|used to|in the past|first (time|groom|visit)|nicked|clipper (burn|rash)|razor burn|incident|happened|accident|was (bitten|attacked|groomed)|years? ago|months? ago|weeks? ago|(19|20)\d\d)\b/i},
   {cat:"style",re:/\b(teddy|trim\w*|cut|cuts|length|shav\w*|scissor\w*|style|topknot|top knot|fluffy|round\w*|short\w*|longer|keep (the )?(ears?|tail|legs?|face|beard)|ears? long|puppy cut|lion|sanitary|shape|mm|blades?|combs?)\b/i},
   {cat:"always",re:/\b(always|never|every (time|visit)|please|do not|don'?t|dont|must|prefer\w*|owner (stays|waits|will|wants|would|needs)|call|text|message|drop[- ]?off|pick[- ]?up|pickup|dryer|muzzle|treats?|cash|invoice|late|early)\b/i},
   {cat:"behaviour",re:/\b(anxious|nervous|scared|afraid|fear\w*|bite\w*|bit|snap\w*|growl\w*|aggress\w*|reactive|bark\w*|howl\w*|shy|timid|settle\w*|calm|hyper|wriggl\w*|squirm\w*|wiggl\w*|hates|dislikes?|sensitive|jump\w*|escape|noise|thunder|clippers?|rescue|puppy|new to)\b/i}
 ];
 const NOTE_SYS=/^(Photo note:|Reference photos:|Approx age at intake:)/i;
+// "Anxious and allergic to chicken" -> "Anxious." + "Allergic to chicken." when the parts belong in different boxes
+function splitMixed_(sent){
+  const parts=sent.replace(/[.!?]+$/,"").split(/\s*(?:,|;|\s+and\s+|\s+but\s+|\s+also\s+|\s+plus\s+)\s*/i).map(x=>x.trim()).filter(Boolean);
+  if(parts.length<2)return[sent];
+  const cats=parts.map(x=>classifyNote_(x));
+  if(new Set(cats.filter(Boolean)).size<2)return[sent];
+  const segs=[];
+  parts.forEach((x,i)=>{
+    if(cats[i]&&(!segs.length||segs[segs.length-1].cat))segs.push({cat:cats[i],t:[x]});
+    else if(cats[i]){segs[segs.length-1].cat=cats[i];segs[segs.length-1].t.push(x);}
+    else if(segs.length)segs[segs.length-1].t.push(x);
+    else segs.push({cat:null,t:[x]});
+  });
+  const merged=[];
+  segs.forEach(g=>{const last=merged[merged.length-1];if(last&&last.cat===g.cat)last.t.push(...g.t);else merged.push(g);});
+  return merged.map(g=>{const t=g.t.join(", ");return t.charAt(0).toUpperCase()+t.slice(1)+".";});
+}
+function reviewItems_(text){return noteSentences_(text).flatMap(splitMixed_);}
 function noteSentences_(text){
   const out=[];
   String(text||"").split(/\n+|\s—\s/).forEach(line=>{
@@ -638,7 +672,7 @@ function readNoteFields_(){const f={};Object.keys(NOTE_FIELDS).forEach(k=>{f[k]=
 // A sentence with no keyword match stays where it was before (or goes to Behaviour notes if it is new).
 let _noteOrigin={};
 function sortNotesCore_(text,origin){
-  const keep={behaviour:[],always:[],medical:[],style:[]};
+  const keep={behaviour:[],always:[],medical:[],style:[],history:[]};
   noteSentences_(text).forEach(sent=>{keep[classifyNote_(sent)||origin[sent.toLowerCase()]||"behaviour"].push(sent);});
   const result={},counts={};
   Object.keys(keep).forEach(f=>{
@@ -650,7 +684,7 @@ function sortNotesCore_(text,origin){
 }
 function combineNotes_(f){
   const origin={},lines=[];
-  ["behaviour","always","medical","style"].forEach(k=>noteSentences_(f[k]).forEach(sent=>{const key=sent.toLowerCase();if(!origin[key]){origin[key]=k;lines.push(sent);}}));
+  ["behaviour","always","medical","style","history","unsorted"].forEach(k=>noteSentences_(f[k]).forEach(sent=>{const key=sent.toLowerCase();if(!origin[key]){origin[key]=k;lines.push(sent);}}));
   return{text:lines.join("\n"),origin};
 }
 function loadNotesAll_(){
@@ -661,29 +695,24 @@ function loadNotesAll_(){
 }
 function updateNotesSummary_(){
   const el=document.getElementById("pt-notes-sorted");if(!el)return;
-  const r=sortNotesCore_(document.getElementById("pt-notes-all").value,_noteOrigin);
-  const defs=[["medical","Medical","#FDECEA","#E8534A"],["style","Style","#E8F3FF","#185FA5"],["always","Pet notes (every booking)","#FAEEDA","#854F0B"],["behaviour","Behaviour","#F0F0F0","#666"]];
-  const chips=defs.filter(d=>r.counts[d[0]]).map(d=>`<span class="badge" style="background:${d[2]};color:${d[3]}">${d[1]} ${r.counts[d[0]]}</span>`).join("");
-  el.innerHTML=chips?`<span style="font-size:11px;color:#888">Will sort into:</span>${chips}`:"";
+  const n=planNotes_(document.getElementById("pt-notes-all").value,_noteOrigin).filter(p=>p.cat==="unsorted").length;
+  el.innerHTML=n?`<span class="badge" style="background:#FAEEDA;color:#854F0B">${n} note${n===1?"":"s"} kept as plain text until you review</span>`:"";
 }
 function syncNotesAll_(){
   const r=sortNotesCore_(document.getElementById("pt-notes-all").value,_noteOrigin).result;
   Object.keys(NOTE_FIELDS).forEach(k=>{const el=document.getElementById(NOTE_FIELDS[k].id);if(el)el.value=r[k];});
   if(r.medical){const nk=document.getElementById("pt-no-allergies");if(nk&&nk.checked)nk.checked=false;}
 }
-// ── Approval before sorting: nothing is filed until you approve ──
-const NOTE_CAT_LABELS={behaviour:"Behaviour notes",always:"Pet notes (every booking)",medical:"Medical notes",style:"Preferred style"};
-let _nsPlan=null,_nsBulk=null,_noteOverrides={};
-function planNoteSort_(text,origin,overrides){
-  const ov=overrides||{};
-  return noteSentences_(text).map(sent=>{
-    const o=origin[sent.toLowerCase()]||null;
-    const cat=ov[sent.toLowerCase()]||classifyNote_(sent)||o||"behaviour"; // your earlier choices win
-    return{text:sent,cat,from:o,changed:!o||cat!==o};
-  });
+// ── Notes stay as plain text until you review them and approve how they are filed ──
+const NOTE_CAT_LABELS={behaviour:"Behaviour notes",always:"Pet notes (every booking)",medical:"Medical notes",style:"Preferred style",history:"History"};
+const RV_SHORT={behaviour:"Behaviour",always:"Every booking",medical:"Medical",style:"Style",history:"History"};
+let _nsGroups=null;
+// Sentences already filed keep their box; anything new stays in the plain "unsorted" note.
+function planNotes_(text,origin){
+  return noteSentences_(text).flatMap(sent=>origin[sent.toLowerCase()]?[{text:sent,cat:origin[sent.toLowerCase()]}]:splitMixed_(sent).map(t=>({text:t,cat:"unsorted"})));
 }
 function joinPlan_(plan){
-  const keep={behaviour:[],always:[],medical:[],style:[]};
+  const keep={behaviour:[],always:[],medical:[],style:[],history:[],unsorted:[]};
   plan.forEach(p=>keep[p.cat].push(p.text));
   const result={};
   Object.keys(keep).forEach(f=>{
@@ -698,63 +727,91 @@ function applyNotePlan_(plan){
   Object.keys(NOTE_FIELDS).forEach(k=>{const el=document.getElementById(NOTE_FIELDS[k].id);if(el)el.value=r[k];});
   if(r.medical){const nk=document.getElementById("pt-no-allergies");if(nk&&nk.checked)nk.checked=false;}
 }
-function nsEsc_(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
-function nsSelect_(sel,i){return`<select class="ns-sel" data-i="${i}" style="font-size:12px;padding:5px 8px;margin-top:4px;width:100%">${Object.keys(NOTE_CAT_LABELS).map(k=>`<option value="${k}"${k===sel?" selected":""}>${NOTE_CAT_LABELS[k]}</option>`).join("")}</select>`;}
 function savePtModal(){
-  const plan=planNoteSort_(document.getElementById("pt-notes-all").value,_noteOrigin,_noteOverrides);
-  if(!plan.some(p=>p.changed)){applyNotePlan_(plan);return savePtModalCore_();}
-  _nsPlan=plan;_nsBulk=null;
-  document.getElementById("ns-title").textContent="Approve note sorting";
-  document.getElementById("ns-apply").textContent="Approve & save";
-  document.getElementById("ns-body").innerHTML=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Here is where each new or moved note will be filed. Change any box you disagree with. Nothing is saved until you approve.</div>`+
-    plan.map((p,i)=>p.changed?`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:13px">&ldquo;${nsEsc_(p.text)}&rdquo;</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${p.from?"Currently in "+NOTE_CAT_LABELS[p.from]:"New note"}</div>${nsSelect_(p.cat,i)}</div>`:"").join("");
+  applyNotePlan_(planNotes_(document.getElementById("pt-notes-all").value,_noteOrigin));
+  return savePtModalCore_();
+}
+function nsEsc_(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+// petId = review one pet, null = every pet that has notes waiting
+function openNoteReview(petId){
+  const list=petId?[petById(petId)].filter(Boolean):pets.filter(p=>(p.unsortedNotes||"").trim());
+  const groups=list.map(p=>({pet:p,items:reviewItems_(p.unsortedNotes).map(t=>({text:t,cat:classifyNote_(t)||"unsorted"}))})).filter(g=>g.items.length);
+  if(!groups.length){alert("No notes are waiting for review.");return;}
+  _nsGroups=groups;
+  document.getElementById("ns-title").textContent="Review notes";
+  document.getElementById("ns-body").innerHTML=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Pick a box for each note. Tick the ones to approve, or approve them all. Anything not approved stays as a plain note until you review it.</div>`+
+    groups.map((g,gi)=>`<div style="margin-top:10px"><strong style="font-size:13px">${nsEsc_(g.pet.name)}</strong>${g.items.map((it,i)=>{const c=it.cat==="unsorted"?"":it.cat;return`<div style="display:flex;gap:8px;align-items:flex-start;padding:8px 0;border-bottom:1px solid var(--border)"><input type="checkbox" class="ns-chk" id="nsc-${gi}-${i}" data-g="${gi}" data-i="${i}"${c?" checked":""} style="width:auto;margin-top:4px"/><div style="flex:1;min-width:0"><label for="nsc-${gi}-${i}" style="font-size:13px;cursor:pointer">&ldquo;${nsEsc_(it.text)}&rdquo;</label><select class="ns-sel rv-sel" data-g="${gi}" data-i="${i}" data-c="${c}" onchange="nsPick_(this)" style="display:block;margin-top:5px;max-width:none;width:100%">${c?"":`<option value="" selected disabled>Choose a box&hellip;</option>`}${Object.keys(NOTE_CAT_LABELS).map(k=>`<option value="${k}"${k===c?" selected":""}>${NOTE_CAT_LABELS[k]}</option>`).join("")}</select></div></div>`;}).join("")}</div>`).join("");
   document.getElementById("modal-notesort").classList.add("open");
 }
-function closeNoteApproval(){document.getElementById("modal-notesort").classList.remove("open");}
-function approveNoteSort_(){
-  if(_nsBulk){applyBulkNoteSort_();return;}
-  document.querySelectorAll("#ns-body .ns-sel").forEach(sel=>{
-    const p=_nsPlan[Number(sel.dataset.i)],suggested=classifyNote_(p.text)||p.from||"behaviour";
-    p.cat=sel.value;
-    if(p.cat!==suggested)_noteOverrides[p.text.toLowerCase()]=p.cat; // remember so it is not suggested again
-  });
-  closeNoteApproval();
-  applyNotePlan_(_nsPlan);
-  savePtModalCore_();
+function nsPick_(sel){sel.dataset.c=sel.value;const c=document.getElementById(`nsc-${sel.dataset.g}-${sel.dataset.i}`);if(c&&sel.value)c.checked=true;}
+let petReviewFilter=false;
+function togglePetReviewFilter(){petReviewFilter=!petReviewFilter;renderPage();}
+function rvBoxHtml(p){
+  const items=reviewItems_(p.unsortedNotes);
+  if(!items.length)return"";
+  if(p.notesSnoozed)return`<div style="border:1px dashed var(--border);border-radius:8px;padding:6px 10px;margin-top:6px;font-size:11px;color:#888">&#128221; ${items.length} note${items.length===1?"":"s"} waiting &middot; <a href="#" onclick="rvWake(${p.id});return false" style="color:#4DA6FF">Review now</a></div>`;
+  return`<div style="border:1px dashed var(--border);border-radius:8px;padding:8px 10px;margin-top:10px">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:6px;margin-bottom:4px"><strong style="font-size:10px;text-transform:uppercase;letter-spacing:.04em;color:#f0bd6e;white-space:nowrap">Notes to review &middot; ${items.length}</strong><a href="#" onclick="rvSnooze(${p.id});return false" style="font-size:11px;color:var(--text-muted);white-space:nowrap">Not now</a></div>
+    ${items.map((t,i)=>{const g=classifyNote_(t)||"";return`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--border)"><input type="checkbox" class="rv-chk" id="rvc-${p.id}-${i}"${g?" checked":""} style="width:auto;margin:0;flex-shrink:0"/><label for="rvc-${p.id}-${i}" style="flex:1;min-width:0;font-size:12px;cursor:pointer">${nsEsc_(t)}</label><select class="rv-sel rv-tag" id="rv-${p.id}-${i}" data-c="${g}" onchange="rvPick(this,${p.id},${i})">${g?"":`<option value="" selected disabled>Choose</option>`}${Object.keys(RV_SHORT).map(k=>`<option value="${k}"${k===g?" selected":""}>${RV_SHORT[k]}</option>`).join("")}</select></div>`;}).join("")}
+    <div style="display:flex;gap:6px;justify-content:flex-end;padding-top:7px;border-top:1px solid var(--border)"><button class="sm" onclick="rvApproveSel(${p.id})">Approve selected</button><button class="sm green" onclick="rvApproveAll(${p.id})">Approve all</button></div>
+  </div>`;
 }
-function sortAllPetNotes(){
-  const groups=[];
-  pets.forEach(p=>{
-    const c=combineNotes_({behaviour:p.lastNote||"",always:p.petNote||"",medical:p.medicalNotes||"",style:p.preferredStyle||""});
-    const plan=planNoteSort_(c.text,c.origin,p.noteOverrides);
-    if(plan.some(x=>x.changed))groups.push({pet:p,plan});
-  });
-  if(!groups.length){alert("All notes were already sorted.");return;}
-  _nsBulk=groups;_nsPlan=null;
-  document.getElementById("ns-title").textContent="Approve note sorting";
-  document.getElementById("ns-apply").textContent="Approve selected";
-  document.getElementById("ns-body").innerHTML=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">These notes would move to a different box. Untick any you want to leave where they are. Nothing changes until you approve.</div>`+
-    groups.map((g,gi)=>`<div style="margin-top:10px"><strong style="font-size:13px">${nsEsc_(g.pet.name)}</strong>${g.plan.map((p,i)=>p.changed?`<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" class="ns-chk" data-g="${gi}" data-i="${i}" checked style="width:auto;margin-top:3px"/><div style="min-width:0"><div style="font-size:13px">&ldquo;${nsEsc_(p.text)}&rdquo;</div><div style="font-size:11px;color:var(--text-muted)">${NOTE_CAT_LABELS[p.from]} &rarr; <strong style="color:#5fe0d6">${NOTE_CAT_LABELS[p.cat]}</strong></div></div></label>`:"").join("")}</div>`).join("");
-  document.getElementById("modal-notesort").classList.add("open");
-}
-function applyBulkNoteSort_(){
-  const checked=new Set([...document.querySelectorAll("#ns-body .ns-chk")].filter(c=>c.checked).map(c=>c.dataset.g+":"+c.dataset.i));
-  let n=0;
-  _nsBulk.forEach((g,gi)=>{
-    const any=g.plan.some((x,i)=>x.changed&&checked.has(gi+":"+i));
-    if(!any)return;
-    const ov={...(g.pet.noteOverrides||{})};
-    const plan=g.plan.map((x,i)=>{
-      if(x.changed&&!checked.has(gi+":"+i)){ov[x.text.toLowerCase()]=x.from||x.cat;return{...x,cat:x.from||x.cat};}
-      return x;
-    });
-    const r=joinPlan_(plan);
-    pets=pets.map(p=>p.id===g.pet.id?{...p,noteOverrides:ov,lastNote:r.behaviour.split("\n").join(" — "),petNote:r.always,medicalNotes:r.medical,preferredStyle:r.style}:p);
-    n++;
-  });
-  closeNoteApproval();_nsBulk=null;
+function rvPick(sel,petId,i){sel.dataset.c=sel.value;const c=document.getElementById(`rvc-${petId}-${i}`);if(c&&sel.value)c.checked=true;}
+function rvApproveOne(petId,i){const sel=document.getElementById(`rv-${petId}-${i}`);if(!sel||!sel.value)return;rvFile_(petId,[{i,cat:sel.value}]);}
+function rvFile_(petId,assign){
+  const p=petById(petId);if(!p||!assign.length)return;
+  const items=reviewItems_(p.unsortedNotes);
+  const chosen=new Map(assign.map(a=>[a.i,a.cat]));
+  const base=combineNotes_({behaviour:p.lastNote||"",always:p.petNote||"",medical:p.medicalNotes||"",style:p.preferredStyle||"",history:p.historyNotes||"",unsorted:""});
+  const plan=[...planNotes_(base.text,base.origin),...items.map((t,i)=>({text:t,cat:chosen.get(i)||"unsorted"}))];
+  const r=joinPlan_(plan);
+  pets=pets.map(q=>q.id===petId?{...q,lastNote:r.behaviour.split("\n").join(" — "),petNote:r.always,medicalNotes:r.medical,preferredStyle:r.style,historyNotes:r.history,unsortedNotes:r.unsorted}:q);
   save();render();
-  alert(n?`Sorted notes on ${n} pet${n===1?"":"s"}.`:"Nothing was changed.");
+}
+function rvCollect_(petId,onlyTicked){
+  const p=petById(petId);if(!p)return[];
+  return reviewItems_(p.unsortedNotes).map((t,i)=>({i,cat:document.getElementById(`rv-${petId}-${i}`)?.value||"",on:document.getElementById(`rvc-${petId}-${i}`)?.checked})).filter(a=>a.cat&&(!onlyTicked||a.on));
+}
+function rvLeftMsg_(petId,assign){
+  const total=reviewItems_(petById(petId)?.unsortedNotes).length,left=total-assign.length;
+  rvFile_(petId,assign);
+  if(left>0)setTimeout(()=>alert(`${assign.length} note${assign.length===1?"":"s"} filed. ${left} left as plain text to review later.`),50);
+}
+function rvApproveSel(petId){
+  const assign=rvCollect_(petId,true);
+  if(!assign.length){alert("Tick at least one note with a box chosen, or use Approve all.");return;}
+  rvLeftMsg_(petId,assign);
+}
+function rvApproveAll(petId){
+  const assign=rvCollect_(petId,false);
+  if(!assign.length){alert("Choose a box for at least one note first.");return;}
+  rvLeftMsg_(petId,assign);
+}
+function rvSnooze(petId){pets=pets.map(q=>q.id===petId?{...q,notesSnoozed:true}:q);save();render();}
+function rvWake(petId){pets=pets.map(q=>q.id===petId?{...q,notesSnoozed:false}:q);save();render();}
+function closeNoteApproval(){document.getElementById("modal-notesort").classList.remove("open");}
+function approveNoteSort_(mode){
+  if(!_nsGroups)return;
+  const picks=[];
+  document.querySelectorAll("#ns-body .ns-sel").forEach(sel=>{
+    const g=Number(sel.dataset.g),i=Number(sel.dataset.i);
+    const chk=document.getElementById(`nsc-${g}-${i}`);
+    if(sel.value&&(mode==="all"||chk?.checked))picks.push({g,i,cat:sel.value});
+  });
+  if(!picks.length){alert(mode==="all"?"Choose a box for at least one note first.":"Tick at least one note, or use Approve all.");return;}
+  const missing=document.querySelectorAll("#ns-body .ns-sel").length-picks.length;
+  _nsGroups.forEach((g,gi)=>{
+    const mine=picks.filter(x=>x.g===gi);if(!mine.length)return;
+    const chosen=new Map(mine.map(x=>[x.i,x.cat]));
+    const p=petById(g.pet.id);
+    const base=combineNotes_({behaviour:p.lastNote||"",always:p.petNote||"",medical:p.medicalNotes||"",style:p.preferredStyle||"",history:p.historyNotes||"",unsorted:""});
+    const plan=[...planNotes_(base.text,base.origin),...g.items.map((it,i)=>({text:it.text,cat:chosen.get(i)||"unsorted"}))];
+    const r=joinPlan_(plan);
+    pets=pets.map(q=>q.id===p.id?{...q,lastNote:r.behaviour.split("\n").join(" — "),petNote:r.always,medicalNotes:r.medical,preferredStyle:r.style,historyNotes:r.history,unsortedNotes:r.unsorted}:q);
+  });
+  closeNoteApproval();_nsGroups=null;
+  save();render();
+  if(missing>0)alert(`${picks.length} note${picks.length===1?"":"s"} filed. ${missing} left as plain text to review later.`);
 }
 // ── Compare two grooms of the same pet ──
 let cmpPetId=null,cmpIds=[null,null];
@@ -1501,7 +1558,7 @@ async function checkIntake(){
         coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:item.medicalNotes||"",
         allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",petNote:"",
         treatsOk:item.treatsOk!==false,treatsLimit:!!item.limitTreats,
-        lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
+        lastNote:petNoteParts.filter(t=>NOTE_SYS.test(t)||/https?:\/\//i.test(t)).join(" — "),unsortedNotes:reviewItems_(petNoteParts.filter(t=>!(NOTE_SYS.test(t)||/https?:\/\//i.test(t))).join("\n")).join("\n"),ownerIds:[owner.id],photo:null,photos:[],
         customSpecialHandling:item.noContactServices||"",hideBrachy:false,oodleName:null,needsReview:true,
         consentSigned:!!(item.agreeTerms&&item.signature),consentSignature:item.signature||"",consentDate:item.consentDate||""});
       processedIds.push(item.id);
@@ -1599,6 +1656,8 @@ const MG_PET_FIELDS=[
   {k:"customAllergies",l:"Other allergies",t:"note"},
   {k:"customSpecialHandling",l:"Special handling",t:"note"},
   {k:"lastNote",l:"Notes",t:"note"},
+  {k:"unsortedNotes",l:"Notes to review",t:"note"},
+  {k:"historyNotes",l:"History",t:"note"},
   {k:"petNote",l:"Pet notes (every booking)",t:"note"},
   {k:"consent",l:"Consent",t:"consent"}
 ];
@@ -1843,7 +1902,7 @@ function openIntakeInfo(petId,ownerId){
    +iiRow("Coat",p.coatTypes)+iiRow("Special handling",[...(p.medicalTags||[]),...(p.behaviour||[])].filter(t=>SPECIAL_HANDLING_TRAITS.includes(t)).concat(p.customSpecialHandling?[p.customSpecialHandling]:[]))
    +iiRow("Behaviour",(p.behaviour||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical",(p.medicalTags||[]).filter(t=>!SPECIAL_HANDLING_TRAITS.includes(t)))+iiRow("Medical notes",p.medicalNotes)
    +iiRow("Allergies",[...(p.allergies||[])].concat(p.customAllergies?[p.customAllergies]:[]))+iiRow("Treats",treatsLabel(p))+iiRow("Style",p.preferredStyle)
-   +iiRow("Notes",p.lastNote?linkifyNote(p.lastNote):"")+iiRow("Pet notes",p.petNote)+iiRow("Consent",consent);
+   +iiRow("Notes",p.lastNote?linkifyNote(p.lastNote):"")+iiRow("Notes to review",p.unsortedNotes)+iiRow("History",p.historyNotes)+iiRow("Pet notes",p.petNote)+iiRow("Consent",consent);
   html+=`<div style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--text-muted);margin:12px 0 2px">Owner</div>`;
   html+=o?iiRow("Name",o.name)+iiRow("Phone",o.phone)+iiRow("Email",o.email)+iiRow("Contact",o.contact)+iiRow("Notes",o.notes):`<div style="font-size:12px;color:var(--text-muted);padding:6px 0">No owner linked</div>`;
   html+=petDupHtml_(p,o)||"";
@@ -2223,7 +2282,7 @@ function calNavMonth(delta){
 function calGoToday(){calViewYear=null;calViewMonth=null;render();}
 
 function renderPets(){
-  const rows=[...pets].sort((a,b)=>a.name.localeCompare(b.name)).map(p=>{
+  const rows=[...pets].filter(p=>!petReviewFilter||(p.unsortedNotes||"").trim()).sort((a,b)=>a.name.localeCompare(b.name)).map(p=>{
     const linkedOwners=owners.filter(o=>p.ownerIds.includes(o.id));
     const last=bookings.filter(b=>b.petId===p.id).sort((a,b)=>b.date.localeCompare(a.date))[0];
     const brachy=isBrachy(p.breed)&&!p.hideBrachy?`<span class="badge" style="background:#FDECEA;color:#E8534A;margin-left:6px">Brachy</span>`:"";
@@ -2235,9 +2294,9 @@ function renderPets(){
     const allergyTags=(p.allergies||[]).filter(t=>ALLERGENS.includes(t)).map(t=>{const c=allergyColor(t);return tag(t,c.bg,c.text);}).join("");
     const coatTags=(p.coatTypes||[]).filter(t=>COAT_TYPES.includes(t)).map(t=>tag(t,"#F0F0F0","#444")).join("");
     const photoEl=p.photo?`<img src="${p.photo}" style="width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0"/>`:`<div style="width:44px;height:44px;border-radius:50%;background:#f0f0f0;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">🐾</div>`;
-    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div><div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}${petDoneBookings_(p.id).length>=2?` &nbsp;<a href="#" onclick="openCompare(${p.id});return false" style="color:#4DA6FF">&#9878; Compare grooms</a>`:""}</span><span style="font-size:11px;color:#888">${(()=>{const ow=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);if(!ow.length)return"Owner: —";return ow.map((o,i)=>`${ow.length>1?`<b>${i===0?"Primary":i===1?"Secondary":"Other"}:</b> `:"Owner: "}${o.name}${o.phone?" &middot; "+o.phone:""}`).join(" &nbsp;|&nbsp; ");})()}</span></div></div>`;
+    return`<div class="card"><div style="display:flex;align-items:flex-start;gap:10px">${photoEl}<div style="flex:1"><div style="font-size:14px;font-weight:500">${p.name} <span style="font-size:12px;color:#888;font-weight:400">&middot; ${displayBreed(p.breed,p.oodleName)}</span>${brachy}${groomedBadge(p.id)}${reviewBadge}${consentBadge}${treatsBadge}</div>${specialHandlingBox(p,4,4)}<div style="font-size:12px;color:#888;margin-top:2px">${p.sex} &middot; ${p.desexed?"Desexed":"Not desexed"} &middot; ${p.size} &middot; Age ${fmtAge(p.dob,p.approxAge)}</div>${coatTags?`<div style="margin-top:4px">${coatTags}</div>`:""}<div style="margin-top:4px">${behTags}</div>${(medTags||p.medicalNotes)?`<div style="background:#FDECEB;border-radius:6px;padding:5px 8px;font-size:11px;color:#E8534A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Medical:</span>${medTags}</div>${p.medicalNotes?`<div style="white-space:pre-wrap;margin-top:3px">${p.medicalNotes}</div>`:""}</div>`:""}${(allergyTags||p.customAllergies)?`<div style="background:#FFF3CD;border-radius:6px;padding:5px 8px;font-size:11px;color:#92620A;margin-top:6px"><div style="display:flex;align-items:baseline;flex-wrap:wrap;gap:5px"><span style="font-weight:600;white-space:nowrap">Allergies:</span>${allergyTags}</div>${p.customAllergies?`<div style="white-space:pre-wrap;margin-top:3px">${p.customAllergies}</div>`:""}</div>`:""}${p.preferredStyle?`<div style="font-size:11px;color:#888;margin-top:4px"><strong>Preferred style:</strong> ${p.preferredStyle}</div>`:""}${p.historyNotes?`<div style="font-size:11px;color:#888;margin-top:4px;white-space:pre-wrap"><strong>History:</strong> ${nsEsc_(p.historyNotes)}</div>`:""}${p.lastNote?`<div style="background:#FAEEDA;border-radius:6px;padding:5px 8px;font-size:11px;color:#854F0B;margin-top:6px;white-space:pre-wrap">${linkifyNote(p.lastNote)}</div>`:""}${p.driveFolderUrl?`<div style="margin-top:6px"><a href="${p.driveFolderUrl}" target="_blank" rel="noopener" style="font-size:11px;color:#534AB7;text-decoration:none">&#128193; Photos in Drive</a></div>`:""}</div><div style="display:flex;gap:4px;flex-shrink:0">${p.needsReview?`<button class="sm" onclick="markPetReviewed(${p.id})" style="background:#534AB7;color:#fff;border-color:rgb(83,74,183)">&#10003; Reviewed</button>`:""}<button class="sm" onclick="editPet(${p.id})">&#9998;</button><button class="sm" onclick="deletePet(${p.id})">&#128465;</button></div></div>${rvBoxHtml(p)}<div style="margin-top:6px;padding-left:54px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:4px"><span style="font-size:11px;color:#888">Last: ${last?`${fmtDate(last.date)} &middot; ${last.service}`:"—"}${petDoneBookings_(p.id).length>=2?` &nbsp;<a href="#" onclick="openCompare(${p.id});return false" style="color:#4DA6FF">&#9878; Compare grooms</a>`:""}</span><span style="font-size:11px;color:#888">${(()=>{const ow=(p.ownerIds||[]).map(id=>owners.find(o=>o.id===id)).filter(Boolean);if(!ow.length)return"Owner: —";return ow.map((o,i)=>`${ow.length>1?`<b>${i===0?"Primary":i===1?"Secondary":"Other"}:</b> `:"Owner: "}${o.name}${o.phone?" &middot; "+o.phone:""}`).join(" &nbsp;|&nbsp; ");})()}</span></div></div>`;
   }).join("");
-  return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right"><button class="sm" onclick="sortAllPetNotes()">&#10024; Sort all notes</button> <button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
+  return`<div class="search-row"><span style="font-size:14px;font-weight:500">Pet profiles</span><div class="right">${pets.some(p=>(p.unsortedNotes||"").trim())||petReviewFilter?`<button class="sm" onclick="togglePetReviewFilter()">${petReviewFilter?"Show all pets":"&#128221; Notes to review ("+pets.filter(p=>(p.unsortedNotes||"").trim()).length+")"}</button>`:""} <button class="accent" onclick="openPtModal(null)">+ New pet</button></div></div>${rows||`<p style="text-align:center;color:#888;padding:2rem">No pets yet.</p>`}`;
 }
 
 function renderClients(){
@@ -3008,6 +3067,8 @@ function openPtModal(pet){
   document.getElementById("pt-treats").value=pet?treatsState(pet):"ok";
   document.getElementById("pt-behavnote").value=pet?.lastNote||"";
   document.getElementById("pt-petnote").value=pet?.petNote||"";
+  document.getElementById("pt-unsorted").value=pet?.unsortedNotes||"";
+  document.getElementById("pt-history").value=pet?.historyNotes||"";
   ptActiveBehaviour=[...(pet?.behaviour||[])];
   ptActiveCoats=[...(pet?.coatTypes||[])];
   ptActiveMedical=[...(pet?.medicalTags||[])];
@@ -3043,7 +3104,6 @@ function openPtModal(pet){
   document.getElementById("pt-no-allergies").checked=hasNone;
   document.getElementById("pt-medconditions-section").style.display=hasNone?"none":"";
   document.getElementById("pt-allergies-section").style.display=hasNone?"none":"";
-  _noteOverrides={...(pet?.noteOverrides||{})};
   loadNotesAll_();
   document.getElementById("modal-pet").classList.add("open");
 }
@@ -3135,7 +3195,7 @@ async function savePtModalCore_(){
     if(url)ptPhotoData=url;
     _pendingPetPhotoUpload=null;
   }
-  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,petNote:document.getElementById("pt-petnote").value.trim(),noteOverrides:_noteOverrides,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
+  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,petNote:document.getElementById("pt-petnote").value.trim(),unsortedNotes:document.getElementById("pt-unsorted").value.trim(),historyNotes:document.getElementById("pt-history").value.trim(),notesSnoozed:false,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
   if(ptEditing){pets=pets.map(p=>p.id===ptEditing.id?{...p,...obj}:p);}else{pets.push({id:nextPetId++,...obj});}
   const _ch=_chainOwnerId;
   save();closePtModal();render();
