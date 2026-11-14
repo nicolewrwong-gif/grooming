@@ -520,6 +520,14 @@ if("serviceWorker" in navigator){
 </div>
 </div>
 
+<div id="modal-notesort" class="modal-bg" style="z-index:70">
+<div class="modal" style="width:440px">
+<h2 id="ns-title">Approve note sorting</h2>
+<div id="ns-body" style="max-height:60vh;overflow-y:auto"></div>
+<div class="row-end"><button onclick="closeNoteApproval()">Back</button><button class="primary" id="ns-apply" onclick="approveNoteSort_()">Approve</button></div>
+</div>
+</div>
+
 <div id="confirm-modal" class="confirm-bg">
 <div class="confirm-box">
 <p id="confirm-msg"></p>
@@ -656,25 +664,97 @@ function updateNotesSummary_(){
   const r=sortNotesCore_(document.getElementById("pt-notes-all").value,_noteOrigin);
   const defs=[["medical","Medical","#FDECEA","#E8534A"],["style","Style","#E8F3FF","#185FA5"],["always","Pet notes (every booking)","#FAEEDA","#854F0B"],["behaviour","Behaviour","#F0F0F0","#666"]];
   const chips=defs.filter(d=>r.counts[d[0]]).map(d=>`<span class="badge" style="background:${d[2]};color:${d[3]}">${d[1]} ${r.counts[d[0]]}</span>`).join("");
-  el.innerHTML=chips?`<span style="font-size:11px;color:#888">Sorted into:</span>${chips}`:"";
+  el.innerHTML=chips?`<span style="font-size:11px;color:#888">Will sort into:</span>${chips}`:"";
 }
 function syncNotesAll_(){
   const r=sortNotesCore_(document.getElementById("pt-notes-all").value,_noteOrigin).result;
   Object.keys(NOTE_FIELDS).forEach(k=>{const el=document.getElementById(NOTE_FIELDS[k].id);if(el)el.value=r[k];});
   if(r.medical){const nk=document.getElementById("pt-no-allergies");if(nk&&nk.checked)nk.checked=false;}
 }
-function sortAllPetNotes(){
-  openConfirm("Sort the notes on every pet profile into Behaviour, Medical, Style and Pet notes?","Sort all",()=>{
-    let n=0;
-    pets=pets.map(p=>{
-      const f={behaviour:p.lastNote||"",always:p.petNote||"",medical:p.medicalNotes||"",style:p.preferredStyle||""};
-      const c=combineNotes_(f),r=sortNotesCore_(c.text,c.origin).result;
-      if(r.behaviour===f.behaviour.split(" — ").join("\n")&&r.always===f.always&&r.medical===f.medical&&r.style===f.style)return p;
-      n++;return{...p,lastNote:r.behaviour.split("\n").join(" — "),petNote:r.always,medicalNotes:r.medical,preferredStyle:r.style};
-    });
-    save();render();
-    alert(n?`Sorted notes on ${n} pet${n===1?"":"s"}.`:"All notes were already sorted.");
+// ── Approval before sorting: nothing is filed until you approve ──
+const NOTE_CAT_LABELS={behaviour:"Behaviour notes",always:"Pet notes (every booking)",medical:"Medical notes",style:"Preferred style"};
+let _nsPlan=null,_nsBulk=null,_noteOverrides={};
+function planNoteSort_(text,origin,overrides){
+  const ov=overrides||{};
+  return noteSentences_(text).map(sent=>{
+    const o=origin[sent.toLowerCase()]||null;
+    const cat=ov[sent.toLowerCase()]||classifyNote_(sent)||o||"behaviour"; // your earlier choices win
+    return{text:sent,cat,from:o,changed:!o||cat!==o};
   });
+}
+function joinPlan_(plan){
+  const keep={behaviour:[],always:[],medical:[],style:[]};
+  plan.forEach(p=>keep[p.cat].push(p.text));
+  const result={};
+  Object.keys(keep).forEach(f=>{
+    const seen=new Set(),list=[];
+    keep[f].forEach(x=>{const k=x.toLowerCase().replace(/[.\s]+$/,"");if(!seen.has(k)){seen.add(k);list.push(f==="style"?x.replace(/\.+$/,""):x);}});
+    result[f]=list.join(NOTE_FIELDS[f].join);
+  });
+  return result;
+}
+function applyNotePlan_(plan){
+  const r=joinPlan_(plan);
+  Object.keys(NOTE_FIELDS).forEach(k=>{const el=document.getElementById(NOTE_FIELDS[k].id);if(el)el.value=r[k];});
+  if(r.medical){const nk=document.getElementById("pt-no-allergies");if(nk&&nk.checked)nk.checked=false;}
+}
+function nsEsc_(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");}
+function nsSelect_(sel,i){return`<select class="ns-sel" data-i="${i}" style="font-size:12px;padding:5px 8px;margin-top:4px;width:100%">${Object.keys(NOTE_CAT_LABELS).map(k=>`<option value="${k}"${k===sel?" selected":""}>${NOTE_CAT_LABELS[k]}</option>`).join("")}</select>`;}
+function savePtModal(){
+  const plan=planNoteSort_(document.getElementById("pt-notes-all").value,_noteOrigin,_noteOverrides);
+  if(!plan.some(p=>p.changed)){applyNotePlan_(plan);return savePtModalCore_();}
+  _nsPlan=plan;_nsBulk=null;
+  document.getElementById("ns-title").textContent="Approve note sorting";
+  document.getElementById("ns-apply").textContent="Approve & save";
+  document.getElementById("ns-body").innerHTML=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">Here is where each new or moved note will be filed. Change any box you disagree with. Nothing is saved until you approve.</div>`+
+    plan.map((p,i)=>p.changed?`<div style="padding:8px 0;border-bottom:1px solid var(--border)"><div style="font-size:13px">&ldquo;${nsEsc_(p.text)}&rdquo;</div><div style="font-size:10px;color:var(--text-muted);margin-top:2px">${p.from?"Currently in "+NOTE_CAT_LABELS[p.from]:"New note"}</div>${nsSelect_(p.cat,i)}</div>`:"").join("");
+  document.getElementById("modal-notesort").classList.add("open");
+}
+function closeNoteApproval(){document.getElementById("modal-notesort").classList.remove("open");}
+function approveNoteSort_(){
+  if(_nsBulk){applyBulkNoteSort_();return;}
+  document.querySelectorAll("#ns-body .ns-sel").forEach(sel=>{
+    const p=_nsPlan[Number(sel.dataset.i)],suggested=classifyNote_(p.text)||p.from||"behaviour";
+    p.cat=sel.value;
+    if(p.cat!==suggested)_noteOverrides[p.text.toLowerCase()]=p.cat; // remember so it is not suggested again
+  });
+  closeNoteApproval();
+  applyNotePlan_(_nsPlan);
+  savePtModalCore_();
+}
+function sortAllPetNotes(){
+  const groups=[];
+  pets.forEach(p=>{
+    const c=combineNotes_({behaviour:p.lastNote||"",always:p.petNote||"",medical:p.medicalNotes||"",style:p.preferredStyle||""});
+    const plan=planNoteSort_(c.text,c.origin,p.noteOverrides);
+    if(plan.some(x=>x.changed))groups.push({pet:p,plan});
+  });
+  if(!groups.length){alert("All notes were already sorted.");return;}
+  _nsBulk=groups;_nsPlan=null;
+  document.getElementById("ns-title").textContent="Approve note sorting";
+  document.getElementById("ns-apply").textContent="Approve selected";
+  document.getElementById("ns-body").innerHTML=`<div style="font-size:12px;color:var(--text-muted);margin-bottom:6px">These notes would move to a different box. Untick any you want to leave where they are. Nothing changes until you approve.</div>`+
+    groups.map((g,gi)=>`<div style="margin-top:10px"><strong style="font-size:13px">${nsEsc_(g.pet.name)}</strong>${g.plan.map((p,i)=>p.changed?`<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 0;border-bottom:1px solid var(--border);cursor:pointer"><input type="checkbox" class="ns-chk" data-g="${gi}" data-i="${i}" checked style="width:auto;margin-top:3px"/><div style="min-width:0"><div style="font-size:13px">&ldquo;${nsEsc_(p.text)}&rdquo;</div><div style="font-size:11px;color:var(--text-muted)">${NOTE_CAT_LABELS[p.from]} &rarr; <strong style="color:#5fe0d6">${NOTE_CAT_LABELS[p.cat]}</strong></div></div></label>`:"").join("")}</div>`).join("");
+  document.getElementById("modal-notesort").classList.add("open");
+}
+function applyBulkNoteSort_(){
+  const checked=new Set([...document.querySelectorAll("#ns-body .ns-chk")].filter(c=>c.checked).map(c=>c.dataset.g+":"+c.dataset.i));
+  let n=0;
+  _nsBulk.forEach((g,gi)=>{
+    const any=g.plan.some((x,i)=>x.changed&&checked.has(gi+":"+i));
+    if(!any)return;
+    const ov={...(g.pet.noteOverrides||{})};
+    const plan=g.plan.map((x,i)=>{
+      if(x.changed&&!checked.has(gi+":"+i)){ov[x.text.toLowerCase()]=x.from||x.cat;return{...x,cat:x.from||x.cat};}
+      return x;
+    });
+    const r=joinPlan_(plan);
+    pets=pets.map(p=>p.id===g.pet.id?{...p,noteOverrides:ov,lastNote:r.behaviour.split("\n").join(" — "),petNote:r.always,medicalNotes:r.medical,preferredStyle:r.style}:p);
+    n++;
+  });
+  closeNoteApproval();_nsBulk=null;
+  save();render();
+  alert(n?`Sorted notes on ${n} pet${n===1?"":"s"}.`:"Nothing was changed.");
 }
 // ── Compare two grooms of the same pet ──
 let cmpPetId=null,cmpIds=[null,null];
@@ -1415,14 +1495,13 @@ async function checkIntake(){
         else petNoteParts.push(t);
       });
 
-      const sortedN=autoSortNotes({behaviour:petNoteParts.join("\n"),always:"",medical:item.medicalNotes||"",style:""}).result;
       pets.push({id:nextPetId++,name:item.petName||"Unknown",breed:item.petBreed||"",
         dob:approxAge?"":(item.petDob||""),approxAge:approxAge,
         sex:item.petSex||"Male",desexed:(item.petDesexed||"")==="Yes",size:item.petSize||"Medium",
-        coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:sortedN.medical,
-        allergies:[],customAllergies:item.customAllergies||"",preferredStyle:sortedN.style,petNote:sortedN.always,
+        coatTypes:[],behaviour:behaviourTags,medicalTags:medicalTags,medicalNotes:item.medicalNotes||"",
+        allergies:[],customAllergies:item.customAllergies||"",preferredStyle:"",petNote:"",
         treatsOk:item.treatsOk!==false,treatsLimit:!!item.limitTreats,
-        lastNote:sortedN.behaviour.split("\n").join(" — "),ownerIds:[owner.id],photo:null,photos:[],
+        lastNote:petNoteParts.join(" — "),ownerIds:[owner.id],photo:null,photos:[],
         customSpecialHandling:item.noContactServices||"",hideBrachy:false,oodleName:null,needsReview:true,
         consentSigned:!!(item.agreeTerms&&item.signature),consentSignature:item.signature||"",consentDate:item.consentDate||""});
       processedIds.push(item.id);
@@ -2964,6 +3043,7 @@ function openPtModal(pet){
   document.getElementById("pt-no-allergies").checked=hasNone;
   document.getElementById("pt-medconditions-section").style.display=hasNone?"none":"";
   document.getElementById("pt-allergies-section").style.display=hasNone?"none":"";
+  _noteOverrides={...(pet?.noteOverrides||{})};
   loadNotesAll_();
   document.getElementById("modal-pet").classList.add("open");
 }
@@ -3041,8 +3121,7 @@ function ptOwnerCreate(){
 function togglePtOwnEdit(){ptOwnEdit=!ptOwnEdit;if(!ptOwnEdit)ptOwnQuery="";renderPtOwners();}
 function ptOwnerUp(i){if(i<1||i>=ptActiveOwners.length)return;const a=[...ptActiveOwners];[a[i-1],a[i]]=[a[i],a[i-1]];ptActiveOwners=a;renderPtOwners();}
 function closePtModal(){document.getElementById("modal-pet").classList.remove("open");ptEditing=null;_chainOwnerId=null;}
-async function savePtModal(){
-  syncNotesAll_();
+async function savePtModalCore_(){
   const name=document.getElementById("pt-name").value.trim();
   const breed=ptGetBreedString();
   if(!name||!breed){alert("Please enter name and at least one breed.");return;}
@@ -3056,7 +3135,7 @@ async function savePtModal(){
     if(url)ptPhotoData=url;
     _pendingPetPhotoUpload=null;
   }
-  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,petNote:document.getElementById("pt-petnote").value.trim(),ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
+  const obj={name,breed,dob:dob,approxAge:approxAge,sex:document.getElementById("pt-sex").value,desexed:document.getElementById("pt-desexed").value==="yes",size:document.getElementById("pt-size").value,coatTypes:[...ptActiveCoats],behaviour:[...ptActiveBehaviour],medicalTags:[...ptActiveMedical],medicalNotes:document.getElementById("pt-mednotes").value,allergies:[...ptActiveAllergies],customAllergies:document.getElementById("pt-allergies-custom").value.trim(),preferredStyle:document.getElementById("pt-prefstyle").value,treatsOk:document.getElementById("pt-treats").value!=="no",treatsLimit:document.getElementById("pt-treats").value==="limit",lastNote:document.getElementById("pt-behavnote").value,petNote:document.getElementById("pt-petnote").value.trim(),noteOverrides:_noteOverrides,ownerIds:[...ptActiveOwners],photo:ptPhotoData||null,photos:ptEditing?.photos||[],customSpecialHandling:document.getElementById("pt-special-custom").value.trim(),hideBrachy:document.getElementById("pt-hide-brachy").checked,oodleName:document.getElementById("pt-oodle-name").value.trim()||null};
   if(ptEditing){pets=pets.map(p=>p.id===ptEditing.id?{...p,...obj}:p);}else{pets.push({id:nextPetId++,...obj});}
   const _ch=_chainOwnerId;
   save();closePtModal();render();
